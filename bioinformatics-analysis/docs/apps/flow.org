@@ -1,0 +1,148 @@
+#+TITLE: 流程相关文档
+#+SETUPFILE: ~/.doom.d/org-templates/level-0.org
+
+
+* 业务逻辑
+
+** parameters 含义
+#+BEGIN_SRC json
+[
+    {
+        "key": "INPUT_DIR",
+        "type": "array",
+        "required": true,
+        "blank": false
+    },
+    {
+        "key": "REPORT_OUTPUT_DIR",
+        "type": "array",
+        "required": true,
+        "blank": false
+    },
+    {
+        "key": "BAM_OUTPUT_DIR",
+        "type": "array",
+        "required": true,
+        "blank": true,
+        "default": null
+    },
+    {
+        "key": "SAMPLE_TYPE",
+        "type": "array",
+        "required": true,
+        "choices": ["single", "double"],
+        "default": "single"
+    },
+]
+#+END_SRC
+parameters 是一个列表，列表中的每一个元素表示一个参数，其中每个 key 的含义如下：
+1. =key= 表示当前参数的参数名；
+2. =type= 表示当前输入参数接收的值，目前仅支持 =string/number/array/boolean= 几
+   种类型；
+3. =required= 表明在运行脚本时，当前参数是否必须要输入值；
+4. =blank= 表明该参数值是否接受空值；
+5. =default= 是该参数的默认值；
+5. =choices= 可以设定该参数的被选项；
+
+* API 接口
+
+** 创建流程
+#+BEGIN_SRC sh
+curl --location --request POST 'http://127.0.0.1:8000/flow/flows/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "WGS",
+    "code": "WGS",
+    "location": "first.sh",
+    "alignment_tool": "bioinfo",
+    "parameters": [{"key": "AAA", "required": true}],
+    "desp": "xxx",
+    "flow_category": "DNA"
+}'
+#+END_SRC
+
+** 修改流程
+#+BEGIN_SRC sh
+curl --location --request PATCH 'http://127.0.0.1:8000/flow/flows/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "RNA"
+}'
+#+END_SRC
+
+=PATCH= 方法是部分修改，如果需要全量的修改使用 =PUT= 方法。
+
+** 获取流程列表
+
+1. 直接模糊查询
+
+   #+BEGIN_SRC sh
+   curl --location --request GET 'http://127.0.0.1:8000/flow/flows/?s=DNA' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json'
+   #+END_SRC
+
+2. 筛选器
+
+   #+BEGIN_SRC sh
+   curl --location --request POST 'http://127.0.0.1:8000/flow/flows/query' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json' \
+   --data-raw '{
+       "account_id": 1,
+       "filters": [
+           {"key": "flow_category", "op": "in", "values": ["DNA"]}
+       ]
+   }'
+   #+END_SRC
+
+   1. 如果是管理员且有 =account_id= ，则返回该用户有权限的 flows 列表；
+
+** 获取单个流程
+#+BEGIN_SRC sh
+curl --location --request GET 'http://127.0.0.1:8000/flow/flows/1/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json'
+#+END_SRC
+
+** 删除单个流程
+#+BEGIN_SRC sh
+curl --location --request DELETE 'http://127.0.0.1:8000/flow/flows/1/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json'
+#+END_SRC
+
+** 获取字段选项及相关信息
+#+BEGIN_SRC sh
+curl --location --request GET 'http://127.0.0.1:8000/flow/flows/list_fields' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json'
+#+END_SRC
+
+** 用户权限
+
+*** 向流程中添加用户
+
+#+BEGIN_SRC sh
+curl --location --request POST 'http://127.0.0.1:8000/flow/members/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "flow_ids": [1],
+    "account_ids": [1, 2]
+}'
+#+END_SRC
+
+*** 从流程中删除用户
+
+#+BEGIN_SRC sh
+curl --location --request DELETE 'http://127.0.0.1:8000/flow/members/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "flow_ids": [1],
+    "account_ids": [1, 2]
+}'
+#+END_SRC

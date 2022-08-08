@@ -1,0 +1,21 @@
+{% block header %}
+    <title> {{ title }}</title>
+{% endblock %}
+<body>
+<p>恭喜您已经成功的完成邮箱验证！还有<span id="sp">5</span>秒跳转到登录界面...</p>
+<script>
+ onload=function () {
+ setInterval(go,1000)
+ };
+ var x=4;
+ function go() {
+ 
+ if (x>=0){
+  document.getElementById("sp").innerText=x;
+ }else {
+  location.href="/#/login";
+ }
+ x--;
+ }
+</script>
+</body>

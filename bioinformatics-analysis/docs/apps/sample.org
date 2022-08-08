@@ -1,0 +1,152 @@
+#+TITLE: 样本
+#+SETUPFILE: ~/.doom.d/org-templates/level-0.org
+
+
+* 业务逻辑
+=sample= 表结构：
+
+| name                | 中文名         |
+|---------------------+----------------|
+| test_date           | 送检日期       |
+| project_code        | 项目代码       |
+| project_index       | 项目编码       |
+| test_organizer      | 测序发起人     |
+| company             | 测序公司       |
+| platform            | 测序平台       |
+| test_type           | 测序类型       |
+| index_type          | index 类型     |
+| origin_sample_info  | 原始样本信息   |
+| sample_orginization | 样本类型1      |
+| sample_type         | 样本类型2      |
+| library_type        | 文库编号       |
+| prob_content        | 探针内容       |
+| pooling_library     | Pooling 文件   |
+| index_number        | index 编号     |
+| barocode_1          | barocode 1     |
+| barocode_2          | barocode 2     |
+| sequence_size       | 测序量         |
+| location            | 数据文件夹地址 |
+| real_size           | 实际数据量     |
+| quality_30          | Q30            |
+
+* API 接口
+
+** 上传文件
+#+BEGIN_SRC sh
+curl --location --request POST 'http://127.0.0.1:8000/sample/upload/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Disposition: attachment; filename=test-samples.xlsx' \
+-F 'file=@/home/vagrant/working/coding/bio/bioinformatics-be/test-samples.xlsx'
+#+END_SRC
+
+** 新建样本
+#+BEGIN_SRC sh
+curl --location --request POST 'http://127.0.0.1:8000/sample/samples/' \
+--header "Authorization: ${access_token}" \
+--header "Content-Type: application/json" \
+--data-raw '{
+    "test_date":"2020-01-16",
+    "project_code":"研发3类",
+    "project_index":"",
+    "test_organizer":"韩丽萍",
+    "platform":"纳昂达",
+    "company":"MGISEQ-2000RS",
+    "test_type":"SPE150[DI]",
+    "index_type":"单端-10nt",
+    "origin_sample_info":"GZ19012-1",
+    "sample_orginization":"白细胞gDNA",
+    "sample_type":"对照",
+    "library_type":"GZ19012-1A",
+    "prob_content":"NanOnCT Panel v1.0",
+    "pooling_library":"NADM20200116-1",
+    "index_number":"P 19",
+    "barocode_1":"TGTCTGCGAA",
+    "barocode_2":"",
+    "sequence_size":1,
+    "location":"V300037187/L01_split_dual/output/V300037187",
+    "real_size":1.25,
+    "quality_30":88.94
+}'
+#+END_SRC
+
+** 更新样本信息
+#+BEGIN_SRC sh
+curl --location --request PATCH 'http://127.0.0.1:8000/sample/samples/1/' \
+--header "Authorization: ${access_token}" \
+--header "Content-Type: application/json" \
+--data-raw '{
+    "platform": "测试平台"
+}'
+#+END_SRC
+
+** 查看单个样本详情
+#+BEGIN_SRC sh
+curl --location --request GET 'http://127.0.0.1:8000/sample/samples/1/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json'
+#+END_SRC
+
+** 获取字段选项及相关信息
+#+BEGIN_SRC sh
+curl --location --request GET 'http://127.0.0.1:8000/sample/samples/list_fields' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json'
+#+END_SRC
+
+** 删除单个样本
+#+BEGIN_SRC sh
+curl --location --request POST 'http://127.0.0.1:8000/sample/samples/1/' \
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json'
+#+END_SRC
+
+** 下载样本
+#+BEGIN_SRC sh
+curl --location --request GET 'http://127.0.0.1:8000/sample/samples/export' \                                                                                                                              vagrant@fedora
+--header "Authorization: ${access_token}" \
+--header 'Content-Type: application/json'
+#+END_SRC
+
+** 查询样本
+
+1. 模糊搜索
+
+   #+BEGIN_SRC sh
+   curl --location --request GET 'http://127.0.0.1:8000/sample/samples/?s=锐赛' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json'
+   #+END_SRC
+
+2. 筛选器
+
+   #+BEGIN_SRC sh
+   curl --location --request POST 'http://127.0.0.1:8000/sample/samples/query' \
+   --header "Authorization: ${access_token}" \
+   --header 'Content-Type: application/json' \
+   --data-raw '{
+       "project_id": {"in": [1], "not_in": [2]},
+       "filters": [
+           {"key": "sample_type", "op": "in", "values": ["正常"]}
+       ]
+   }'
+   #+END_SRC
+
+   其中过滤参数放在 =filters= 中，里面是一个数组嵌套对象的结构，数组之间是「与」
+   关系，各个参数的含义为：
+
+   1. =key= 表示数据库中的字段名；
+
+   2. =op= 表示操作符，目前支持下面几种：
+
+      | op      | 中文       | value 案例 |
+      |---------+------------+------------|
+      | in      | 属于       |     [1, 2] |
+      | eq      | 等于       |          1 |
+      | ne      | 不等于     |          1 |
+      | gt      | 大于       |          1 |
+      | gte     | 大于等于   |          1 |
+      | lt      | 小于       |          1 |
+      | lte     | 小于等于   |          1 |
+      | between | 在什么之间 |    [1, 10] |
+
+   3. =key= 表示数据库中的字段名；

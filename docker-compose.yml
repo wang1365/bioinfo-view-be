@@ -1,0 +1,53 @@
+version: "3.0"
+
+networks:
+  db_network:
+    driver: bridge
+  redis_network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: pg
+    environment:
+      POSTGRES_DB: bioinfo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - ./compose/pg/data:/var/lib/postgresql/data:rw
+      - ./compose/pg/init:/docker-entrypoint-initdb.d
+    networks:
+      - db_network
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    networks:
+      - redis_network
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./compose/redis/data:/data:rw
+
+  web:
+    build: ./bioinformatics-analysis
+    restart: always
+    container_name: web
+    networks:
+      - db_network
+      - redis_network
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DEBUG=true
+    ports:
+      - 8080:8080
+    volumes:
+      - ./compose/uwsgi:/tmp # 挂载uwsgi日志
