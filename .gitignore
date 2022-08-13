@@ -24,3 +24,5 @@ wheels/
 *.egg
 MANIFEST
 .idea
+
+compose
