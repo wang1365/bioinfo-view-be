@@ -1,4 +1,5 @@
 POST_ACTION_LOGIN = "login"
 POST_ACTION_REGISTER = "register"
+SUPER = "super"
 ADMIN = "admin"
 NORMAL = "normal"

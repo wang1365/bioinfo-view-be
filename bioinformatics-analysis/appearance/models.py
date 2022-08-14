@@ -5,6 +5,6 @@ from django.utils.timezone import now
 
 class SiteLayOut(models.Model):
     title = models.CharField(max_length=64)
-    image = models.ImageField(upload_to="media")
+    image = models.TextField()
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)

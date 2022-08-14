@@ -26,7 +26,7 @@ class User2Role(models.Model):
     用户角色表
     """
     user = models.ForeignKey(to=Account,
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE, related_name="user2role")
     role = models.ForeignKey(to="Role",
                              on_delete=models.CASCADE)
 

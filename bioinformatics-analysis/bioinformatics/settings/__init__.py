@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     "task",
     "rbac",
     "flow",
-    "config"
+    "config",
+    "appearance"
 ]
 
 MIDDLEWARE = [

@@ -35,6 +35,7 @@ urlpatterns = [
     url(r"^sample", include(("sample.urls", "sample"), namespace="sample")),
     url(r"^task", include(("task.urls", "task"), namespace="task")),
     url(r"^config", include(("config.urls", "config"), namespace="config")),
+    url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
 ]
 
 
@@ -86,4 +87,4 @@ def clean_task_log():
     os.makedirs(base, exist_ok=True)
     subprocess.Popen(f"rm -rf {base}/*", shell=True)
 
-sched.start()
+# sched.start()

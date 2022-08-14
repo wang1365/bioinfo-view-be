@@ -5,8 +5,8 @@ from django.utils.timezone import now
 
 
 class Account(models.Model):
-    username = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=100, unique=True)
+    email = models.EmailField(null=True, blank=True)
     password = models.CharField(max_length=256)
     department = models.CharField(max_length=128, null=True)
     is_active = models.BooleanField(default=False)

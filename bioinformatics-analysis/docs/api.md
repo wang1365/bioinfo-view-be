@@ -3,59 +3,69 @@
 ## 登录
 
 ```
-curl --location --request POST 'http://127.0.0.1:8080/account/?action=login' \
+curl --location --request POST 'http://127.0.0.1:8080/account/login' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'email=2514553187@qq.com' \
---data-urlencode 'password=123456' 
+--data-urlencode 'username=admin@admin.com' \
+--data-urlencode 'password=1234qwer'
 ```
 
 ```
-{"code": 0, "msg": "", "data": {"access_token":
-"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDIzMjA2ODEsInN1YiI6ImFjY2VzcyJ9.5SyLbNGrRgEqHq6EpBJ-mrHBZkekclEfCo5KnuUabJ0",
-"token_type": "bearer"}}
+{"code": 0, "msg": "", "data": {"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE", "token_type": "bearer"}}
 ```
 
 ```
-{"code": 1, "msg": "邮箱未验证, 请前往邮箱验证", "data": ""}
+{"code": 401, "msg": "用户名或密码错误", "data": ""}
 ```
 
- **备注: 登录和注册使用同一个url，同一个请求方法，用action区分**
 
-## 注册
+## 管理员创建普通账号
 
 ```
-curl --location --request POST 'http://127.0.0.1:8000/account/?action=register' \
+curl --location --request POST 'http://127.0.0.1:8080/account/create_user' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --data-urlencode 'username=jack' \
---data-urlencode 'email=2514553187@qq.com' \
 --data-urlencode 'password=123456' \
 --data-urlencode 'password_again=123456'
 ```
 
 ```
-{"code": 0, "msg": "", "data": "验证邮件已发送, 请前往邮箱认证"}
+{"code": 0, "msg": "", "data": {"id": 8, "username": "jack", "email": "", "is_active": false, "department": null}}
 ```
 
 ```
-{"code": 1, "msg": "邮箱已存在", "data": ""}
+{"code": 1, "msg": "用户名已存在", "data": ""}
 ```
 
 ## 查看当前登录用户
 
 ```
-curl --location --request GET 'http://127.0.0.1:8000/account/' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDIzMjA1MjgsInN1YiI6ImFjY2VzcyJ9.ndWPp-OEwdsM0cYnK6z2pk0KyHbqMhyiUj3LVN8ejjY' 
+curl --location --request GET 'http://127.0.0.1:8080/account/me' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' 
 ```
 
 ```
-{"code": 0, "msg": "", "data": {"id": 4, "username": "jack", "email": "2514553187@qq.com", "role_list": ["normal"]}}
+{"code": 0, "msg": "", "data": {"id": 8, "username": "jack", "email": "", "is_active": true, "department": null, "role_list": ["normal"]}}```
+```
+
+## 管理员重置用户密码
+
+```
+curl --location --request PUT 'http://127.0.0.1:8080/account/4/reset_password' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'password=12345678'
+```
+
+```
+{"code": 0, "msg": "", "data": "重置密码成功"}```
 ```
 
 ## 修改用户信息
 
 ```
-curl --location --request PATCH 'http://127.0.0.1:8000/account/' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJleHAiOjE2MDIzMjQ2MjgsInN1YiI6ImFjY2VzcyJ9.foL8qjAt5phlAg8yl9XzAxh6lUzQtkO2JaqpjuH_hzc' \
+curl --location --request PATCH 'http://127.0.0.1:8080/account/5' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'username=jack0' \
 --data-urlencode 'password=123456' \
@@ -66,13 +76,11 @@ curl --location --request PATCH 'http://127.0.0.1:8000/account/' \
 {"code": 0, "msg": "", "data": "更新成功"}
 ```
 
- **备注: 修改使用patch, 部分更新**
-
 ## 管理员批量删除用户
 
 ```
-curl --location --request DELETE 'http://127.0.0.1:8000/account/manager' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJleHAiOjE2MDI0ODk0NjksInN1YiI6ImFjY2VzcyJ9.jpAFbRIXSQaREoeGdJP9SJHRL10WczyfC7XP0cn4xtE' \
+curl --location --request DELETE 'http://127.0.0.1:8080/account/delete_user' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --header 'Content-Type: application/json' \
 --data-raw '{"ids": [9, 11]}'
 ```
@@ -85,17 +93,13 @@ curl --location --request DELETE 'http://127.0.0.1:8000/account/manager' \
 {"code": 1, "msg": "", "msg": "非管理员用户不能删除用户"}
 ```
 
-
-
 ## 管理员查询用户列表
 
 ```
-curl --location --request GET 'http://127.0.0.1:8000/account/manager?page=1&size=5' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJleHAiOjE2MDI0ODk0NjksInN1YiI6ImFjY2VzcyJ9.jpAFbRIXSQaREoeGdJP9SJHRL10WczyfC7XP0cn4xtE' \
+curl --location --request GET 'http://127.0.0.1:8080/account/?page=1&size=5' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --header 'Content-Type: application/json'
 ```
-
-
 
 ```
 {
@@ -157,30 +161,60 @@ curl --location --request GET 'http://127.0.0.1:8000/account/manager?page=1&size
 ## 管理员修改用户角色和禁用用户
 
 ```
-curl --location --request PATCH 'http://127.0.0.1:8000/account/manager?page=1&size=15' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDI2NDM1ODcsInN1YiI6ImFjY2VzcyJ9.P_ZiZSUa0vFzHvJeYED8qfe95CkNQF0cGxGhCNv9Y7k' \
+curl --location --request POST 'http://127.0.0.1:8080/account/manager' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --header 'Content-Type: application/json' \
---data-raw '{"userid": 3, "role": ["admin"]}'
+--data-raw '{"userid": 5, "is_active": false}'
 ```
 
 ```
 {"code": 0, "msg": "", "data": true}
 ```
 
+# 系统样式图标设置
+
+## 查看系统设置的title和image
 ```
-{"code": 1, "msg": "非管理员用户不能修改用户角色", "data": ""}
+curl --location --request GET 'http://127.0.0.1:8080/site_config' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
+--header 'Content-Type: application/json'
 ```
 
+```buildoutcfg
+[{"id":1,"title":"test","image":"data:image/jpeg;base64,/9sss","create_time":"2022-08-14T14:57:47.552747","update_time":"2022-08-14T14:57:47.553068"}]
+```
 
+## 创建
+```
+curl --location --request POST 'http://127.0.0.1:8080/site_config' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
+--header 'Content-Type: application/json' \
+--data-raw '{"title": "test", "image": "data:image/jpeg;base64,/9sss"}'
+```
 
+```
+{"id":1,"title":"test","image":"data:image/jpeg;base64,/9sss","create_time":"2022-08-14T14:57:47.552747","update_time":"2022-08-14T14:57:47.553068"}
+```
 
+## 修改
+
+```
+curl --location --request PUT 'http://127.0.0.1:8080/site_config/1' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
+--header 'Content-Type: application/json' \
+--data-raw '{"title": "test", "image": "data:image/jpeg;base64,/9sss"}'
+```
+
+```
+{"id":1,"title":"test","image":"data:image/jpeg;base64,/9sss","create_time":"2022-08-14T14:57:47.552747","update_time":"2022-08-14T14:57:47.553068"}
+```
 
 # 角色
 
 ## 查看系统已有角色
 
 ```
-curl --location --request GET 'http://127.0.0.1:8000/role' \
+curl --location --request GET 'http://127.0.0.1:8080/role' \
 --header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDI1ODM1MjEsInN1YiI6ImFjY2VzcyJ9.qlMPPx_QrR1Uj0Ay0U9YaSJKl5JzmD1hZTtgI4aOWoQ' \
 --header 'Content-Type: application/json'
 ```

@@ -1,7 +1,9 @@
-from django.conf.urls import url
+
+from rest_framework.routers import DefaultRouter
 
 from . import views
 
-urlpatterns = [
-    url(r"^site_layout", views.SiteLayoutlViewSet.as_view(), name="site_layout"),
-]
+router = DefaultRouter(trailing_slash=False)
+router.register(r"", views.SiteLayoutlViewSet, "site_layout")
+
+urlpatterns = router.urls

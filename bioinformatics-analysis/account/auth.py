@@ -11,9 +11,9 @@ ALGORITHM = "HS256"
 access_token_jwt_subject = "access"
 
 
-def authenticate(email, password):
+def authenticate(username, password):
     return Account.objects.filter(
-        email=email, password=get_md5(password), is_delete=False
+        username=username, password=get_md5(password), is_delete=False
     ).first()
 
 

@@ -35,6 +35,7 @@ class RegisterForm(forms.Form):
         ),
     )
     email = forms.EmailField(
+        required=False,
         label="邮箱",
         widget=forms.EmailInput(
             attrs={"class": "form-control", "placeholder": "请输入邮箱"}
@@ -62,17 +63,15 @@ class RegisterForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data["username"]
-        if not username.isalpha() or re.findall('[\u4e00-\u9fa5]', username):
-            raise forms.ValidationError("用户名只能由大小写英文字母组成")
         if Account.objects.filter(username=username).exists():
             raise forms.ValidationError("用户名已存在, 请修改用户名")
         return username
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        if not email.endswith("nanodigmbio.com"):
+        if email and not email.endswith("nanodigmbio.com"):
             raise forms.ValidationError("邮箱后缀名必须是nanodigmbio.com")
-        if Account.objects.filter(email=email).exists():
+        if email and Account.objects.filter(email=email).exists():
             raise forms.ValidationError("邮箱已存在")
         return email
 
@@ -97,13 +96,13 @@ class RegisterForm(forms.Form):
 
 
 class LoginForm(forms.Form):
-    email = forms.EmailField(
+    username = forms.CharField(
         widget=widgets.TextInput(
             attrs={
                 "class": "form-control",
-                "name": "email",
-                "id": "email",
-                "placeholder": "请输入邮箱",
+                "name": "username",
+                "id": "username",
+                "placeholder": "请输入用户名",
                 "autofocus": "autofocus",
             }
         )
