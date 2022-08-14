@@ -24,3 +24,6 @@ wheels/
 *.egg
 MANIFEST
 .idea
+
+compose
+storage
