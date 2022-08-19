@@ -36,6 +36,7 @@ urlpatterns = [
     url(r"^task", include(("task.urls", "task"), namespace="task")),
     url(r"^config", include(("config.urls", "config"), namespace="config")),
     url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
+    url(r"^patient", include(("patient.urls", "patient"), namespace="patient")),
 ]
 
 

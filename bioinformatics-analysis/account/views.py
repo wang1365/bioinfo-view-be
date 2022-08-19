@@ -15,7 +15,7 @@ from account.serializer import AccountSerializer
 from rbac.models import Role, User2Role
 from utils.paginator import PageNumberPagination
 from utils.response import response_body
-from utils.site import  get_md5
+from utils.site import get_md5
 from account import constants as account_constant
 
 logger = logging.getLogger(__name__)

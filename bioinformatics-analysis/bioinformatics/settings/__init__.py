@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     "rbac",
     "flow",
     "config",
-    "appearance"
+    "appearance",
+    "patient"
 ]
 
 MIDDLEWARE = [

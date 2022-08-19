@@ -982,5 +982,156 @@ curl --location --request PUT 'http://127.0.0.1:8000/config/1' \
 {"code": 0, "msg": "success", "data": {"id": 1, "name": "memory_rate", "value": 0.9}}
 ```
 
+# 患者管理
 
+## 创建患者
 
+```buildoutcfg
+curl --location --request POST 'http://127.0.0.1:8080/patient/patients' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "age": 23,
+    "birthday": "2022-08-05",
+    "name": "张三",
+    "id_card": "3402111999111106501",
+    "medical_doctor": "李四",
+    "gender": "male",
+    "location": "location",
+    "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473",
+    "inspection_agency": "xxx",
+    "tumor_stage": "tumor_stage",
+    "diagnosis": "diagnosis",
+    "disease": "disease",
+    "family_history": "family_history",
+    "medication_history": "medication_history",
+    "treatment_history": "treatment_history",
+    "prognosis_time": "2022-08-05 12:00:00",
+    "recurrence_time": "2022-08-05 12:00:00",
+    "survival_time": "2022-08-05 12:00:00"
+}'
+```
+
+```buildoutcfg
+{
+    "id": 1,
+    "age": 23,
+    "birthday": "2022-08-05",
+    "name": "张三",
+    "id_card": "3402111999111106501",
+    "medical_doctor": "李四",
+    "gender": "male",
+    "location": "location",
+    "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473",
+    "inspection_agency": "xxx",
+    "tumor_stage": "tumor_stage",
+    "diagnosis": "diagnosis",
+    "disease": "disease",
+    "family_history": "family_history",
+    "medication_history": "medication_history",
+    "treatment_history": "treatment_history",
+    "prognosis_time": "2022-08-05T12:00:00",
+    "recurrence_time": "2022-08-05T12:00:00",
+    "survival_time": "2022-08-05T12:00:00",
+    "create_time": "2022-08-19T21:33:57.895420",
+    "update_time": "2022-08-19T21:33:57.895842",
+    "creator": 2
+}
+```
+
+## 查询患者
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:8080/patient/patients' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json'
+```
+
+```buildoutcfg
+{"code": 0, "msg": "", "data": {"count": 1, "next": null, "previous": null, "results": [{"id": 1, "age": 23, "birthday":
+"2022-08-05", "name": "张三", "id_card": "3402111999111106501", "medical_doctor": "李四", "gender": "male", "location":
+"location", "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473", "inspection_agency": "xxx", "tumor_stage":
+"tumor_stage", "diagnosis": "diagnosis", "disease": "disease", "family_history": "family_history", "medication_history":
+"medication_history", "treatment_history": "treatment_history", "prognosis_time": "2022-08-05T12:00:00",
+"recurrence_time": "2022-08-05T12:00:00", "survival_time": "2022-08-05T12:00:00", "create_time":
+"2022-08-19T21:33:57.895420", "update_time": "2022-08-19T21:33:57.895842", "creator": 2}]}}
+```
+
+## 删除患者
+
+```buildoutcfg
+curl --location --request DELETE 'http://127.0.0.1:8080/patient/patients/1' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json' 
+```
+
+## 修改患者
+
+```buildoutcfg
+curl --location --request PATCH 'http://127.0.0.1:8080/patient/patients/2' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "age": 23,
+    "birthday": "2022-08-05",
+    "name": "张三",
+    "id_card": "3402111999111106501",
+    "medical_doctor": "李四",
+    "gender": "male",
+    "location": "location",
+    "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473",
+    "inspection_agency": "xxx",
+    "tumor_stage": "tumor_stage",
+    "diagnosis": "diagnosis",
+    "disease": "disease",
+    "family_history": "family_history",
+    "medication_history": "medication_history",
+    "treatment_history": "treatment_history",
+    "prognosis_time": "2022-08-05 12:00:00",
+    "recurrence_time": "2022-08-05 12:00:00",
+    "survival_time": "2022-08-05 12:00:00"
+}'
+```
+
+```buildoutcfg
+{
+    "id": 2,
+    "age": 23,
+    "birthday": "2022-08-05",
+    "name": "张三",
+    "id_card": "3402111999111106501",
+    "medical_doctor": "李四",
+    "gender": "male",
+    "location": "location",
+    "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473",
+    "inspection_agency": "xxx",
+    "tumor_stage": "tumor_stage",
+    "diagnosis": "diagnosis",
+    "disease": "disease",
+    "family_history": "family_history",
+    "medication_history": "medication_history",
+    "treatment_history": "treatment_history",
+    "prognosis_time": "2022-08-05T12:00:00",
+    "recurrence_time": "2022-08-05T12:00:00",
+    "survival_time": "2022-08-05T12:00:00",
+    "create_time": "2022-08-19T21:48:38.945847",
+    "update_time": "2022-08-19T21:49:01.864583",
+    "creator": 2
+}
+```
+
+## 下载模板
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:8080/patient/patients/dl_patient_template' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json' 
+```
+
+## 上传csv文件
+
+```buildoutcfg
+curl --location --request POST 'http://127.0.0.1:8080/patient/patients/import_patients' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--form 'file=@"/Users/guwanhua/Documents/patient_template.csv"'
+```
