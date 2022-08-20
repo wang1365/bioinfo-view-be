@@ -2,7 +2,6 @@ django_mysql==3.7.1
 psutil==5.7.3
 PyMySQL==0.10.0
 APScheduler==2.1.2
-Django==2.1
 django_recaptcha==2.0.6
 djangorestframework==3.11.2
 PyJWT==1.7.1
@@ -10,7 +9,14 @@ service==0.6.0
 openpyxl==3.0.5
 django-extensions==2.2.9
 cryptography==3.2.1
-ipdb
-psycopg2-binary==2.8.3
+psycopg2-binary==2.9.3
 pendulum==2.1.2
+django-filter==2.2.0
+django-cors-headers==3.13.0
+Django==2.1
+
+# server
 uwsgi==2.0.20
+
+# test
+ipdb
