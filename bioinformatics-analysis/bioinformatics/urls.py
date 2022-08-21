@@ -28,17 +28,22 @@ from utils.memory import SystemMemory
 
 urlpatterns = [
     url(r"^admin/", admin.site.urls),
-    url(r"^account/", include(("account.urls", "account"), namespace="account")),
-    url(r"^project", include(("project.urls", "account"), namespace="project")),
-    url(r"^role", include(("rbac.urls", "role"), namespace="role")),
-    url(r"^flow", include(("flow.urls", "flow"), namespace="flow")),
-    url(r"^sample", include(("sample.urls", "sample"), namespace="sample")),
-    url(r"^task", include(("task.urls", "task"), namespace="task")),
-    url(r"^config", include(("config.urls", "config"), namespace="config")),
-    url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
-    url(r"^patient", include(("patient.urls", "patient"), namespace="patient")),
+    url(r"^api/account/",
+        include(("account.urls", "account"), namespace="account")),
+    url(r"^api/project",
+        include(("project.urls", "account"), namespace="project")),
+    url(r"^api/role", include(("rbac.urls", "role"), namespace="role")),
+    url(r"^api/flow", include(("flow.urls", "flow"), namespace="flow")),
+    url(r"^api/sample", include(("sample.urls", "sample"),
+                                namespace="sample")),
+    url(r"^api/task", include(("task.urls", "task"), namespace="task")),
+    url(r"^api/config", include(("config.urls", "config"),
+                                namespace="config")),
+    url(r"^api/site_config/",
+        include(("appearance.urls", "appearance"), namespace="appearance")),
+    url(r"^api/patient",
+        include(("patient.urls", "patient"), namespace="patient")),
 ]
-
 
 sched = Scheduler()
 
@@ -56,24 +61,25 @@ def run_task():
     running_tasks_count = len(running_tasks)
     if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
         # run task
-        beto_run_tasks = Task.objects.filter(status=1).order_by("-priority", "create_time")[
-            0: max_task - running_tasks_count
-        ]
+        beto_run_tasks = Task.objects.filter(status=1).order_by(
+            "-priority", "create_time")[0:max_task - running_tasks_count]
         for beto_run_task in beto_run_tasks:
             if used_memory + beto_run_task.memory < totol_memory * memory_rate:
                 shell_location = beto_run_task.flow.location
-                s = subprocess.Popen(
-                    f"/bin/sh -c {shell_location}", env=beto_run_task.env, shell=True
-                )
+                s = subprocess.Popen(f"/bin/sh -c {shell_location}",
+                                     env=beto_run_task.env,
+                                     shell=True)
                 beto_run_task.status = 2
                 beto_run_task.pid = s.pid
                 beto_run_task.save()
                 used_memory += beto_run_task.memory
 
+
 @sched.interval_schedule(seconds=3600 * 24 * 30)
 def clear_task():
     print("Hello Scheduler!Start clean task disk")
-    beto_clean_tasks = Task.objects.filter(status=3, has_cleaned=False).order_by("create_time").all()
+    beto_clean_tasks = Task.objects.filter(
+        status=3, has_cleaned=False).order_by("create_time").all()
     for beto_clean_task in beto_clean_tasks:
         out_dir = beto_clean_task.env.get("OUT_DIR")
         if out_dir:
@@ -81,11 +87,13 @@ def clear_task():
             beto_clean_task.has_cleaned = True
             beto_clean_task.save()
 
+
 @sched.interval_schedule(seconds=3600 * 24 * 30)
 def clean_task_log():
     print("Hello Scheduler!Start clean task_data dir")
     base = os.path.join(os.path.dirname(settings.BASE_DIR), "task_data")
     os.makedirs(base, exist_ok=True)
     subprocess.Popen(f"rm -rf {base}/*", shell=True)
+
 
 # sched.start()
