@@ -78,7 +78,7 @@ class ProjectsAPIView(ModelViewSet):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return response_body(
-                data={"item_list": serializer.data, "total_count": len(projects)}
+                data={"results": serializer.data, "count": len(projects)}
             )
 
     def destroy(self, request, *args, **kwargs):

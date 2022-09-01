@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.timezone import now
 # from django_mysql.models import JSONField
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from account.models import Account
 from flow.models import Flow
@@ -12,18 +12,13 @@ from project.models import Project
 class Task(models.Model):
     name = models.CharField(max_length=100, blank=True)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
-    status_choices = (
-        (1, "PENDING"),
-        (2, "RUNNING"),
-        (3, "FINISHED"),
-        (4, "FAILURED"),
-        (5, "CANCELED")
-    )
+    status_choices = ((1, "PENDING"), (2, "RUNNING"), (3, "FINISHED"),
+                      (4, "FAILURED"), (5, "CANCELED"))
     status = models.SmallIntegerField(choices=status_choices, default=1)
     progress = models.SmallIntegerField(default=0)
     creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
     pid = models.BigIntegerField(null=True)
-    is_merge = models.BooleanField(default=False)   # 是否归并任务结果
+    is_merge = models.BooleanField(default=False)  # 是否归并任务结果
     flow = models.ForeignKey(to=Flow, on_delete=models.CASCADE)
     result_path = models.TextField(null=True)
     result_dir = models.CharField(max_length=120, null=True)

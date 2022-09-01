@@ -12,9 +12,9 @@ access_token_jwt_subject = "access"
 
 
 def authenticate(username, password):
-    return Account.objects.filter(
-        username=username, password=get_md5(password), is_delete=False
-    ).first()
+    return Account.objects.filter(username=username,
+                                  password=get_md5(password),
+                                  is_delete=False).first()
 
 
 def create_access_token(*, data: dict, expires_delta: timedelta = None):
@@ -24,17 +24,21 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire, "sub": access_token_jwt_subject})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt.decode("utf8")
+    encoded_jwt = jwt.encode(to_encode,
+                             settings.SECRET_KEY,
+                             algorithm=ALGORITHM)
+    return encoded_jwt
 
 
 def login_required(func):
+
     def wrapper(request, *args, **kwargs):
-        token = request.META.get("HTTP_AUTHORIZATION") or request.COOKIES["token"]
+        token = request.META.get(
+            "HTTP_AUTHORIZATION") or request.COOKIES["token"]
         try:
-            payload = jwt.decode(
-                token.encode("utf8"), settings.SECRET_KEY, algorithms=[ALGORITHM]
-            )
+            payload = jwt.decode(token.encode("utf8"),
+                                 settings.SECRET_KEY,
+                                 algorithms=[ALGORITHM])
         except PyJWTError:
             raise Exception("用户token验证没有通过")
         user = Account.objects.get(id=payload["user_id"])
