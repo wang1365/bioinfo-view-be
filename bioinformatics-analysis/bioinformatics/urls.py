@@ -28,21 +28,19 @@ from utils.memory import SystemMemory
 
 urlpatterns = [
     url(r"^admin/", admin.site.urls),
-    url(r"^api/account/",
-        include(("account.urls", "account"), namespace="account")),
-    url(r"^api/project",
-        include(("project.urls", "account"), namespace="project")),
-    url(r"^api/role", include(("rbac.urls", "role"), namespace="role")),
-    url(r"^api/flow", include(("flow.urls", "flow"), namespace="flow")),
-    url(r"^api/sample", include(("sample.urls", "sample"),
-                                namespace="sample")),
-    url(r"^api/task", include(("task.urls", "task"), namespace="task")),
-    url(r"^api/config", include(("config.urls", "config"),
-                                namespace="config")),
-    url(r"^api/site_config/",
+    url(r"^account/", include(("account.urls", "account"),
+                              namespace="account")),
+    url(r"^project", include(("project.urls", "account"),
+                             namespace="project")),
+    url(r"^role", include(("rbac.urls", "role"), namespace="role")),
+    url(r"^flow", include(("flow.urls", "flow"), namespace="flow")),
+    url(r"^sample", include(("sample.urls", "sample"), namespace="sample")),
+    url(r"^task", include(("task.urls", "task"), namespace="task")),
+    url(r"^config", include(("config.urls", "config"), namespace="config")),
+    url(r"^site_config/",
         include(("appearance.urls", "appearance"), namespace="appearance")),
-    url(r"^api/patient",
-        include(("patient.urls", "patient"), namespace="patient")),
+    url(r"^patient", include(("patient.urls", "patient"),
+                             namespace="patient")),
 ]
 
 sched = Scheduler()
