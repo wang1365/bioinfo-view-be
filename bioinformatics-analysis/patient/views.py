@@ -33,6 +33,7 @@ class PatientViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        request.data['creator']=request.account.id
         serializer = self.get_serializer(instance,
                                          data=request.data,
                                          partial=partial)
