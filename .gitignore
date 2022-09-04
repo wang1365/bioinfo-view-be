@@ -2,6 +2,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+venv
+start-pg.sh
+.vscode
+.DS_Store
+
 # C extensions
 *.so
 
