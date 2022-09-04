@@ -50,6 +50,8 @@ def convert(get_response):
                     response = HttpResponse(status=200,
                                             content=json.dumps({
                                                 'code':
+                                                1,
+                                                'status_code':
                                                 response.status_code,
                                                 'data':
                                                 str(response.content.decode()),
