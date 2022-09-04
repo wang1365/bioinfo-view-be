@@ -8,48 +8,24 @@ https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/
 """
 
 import os
+import json
+import asyncio
+import logging
+from functools import wraps
 
+from asgiref.sync import sync_to_async
+from django.core.handlers.exception import response_for_exception
 from django.core.wsgi import get_wsgi_application
+from django.http import HttpResponse
+
+logger = logging.getLogger('django.request')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bioinformatics.settings.prod")
 
 application = get_wsgi_application()
 
-import json
-import asyncio
-import logging
-import types
-from functools import wraps
-
-from asgiref.sync import async_to_sync, sync_to_async
-
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured, MiddlewareNotUsed
-from django.core.signals import request_finished
-from django.db import connections, transaction
-from django.urls import get_resolver, set_urlconf
-from django.utils.log import log_response
-from django.utils.module_loading import import_string
-from django.http import HttpResponse
-
-from django.core.handlers.exception import convert_exception_to_response, response_for_exception
-
-logger = logging.getLogger('django.request')
-
 
 def convert(get_response):
-    """
-    Wrap the given get_response callable in exception-to-response conversion.
-
-    All exceptions will be converted. All known 4xx exceptions (Http404,
-    PermissionDenied, MultiPartParserError, SuspiciousOperation) will be
-    converted to the appropriate response, and all other exceptions will be
-    converted to 500 responses.
-
-    This decorator is automatically applied to all middleware to ensure that
-    no middleware leaks an exception and that the next middleware in the stack
-    can rely on getting a response instead of an exception.
-    """
     if asyncio.iscoroutinefunction(get_response):
 
         @wraps(get_response)
@@ -77,7 +53,7 @@ def convert(get_response):
                                                 response.status_code,
                                                 'data':
                                                 str(response.content.decode()),
-                                                'message':
+                                                'msg':
                                                 response.reason_phrase
                                             }),
                                             content_type='application/json')
