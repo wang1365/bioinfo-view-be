@@ -46,12 +46,14 @@ class ProjectsAPIView(ModelViewSet):
         # code = request.data.get("code", "")
         # if self._code_exists(code):
         #     return response_body(code=1, msg=f"已存在项目编码{code}的项目")
+        parent = request.data.get("parent", None)
         try:
             project = Project.objects.create(
                 **{
                     "owner": request.account,
                     "name": request.data.get("name", ""),
                     "desc": request.data.get("desc", ""),
+                    "parent_id": parent
                     # "code": request.data.get("code", ""),
                 }
             )
@@ -67,12 +69,19 @@ class ProjectsAPIView(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         query_name = request.GET.get("name")
+        query_parent = request.GET.get("parent_id")
         if "admin" in request.role_list:
             projects = Project.objects.filter(is_visible=True)
         else:
-            projects = Project.objects.filter(members__id__in=[request.account.id], is_visible=True)
+            projects = Project.objects.filter(members__id__in=[request.account.id],
+                                              is_visible=True
+                                              )
         if query_name:
             projects = projects.filter(name__contains=query_name)
+        if query_parent:
+            projects = projects.filter(parent_id=int(query_parent))
+        else:
+            projects = projects.filter(parent__isnull=True)
         projects = projects.order_by("-create_time")
         page = self.paginate_queryset(projects)
         if page is not None:

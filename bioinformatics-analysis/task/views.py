@@ -73,7 +73,7 @@ class TaskView(ModelViewSet):
     def _normal_task_dir(self, task):
         out_dir = os.path.join(
             settings.TASK_RESULT_DIR,
-            f"{task.creator.username}",
+            f"{task.creator.id}",
             f"{task.project.id}",
             datetime.now().strftime('%Y%m%d'),
             f"{task.flow.code}",
@@ -514,22 +514,31 @@ def download(request, pk):
 
 
 def task_summary(request, *args, **kwargs):
+    queryset = Task.objects.all()
     if "admin" in request.role_list:
+        if request.GET.get("start_time__gte"):
+            queryset = queryset.filter(create_time__gte=request.GET.get("start_time__gte"))
+        if request.GET.get("start_time__lte"):
+            queryset = queryset.filter(create_time__lte=request.GET.get("start_time__lte"))
         return response_body(data={
-            "pending_task_count": Task.objects.filter(status=1).count(),
-            "running_task_count": Task.objects.filter(status=2).count(),
-            "finished_task_count": Task.objects.filter(status=3).count(),
-            "failured_task_count": Task.objects.filter(status=4).count(),
-            "canceled_task_count": Task.objects.filter(status=5).count(),
+            "pending_task_count": queryset.filter(status=1).count(),
+            "running_task_count": queryset.filter(status=2).count(),
+            "finished_task_count": queryset.filter(status=3).count(),
+            "failured_task_count": queryset.filter(status=4).count(),
+            "canceled_task_count": queryset.filter(status=5).count(),
         })
     else:
         project = Project.objects.filter(projectmembers__account__in=[request.account]).all()
+        if request.GET.get("start_time__gte"):
+            queryset = queryset.filter(create_time__gte=request.GET.get("start_time__gte"), project__in=project)
+        if request.GET.get("start_time__lte"):
+            queryset = queryset.filter(create_time__lte=request.GET.get("start_time__lte"), project__in=project)
         return response_body(data={
-            "pending_task_count": Task.objects.filter(project__in=project, status=1).count(),
-            "running_task_count": Task.objects.filter(project__in=project, status=2).count(),
-            "finished_task_count": Task.objects.filter(project__in=project, status=3).count(),
-            "failured_task_count": Task.objects.filter(project__in=project, status=4).count(),
-            "canceled_task_count": Task.objects.filter(project__in=project, status=5).count(),
+            "pending_task_count": queryset.filter(status=1).count(),
+            "running_task_count": queryset.filter(status=2).count(),
+            "finished_task_count": queryset.filter(status=3).count(),
+            "failured_task_count": queryset.filter(status=4).count(),
+            "canceled_task_count": queryset.filter(status=5).count(),
         })
 
 

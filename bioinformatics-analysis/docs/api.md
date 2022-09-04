@@ -96,7 +96,7 @@ curl --location --request DELETE 'http://127.0.0.1:8080/account/delete_user' \
 ## 管理员查询用户列表
 
 ```
-curl --location --request GET 'http://127.0.0.1:8080/account/?page=1&size=5' \
+curl --location --request GET 'http://127.0.0.1:9001/account/?page=1&size=5' \
 --header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
 --header 'Content-Type: application/json'
 ```
@@ -114,7 +114,8 @@ curl --location --request GET 'http://127.0.0.1:8080/account/?page=1&size=5' \
                 "is_active": true,
                 "role": [
                     "admin"
-                ]
+                ],
+                "used_disk": ""
             },
             {
                 "id": 3,
@@ -123,7 +124,8 @@ curl --location --request GET 'http://127.0.0.1:8080/account/?page=1&size=5' \
                 "is_active": true,
                 "role": [
                     "admin"
-                ]
+                ],
+                "used_disk": "8M"
             },
             {
                 "id": 4,
@@ -132,21 +134,24 @@ curl --location --request GET 'http://127.0.0.1:8080/account/?page=1&size=5' \
                 "is_active": false,
                 "role": [
                     "normal"
-                ]
+                ],
+                "used_disk": "8G"
             },
             {
                 "id": 5,
                 "username": "勒布朗詹姆斯",
                 "email": "1@qq.com",
                 "is_active": true,
-                "role": []
+                "role": [],
+                "used_disk": "8G"
             },
             {
                 "id": 6,
                 "username": "爱因斯坦",
                 "email": "2@qq.com",
                 "is_active": true,
-                "role": []
+                "role": [],
+                "used_disk": "8G"
             }
         ],
         "total_count": 12
@@ -247,12 +252,23 @@ curl --location --request GET 'http://127.0.0.1:8080/role' \
 ## 创建项目
 
 ```
-curl --location --request POST 'http://127.0.0.1:8000/project' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDgzNjI2NTksInN1YiI6ImFjY2VzcyJ9.a0OP7TvKJoyYwras5MIOWtI93FcnmfhEX9n_T1nuH80' \
+curl --location --request POST 'http://127.0.0.1:8080/project' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjM5MzUwNzksInN1YiI6ImFjY2VzcyJ9.v2cLd31Tnd20t1ILTsFtCv0z3-xuVUbFX8_KxoHBCTY' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name": "jack",
     "desc": "xxx"
+}'
+```
+
+```buildoutcfg
+curl --location --request POST 'http://127.0.0.1:8080/project' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjM5MzUwNzksInN1YiI6ImFjY2VzcyJ9.v2cLd31Tnd20t1ILTsFtCv0z3-xuVUbFX8_KxoHBCTY' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "jack1",
+    "desc": "xxx",
+    "parent": 1
 }'
 ```
 
@@ -303,13 +319,11 @@ curl --location --request POST 'http://127.0.0.1:8000/project' \
 
 
 
-
-
 ## 查询用户参与的所有项目(带查询参数)
 
 ```
-curl --location --request GET 'http://127.0.0.1:8000/project?name=ack&page=1&size=2' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDI1NzY2MzEsInN1YiI6ImFjY2VzcyJ9.q8I5DR3YYYeU2YUIkB4P5sa-wVNEbiPtnLMxyvkIHqM' \
+curl --location --request GET 'http://127.0.0.1:8080/project?parent_id=1&page=1&size=2' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjM5MzUwNzksInN1YiI6ImFjY2VzcyJ9.v2cLd31Tnd20t1ILTsFtCv0z3-xuVUbFX8_KxoHBCTY' \
 --header 'Content-Type: application/json'
 ```
 
@@ -348,8 +362,6 @@ curl --location --request GET 'http://127.0.0.1:8000/project?name=ack&page=1&siz
     }
 }
 ```
-
-
 
 
 
@@ -403,9 +415,6 @@ curl --location --request GET 'http://127.0.0.1:8000/project/6' \
 	}
 }
 ```
-
-
-
 
 
 ## 修改项目
@@ -1134,4 +1143,43 @@ curl --location --request GET 'http://127.0.0.1:8080/patient/patients/dl_patient
 curl --location --request POST 'http://127.0.0.1:8080/patient/patients/import_patients' \
 --header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
 --form 'file=@"/Users/guwanhua/Documents/patient_template.csv"'
+```
+
+# 资源
+
+## 管理员设置用户可以使用的磁盘大小, 单位MB
+
+```buildoutcfg
+curl --location --request POST 'http://127.0.0.1:9001/resource_limit/resource_limits' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "user": 1,
+    "limit_type": "disk",
+    "limit": 34
+}'
+```
+
+## 查询设置情况
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/resource_limit/resource_limits' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json'
+```
+
+```buildoutcfg
+{"code": 0, "msg": "", "data": {"count": 1, "next": null, "previous": null, "results": [{"id": 1, "limit": 34, "limit_type": "disk", "desc": "", "create_time": "2022-09-02T17:48:36.289476", "update_time": "2022-09-02T17:48:36.289876", "user": 1, "creator": 2}]}}
+```
+
+## 查询系统内存和磁盘使用情况 单位MB
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/resource_limit/resource_limits/resource' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json'
+```
+
+```buildoutcfg
+{"code": 0, "msg": "", "data": {"memory": {"all": 16384, "used": 8417}, "disk": {"all": 476802, "used": 399280}}}
 ```

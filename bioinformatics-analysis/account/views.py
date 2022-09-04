@@ -1,5 +1,7 @@
 import logging
 from datetime import timedelta
+import os
+import subprocess
 
 from django.conf import settings
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -7,6 +9,7 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.viewsets import mixins, GenericViewSet
+from django_filters import rest_framework as filters
 
 from account.auth import authenticate, create_access_token
 from account.forms import LoginForm, RegisterForm
@@ -17,8 +20,18 @@ from utils.paginator import PageNumberPagination
 from utils.response import response_body
 from utils.site import get_md5
 from account import constants as account_constant
+from task.models import Task
+
 
 logger = logging.getLogger(__name__)
+
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = Account
+        fields = {
+            'create_time': ('exact', 'gt', 'lt', 'gte', 'lte'),
+        }
 
 
 class UsersAPIView(
@@ -32,6 +45,7 @@ class UsersAPIView(
     # 查询集和结果集
     queryset = Account.objects.all()
     parser_classes = [FormParser, JSONParser, MultiPartParser]
+    filter_class = UserFilter
 
     @action(detail=False, methods=['get'])
     def me(self, request, *args, **kwargs):
@@ -76,8 +90,12 @@ class UsersAPIView(
                     user=item["id"]).values_list(
                     "role__code",
                     flat=True))
+            user_dir = os.path.join(settings.TASK_RESULT_DIR, str(item["id"]))
+            res = subprocess.Popen(f'du -sh {user_dir}', shell=True, stdout=subprocess.PIPE, encoding='utf8')
+            item['used_disk'] = res.stdout.read().split("\t")[0]
+            item['running_task'] = Task.objects.filter(creator_id=item["id"], status=2).count()
         return response_body(
-            data={"item_list": item_list, "total_count": len(accounts)}
+            data={"item_list": item_list, "total_count": accounts.count()}
         )
 
     @action(detail=False, methods=["post"])
@@ -124,6 +142,7 @@ class UsersAPIView(
             username = obj_form.cleaned_data.get("username", None)
             password = obj_form.cleaned_data.get("password", None)
             user = authenticate(username=username, password=password)
+            user.save()
             if user and user.is_active:
                 access_token_expires = timedelta(
                     minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)

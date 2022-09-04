@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     "flow",
     "config",
     "appearance",
-    "patient"
+    "patient",
+    "resource_limit"
 ]
 
 MIDDLEWARE = [
@@ -194,7 +195,7 @@ SAMPLE_SHELL_ENV = {
 
 BAM_PATH = os.getenv("BAM_PATH", "/nano/bam")
 
-TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/nano/web")
+TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/tmp")
 
 MOVE_OTHERS_DIR = os.getenv("MOVE_OTHERS_DIR", "/nano/result/other")
 MOVE_QC_DIR = os.getenv("MOVE_QC_DIR", "/nano/result/qc")

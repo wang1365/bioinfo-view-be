@@ -40,6 +40,7 @@ services:
     build: ./bioinformatics-analysis
     restart: always
     container_name: web
+    privileged: true
     networks:
       - db_network
       - redis_network
@@ -51,6 +52,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
+      - TASK_RESULT_DIR=${TASK_RESULT_DIR}
     ports:
       - ${PORT}:8080
     volumes:

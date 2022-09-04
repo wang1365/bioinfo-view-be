@@ -21,6 +21,7 @@ class Project(models.Model):
     owner = models.ForeignKey(
         to=Account, on_delete=models.CASCADE, related_name="projects"
     )
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     is_visible = models.BooleanField(default=True)
     is_builtin = models.BooleanField(default=False)
     samples = models.ManyToManyField(to=Sample)
