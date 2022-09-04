@@ -32,12 +32,26 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin", "django.contrib.auth",
-    "django.contrib.contenttypes", "django.contrib.sessions",
-    "django.contrib.messages", "django.contrib.staticfiles",
-    "django.contrib.sites", 'django_extensions', 'corsheaders',
-    'rest_framework', "account", "project", "sample", "task", "rbac", "flow",
-    "config", "appearance", "patient"
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    'corsheaders',
+    'django_extensions',
+    'rest_framework',
+    "account",
+    "project",
+    "sample",
+    "task",
+    "rbac",
+    "flow",
+    "config",
+    "appearance",
+    "patient",
+    "resource_limit"
 ]
 
 MIDDLEWARE = [
@@ -183,7 +197,7 @@ SAMPLE_SHELL_ENV = {
 
 BAM_PATH = os.getenv("BAM_PATH", "/nano/bam")
 
-TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/nano/web")
+TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/tmp")
 
 MOVE_OTHERS_DIR = os.getenv("MOVE_OTHERS_DIR", "/nano/result/other")
 MOVE_QC_DIR = os.getenv("MOVE_QC_DIR", "/nano/result/qc")

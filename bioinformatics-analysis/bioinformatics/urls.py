@@ -37,10 +37,9 @@ urlpatterns = [
     url(r"^sample", include(("sample.urls", "sample"), namespace="sample")),
     url(r"^task", include(("task.urls", "task"), namespace="task")),
     url(r"^config", include(("config.urls", "config"), namespace="config")),
-    url(r"^site_config/",
-        include(("appearance.urls", "appearance"), namespace="appearance")),
-    url(r"^patient", include(("patient.urls", "patient"),
-                             namespace="patient")),
+    url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
+    url(r"^patient", include(("patient.urls", "patient"), namespace="patient")),
+    url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
 ]
 
 sched = Scheduler()

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.forms import model_to_dict
 
 from project.models import Project, ProjectMembers
 from task.models import Task
@@ -23,6 +24,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "members",
             "task_count",
             "create_time",
+            "parent"
         ]
 
     def get_members(self, obj):
