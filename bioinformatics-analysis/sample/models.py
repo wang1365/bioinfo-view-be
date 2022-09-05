@@ -85,7 +85,7 @@ class Sample(models.Model):
     reagent_box = models.CharField(max_length=128)
 
     # 核酸打断方式
-    nucleic_type = models.CharField(max_length=128)
+    nucleic_break_type = models.CharField(max_length=128)
 
     # 建库input
     library_input = models.CharField(max_length=128)

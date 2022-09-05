@@ -109,7 +109,7 @@ SAMPLE_MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
-        'key': 'nucleic_type',
+        'key': 'nucleic_break_type',
         'name': '核酸打断方式',
         'value_type': 'string',
         'search_type': SearchType.exact,
