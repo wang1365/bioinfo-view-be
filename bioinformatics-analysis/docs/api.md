@@ -1,5 +1,17 @@
 # 用户
 
+## 月注册用户统计
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/account/summary' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json'
+```
+
+```buildoutcfg
+{"code": 0, "msg": "", "data": [{"month": "2022-08-01 00:00:00", "count": 1}]}
+```
+
 ## 登录
 
 ```

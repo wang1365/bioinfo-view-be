@@ -179,7 +179,7 @@ class TaskView(ModelViewSet):
                     code=1,
                     msg=f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建")
             else:
-                return response_body(code=0,
+                return response_body(code=200,
                                      msg="",
                                      data="")
         if req_data.get("is_merge") and json.loads(req_data.get("is_merge")):
@@ -579,4 +579,4 @@ class RunQcView(APIView):
         sample.save()
         # add 自带去重
         project.samples.add(sample_id)
-        return response_body(data="success", msg="", code=0)
+        return response_body(data="success", msg="", code=200)
