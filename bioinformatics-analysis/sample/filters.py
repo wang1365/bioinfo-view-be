@@ -48,6 +48,8 @@ class SampleProjectFilters:
 
 
 class SampleFilters(CommonFilters):
-    SEARCH_FIELDS = [
-        'company', 'platform', 'index_type'
-    ]
+    SEARCH_FIELDS = ['company', 'index_type']
+
+
+class SampleMetaFilters(CommonFilters):
+    SEARCH_FIELDS = []

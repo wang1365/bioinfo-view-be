@@ -9,15 +9,12 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class SampleMeta(models.Model):
     """样本元信息."""
-    
+
     # 采样日期
     sample_date = models.DateField()
 
     # 送测日期
     test_date = models.DateField()
-
-    # 项目编码
-    project_index = models.CharField(max_length=1024, blank=True, default='')
 
     # 采样部位
     sample_componet = models.CharField(max_length=128)
