@@ -1,15 +1,23 @@
 from django.urls import re_path as url
 
 from sample import views
+from sample.constants import SAMPLE_META_TEMPLATE_PATH, SAMPLE_TEMPLATE_PATH
 from rest_framework import routers
 
 router = routers.DefaultRouter()
 
 router.register(r'^/samples', views.SampleView, basename="samples")
 
+router.register(r'^/sampledatas', views.SampleMetaView, basename="samples_datas")
+
 other_urls = [
-    url(r"^/upload", views.SampleUploadView.as_view()),
     url(r"^/download/(?P<pk>\d+)$", views.download),
+
+    url(
+        r"^/samples/template/download",
+        lambda req: views.download_by_filename(req, SAMPLE_TEMPLATE_PATH),
+    ),
+
     url(
         r"^/samples/query",
         views.SampleView.as_view({"post": "query"}),
@@ -20,6 +28,19 @@ other_urls = [
     ),
     url(r"^/samples/list_fields",
         views.SampleView.as_view({"get": "list_fields"})),
+
+    url(
+        r"^/samplemeta/template/download",
+        lambda req: views.download_by_filename(req, SAMPLE_META_TEMPLATE_PATH),
+    ),
+    url(r"^/samplemeta/list_fields",
+        views.SampleMetaView.as_view({"get": "list_fields"})),
+
+    url(r"^/samplemeta/upload",
+        views.SampleUploadView.as_view({"post": "upload_meta"})),
+
+    url(r"^/samples/upload",
+        views.SampleUploadView.as_view({"post": "upload"})),
 ]
 
-urlpatterns = router.urls + other_urls
+urlpatterns = other_urls + router.urls

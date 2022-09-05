@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 
 
 class SearchType:
@@ -10,22 +11,37 @@ class SearchType:
 
 class ValueType:
     date = 'date'
+    bool = 'bool'
     string = 'string'
     number = 'number'
 
 
+SAMPLE_TEMPLATE_PATH = ""
+SAMPLE_META_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "sample-meta.xlsx"
+)
+
+
 FIELDS_OPERATORS = {
     (ValueType.date, SearchType.ranges): ['between'],
+    (ValueType.bool, SearchType.exact): ['eq', 'ne'],
     (ValueType.string, SearchType.choices): ['in'],
     (ValueType.string, SearchType.exact): ['ne'],
-    (ValueType.number, SearchType.exact):
-    ['eq', 'ne', 'between', 'gt', 'gte', 'lt', 'lte'],
+    (ValueType.number, SearchType.exact): ['eq', 'ne', 'between', 'gt', 'gte', 'lt', 'lte'],
 }
 
-MODEL_ATTRS = [
+SAMPLE_META_MODEL_ATTRS = [
+    {
+        'key': 'sample_date',
+        'name': '采样日期',
+        'value_type': 'date',
+        'search_type': SearchType.ranges
+    },
     {
         'key': 'test_date',
-        'name': '送测日期',
+        'name': '送检日期',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
@@ -36,62 +52,77 @@ MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
-        'key': 'platform',
-        'name': '测序平台',
-        'value_type': 'string',
-        'search_type': SearchType.choices
-    },
-    {
-        'key': 'company',
-        'name': '测序公司',
-        'value_type': 'string',
-        'search_type': SearchType.choices,
-    },
-    {
-        'key': 'test_type',
-        'name': '测序类型',
-        'value_type': 'string',
-        'search_type': SearchType.choices
-    },
-    {
-        'key': 'index_type',
-        'name': 'index 类型',
-        'value_type': 'string',
-        'search_type': SearchType.choices
-    },
-    {
-        'key': 'origin_sample_info',
-        'name': '原始样本信息',
+        'key': 'sample_componet',
+        'name': '采样部位',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'sample_orginization',
-        'name': '样本类型1',
-        'value_type': 'string',
-        'search_type': SearchType.choices
-    },
-    {
         'key': 'sample_type',
-        'name': '样本类型2',
+        'name': '样本类型',
         'value_type': 'string',
         'search_type': SearchType.choices
     },
     {
-        'key': 'library_type',
+        'key': 'panel_proportion',
+        'name': '肿瘤含量',
+        'value_type': 'string',
+        'search_type': SearchType.not_support
+    },
+    {
+        'key': 'is_panel',
+        'name': '肿瘤样本',
+        'value_type': 'bool',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'identifier',
+        'name': '样本识别号',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'patient_identifier',
+        'name': '患者识别号',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+]
+
+SAMPLE_MODEL_ATTRS = [
+    {
+        'key': 'project_index',
+        'name': '项目编码',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'library_number',
         'name': '文库编号',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'prob_content',
-        'name': '探针内容',
+        'key': 'reagent_box',
+        'name': '捕获试剂盒',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'pooling_library',
-        'name': '杂交文库',
+        'key': 'nucleic_type',
+        'name': '核酸打断方式',
+        'value_type': 'string',
+        'search_type': SearchType.exact,
+    },
+    {
+        'key': 'library_input',
+        'name': '建库input',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'index_type',
+        'name': 'index类型',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -102,209 +133,64 @@ MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
-        'key': 'barocode_1',
-        'name': 'Barocode 2/i7',
+        'key': 'hybrid_input',
+        'name': '杂交input',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'barocode_2',
-        'name': 'Barocode1/i7',
+        'key': 'risk',
+        'name': '风险上机',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'sequence_size',
-        'name': '测序量（G）',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'real_size',
-        'name': '实际数据量（G）',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'quality_30',
-        'name': 'Q30（%）',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'analysis_type',
-        'name': '分析类型',
+        'key': 'nucleic_level',
+        'name': '核酸降解等级',
         'value_type': 'string',
         'search_type': SearchType.choices
     },
     {
-        'key': 'building_library_type',
-        'name': '建库方式',
+        'key': 'sample_meta_id',
+        'name': '样本ID',
         'value_type': 'string',
-        'search_type': SearchType.choices
+        'search_type': SearchType.not_support
     },
     {
-        'key': 'break_type',
-        'name': '打断方式',
+        'key': 'company',
+        'name': '送检机构',
         'value_type': 'string',
-        'search_type': SearchType.choices
+        'search_type': SearchType.exact,
     },
     {
-        'key': 'circle_numbers',
-        'name': '循环数',
+        'key': 'nucleic_type',
+        'name': '核酸类型',
         'value_type': 'string',
-        'search_type': SearchType.exact
+        'search_type': SearchType.choices
     },
     {
         'key': 'fastq1_path',
-        'name': 'fastq1 文件地址',
+        'name': 'fastq1文件地址',
         'value_type': 'string',
         'search_type': SearchType.not_support
     },
     {
         'key': 'fastq2_path',
-        'name': 'fastq2 文件地址',
+        'name': 'fastq2文件地址',
         'value_type': 'string',
         'search_type': SearchType.not_support
     },
     {
-        'key': 'bam1_path',
-        'name': 'bam1 文件地址',
+        'key': 'identifier',
+        'name': '数据识别号',
         'value_type': 'string',
-        'search_type': SearchType.not_support
+        'search_type': SearchType.exact
     },
     {
-        'key': 'bam1_tool',
-        'name': 'bam1 比对软件',
+        'key': 'sample_identifier',
+        'name': '样本识别号',
         'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'bam2_path',
-        'name': 'bam2 文件地址',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'bam2_tool',
-        'name': 'bam2 比对软件',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'user_id',
-        'alias': 'name',
-        'name': '测序发起人',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'standard_code',
-        'name': '标准品',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup1',
-        'name': 'backup1',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup2',
-        'name': 'backup2',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup3',
-        'name': 'backup3',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup4',
-        'name': 'backup4',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup5',
-        'name': 'backup5',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup6',
-        'name': 'backup6',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup7',
-        'name': 'backup7',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup8',
-        'name': 'backup8',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup9',
-        'name': 'backup9',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
-        'key': 'backup10',
-        'name': 'backup10',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
+        'search_type': SearchType.exact
     },
 ]
 
-TITLES = [
-    "送测日期",
-    "项目编码",
-    "测序平台",
-    "测序公司",
-    "测序类型",
-    "index类型",
-    "原始样本信息",
-    "样本类型1",
-    "样本类型2",
-    "文库编号",
-    "探针内容",
-    "杂交文库",
-    "index编号",
-    "Barocode2/i7",
-    "Barocode1/i7",
-    "测序量（G）",
-    "实际数据量（G）",
-    "Q30（%）",
-    "分析类型",
-    "建库方式",
-    "打断方式",
-    "循环数",
-    "fastq1文件地址",
-    "fastq2文件地址",
-    "bam1文件地址",
-    "bam1比对软件",
-    "bam2文件地址",
-    "bam2比对软件",
-    "测序发起人",
-    "标准品",
-    "backup1",
-    "backup2",
-    "backup3",
-    "backup4",
-    "backup5",
-    "backup6",
-    "backup7",
-    "backup8",
-    "backup9",
-    "backup10",
-]
