@@ -17,7 +17,7 @@ class SecurityMiddleware(MiddlewareMixin):
         token = request.META.get("HTTP_AUTHORIZATION") or request.COOKIES.get("token")
         if not token:
             if (
-                request.path.startswith("/api/account")
+                request.path.startswith("/account")
                 and request.method == "POST"
                 or request.path == reverse("account:result")
             ) or (request.path.startswith("/task") and request.method.lower() == "put"):

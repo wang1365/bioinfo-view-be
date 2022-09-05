@@ -8,6 +8,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class SampleMeta(models.Model):
+    """样本元信息."""
+    
     # 采样日期
     sample_date = models.DateField()
 
@@ -63,6 +65,7 @@ class SampleMeta(models.Model):
 
 
 class Sample(models.Model):
+    """样本数据."""
 
     class NucleicLevelChoices(models.TextChoices):
         A = "A", "A"
