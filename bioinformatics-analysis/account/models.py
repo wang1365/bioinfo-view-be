@@ -11,6 +11,8 @@ class Account(models.Model):
     department = models.CharField(max_length=128, null=True)
     is_active = models.BooleanField(default=False)
     is_delete = models.BooleanField(default=False)
+    disk_limit = models.PositiveBigIntegerField(null=True, blank=True) # MB
+    used_disk = models.PositiveBigIntegerField(default=0)   # MB
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
 
