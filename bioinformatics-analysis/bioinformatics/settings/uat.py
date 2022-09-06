@@ -9,7 +9,7 @@ DATABASES = {
         "NAME": "bioinfo",
         "USER": "postgres",
         "PASSWORD": "123456",
-        "HOST": "db",
+        "HOST": "47.116.137.79",
         "PORT": "5432",
     }
 }
