@@ -39,7 +39,8 @@ urlpatterns = [
     url(r"^config", include(("config.urls", "config"), namespace="config")),
     url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
     url(r"^patient", include(("patient.urls", "patient"), namespace="patient")),
-    url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
+    # 资源限制和使用放在account model上, 直接使用account的接口
+    # url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
 ]
 
 sched = Scheduler()
