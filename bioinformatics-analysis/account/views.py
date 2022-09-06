@@ -11,6 +11,8 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.viewsets import mixins, GenericViewSet
 from django_filters import rest_framework as filters
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 from account.auth import authenticate, create_access_token
 from account.forms import LoginForm, RegisterForm
@@ -213,6 +215,23 @@ class UsersAPIView(
                 id=request.data.get('userid')).update(
                 password=get_md5("123456"))
         return response_body(data=True)
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request, *args, **kwargs):
+        if account_constant.ADMIN in request.role_list:
+            accounts = Account.objects.filter(
+                is_delete=False, user2role__role__code__in=[
+                    account_constant.NORMAL, account_constant.ADMIN]).all()
+        elif account_constant.SUPER in request.role_list:
+            accounts = Account.objects.filter(
+                is_delete=False, user2role__role__code__in=[
+                    account_constant.SUPER, account_constant.ADMIN]).all()
+        else:
+            accounts = Account.objects.filter(is_delete=False)
+        data = accounts.annotate(month=TruncMonth('create_time')).values('month').annotate(count=Count('id'))
+        return response_body(
+            data=[item for item in data]
+        )
 
 
 def account_validate(request):

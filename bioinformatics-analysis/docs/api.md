@@ -1,5 +1,17 @@
 # 用户
 
+## 月注册用户统计
+
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/account/summary' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+--header 'Content-Type: application/json'
+```
+
+```buildoutcfg
+{"code": 0, "msg": "", "data": [{"month": "2022-08-01 00:00:00", "count": 1}]}
+```
+
 ## 登录
 
 ```
@@ -41,7 +53,7 @@ curl --location --request POST 'http://127.0.0.1:8080/account/create_user' \
 
 ```
 curl --location --request GET 'http://127.0.0.1:8080/account/me' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' 
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjQ2MjkzNDIsInN1YiI6ImFjY2VzcyJ9.nPaZzxsOtUy3hkKbMgK66XmTj3Zt8eMfWISBa9z7jP8' 
 ```
 
 ```
@@ -64,10 +76,11 @@ curl --location --request PUT 'http://127.0.0.1:8080/account/4/reset_password' \
 ## 修改用户信息
 
 ```
-curl --location --request PATCH 'http://127.0.0.1:8080/account/5' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjI1OTk3MjMsInN1YiI6ImFjY2VzcyJ9.XazpV3L98Ep6DBwntXXVRSIo-RsnxRXCtJnE7I-mRaE' \
+curl --location --request PATCH 'http://127.0.0.1:8080/account/2' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjQ2MjkzNDIsInN1YiI6ImFjY2VzcyJ9.nPaZzxsOtUy3hkKbMgK66XmTj3Zt8eMfWISBa9z7jP8' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'username=jack0' \
+--data-urlencode 'disk_limit=1024' \
 --data-urlencode 'password=123456' \
 --data-urlencode 'password_again=123456'
 ```
