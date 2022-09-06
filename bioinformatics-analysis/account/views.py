@@ -4,6 +4,7 @@ import os
 import subprocess
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -22,24 +23,28 @@ from utils.site import get_md5
 from account import constants as account_constant
 from task.models import Task
 
-
 logger = logging.getLogger(__name__)
 
 
 class UserFilter(filters.FilterSet):
+    keyword = filters.CharFilter(method='filter_keyword', help_text='搜索关键字')
+
     class Meta:
         model = Account
-        fields = {
-            'create_time': ('exact', 'gt', 'lt', 'gte', 'lte'),
-        }
+        fields = ('keyword',)
+
+    def filter_keyword(self, queryset, name, value):
+        return queryset.filter(Q(username__icontains=value)
+                               | Q(nickname__icontains=value)
+                               | Q(email__icontains=value))
 
 
 class UsersAPIView(
-        mixins.RetrieveModelMixin,
-        mixins.DestroyModelMixin,
-        mixins.ListModelMixin,
-        mixins.UpdateModelMixin,
-        GenericViewSet):
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    GenericViewSet):
     # 序列化类
     serializer_class = AccountSerializer
     # 查询集和结果集
@@ -76,6 +81,13 @@ class UsersAPIView(
                     account_constant.SUPER, account_constant.ADMIN]).all()
         else:
             accounts = Account.objects.filter(is_delete=False)
+
+        # 支持关键字检索
+        keyword = request.query_params['keyword']
+        if keyword:
+            accounts = accounts.filter(Q(username__icontains=keyword)
+                                       | Q(nickname__icontains=keyword)
+                                       | Q(email__icontains=keyword))
         pg = PageNumberPagination()
         # 在数据库中获取分页的数据,
         pager_accounts = pg.paginate_queryset(
@@ -103,12 +115,14 @@ class UsersAPIView(
         register_form = RegisterForm(request.data, request=request)
         if register_form.is_valid():
             username = register_form.cleaned_data["username"]
+            nickname = register_form.cleaned_data["nickname"]
             email = register_form.cleaned_data["email"]
             password = get_md5(register_form.cleaned_data["password"])
 
             try:
                 account = Account(
                     username=username,
+                    nickname=nickname,
                     email=email,
                     password=password,
                     is_active=True

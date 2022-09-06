@@ -6,6 +6,7 @@ from django.utils.timezone import now
 
 class Account(models.Model):
     username = models.CharField(max_length=100, unique=True)
+    nickname = models.CharField(max_length=100, default='')
     email = models.EmailField(null=True, blank=True)
     password = models.CharField(max_length=256)
     department = models.CharField(max_length=128, null=True)

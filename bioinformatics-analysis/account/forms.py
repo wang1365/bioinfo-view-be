@@ -34,6 +34,14 @@ class RegisterForm(forms.Form):
             attrs={"class": "form-control", "placeholder": "请输入用户名"}
         ),
     )
+    nickname = forms.CharField(
+        label="姓名",
+        max_length=30,
+        min_length=1,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "请输入姓名"}
+        ),
+    )
     email = forms.EmailField(
         required=False,
         label="邮箱",
@@ -66,6 +74,9 @@ class RegisterForm(forms.Form):
         if Account.objects.filter(username=username).exists():
             raise forms.ValidationError("用户名已存在, 请修改用户名")
         return username
+
+    def clean_nickname(self):
+        return self.cleaned_data["nickname"]
 
     def clean_email(self):
         email = self.cleaned_data["email"]
