@@ -83,7 +83,7 @@ class UsersAPIView(
             accounts = Account.objects.filter(is_delete=False)
 
         # 支持关键字检索
-        keyword = request.query_params['keyword']
+        keyword = request.query_params.get('keyword')
         if keyword:
             accounts = accounts.filter(Q(username__icontains=keyword)
                                        | Q(nickname__icontains=keyword)
