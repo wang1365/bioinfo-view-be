@@ -71,6 +71,12 @@ class UsersAPIView(
         user.save()
         return response_body(data="重置密码成功")
 
+    def update(self, request, *args, **kwargs):
+        resp = super().update(request, *args, **kwargs)
+        return response_body(
+            data=resp.data
+        )
+
     def list(self, request, *args, **kwargs):
         # 获取所有数据
         if account_constant.ADMIN in request.role_list:

@@ -16,6 +16,10 @@ class FilterByAccount:
     def filter_queryset(self, request, queryset, view):
         account_id = request.account.id
 
+        # 超级管理员不进行过滤
+        if "super" in request.role_list:
+            return queryset
+
         if "admin" in request.role_list:
             payload = request.parser_context['request'].body
             if not payload:
