@@ -23,6 +23,10 @@ class SiteLayoutlViewSet(ModelViewSet):
         resp = super().create(request, *args, **kwargs)
         return response_body(data=resp.data)
 
+    def update(self, request, *args, **kwargs):
+        resp = super().update(request, *args, **kwargs)
+        return response_body(data=resp.data)
+
     # def create(self, request, *args, **kwargs):
     #     serializer = SiteLayOutSerializer(data=request.data)
     #     if not serializer.is_valid():
