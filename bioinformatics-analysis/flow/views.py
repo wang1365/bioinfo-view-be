@@ -17,7 +17,7 @@ class FlowView(CustomeViewSets):
 
     def create_data(self, request, *args, **kwargs):
         data = super().create_data(request, *args, **kwargs)
-        data['parameter_schema'] = json.dumps(data['parameters'])
+        data['parameter_schema'] = json.dumps(data.get('parameters', "{}"))
         data['owner_id'] = request.account.id
         return data
 

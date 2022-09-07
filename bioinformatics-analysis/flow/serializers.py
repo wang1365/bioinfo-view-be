@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+from shutil import ExecError
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 from flow.models import Flow
+from flow.core import load_image
 
 
 class FlowSerializer(serializers.ModelSerializer):
@@ -16,11 +18,18 @@ class FlowSerializer(serializers.ModelSerializer):
             raise ValidationError("{} 中包含非法字符".format(code))
         return code
 
+    def validate_tar_path(self, tar_path, **params):
+        try:
+            load_image(tar_path, self.initial_data['image_name'])
+        except Exception:
+            raise ValidationError("无法加载镜像")
+        return tar_path
+
     class Meta:
         model = Flow
         fields = [
             "id", "name", "code", "desp", "owner_id", "alignment_tool",
             "parameter_schema", "flow_category", "flow_type", "sample_type",
-            "details", "parameters", "location", "memory",
+            "details", "parameters", "memory", "tar_path", "image_name",
             "builtin_parameters", "create_time", "allow_nonstandard_samples",
         ]

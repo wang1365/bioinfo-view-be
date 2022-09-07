@@ -1,4 +1,6 @@
 import json
+from operator import mod
+from statistics import mode
 
 from django.db import models
 from django.utils.timezone import now
@@ -19,7 +21,12 @@ class Flow(models.Model):
     update_time = models.DateTimeField("修改时间", default=now)
 
     # 生信脚本地址
-    location = models.CharField(max_length=100, blank=False, unique=True)
+    # location = models.CharField(max_length=100, blank=False, unique=True)
+    # docker tar 地址
+    tar_path = models.CharField(max_length=1024, blank=False)
+
+    # image 地址
+    image_name = models.CharField(max_length=128, blank=False, unique=True)
 
     # 比对软件
     alignment_tool = models.CharField(max_length=64)
