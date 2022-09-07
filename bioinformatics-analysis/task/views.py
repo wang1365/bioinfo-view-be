@@ -266,6 +266,13 @@ class TaskView(ModelViewSet):
         ):
             self._clean_out_dir(instance)
             self._unset_sample_task_id(instance)
+            async_func(
+                cal_dir_size,
+                dirctory=os.path.join(
+                    settings.TASK_RESULT_DIR,
+                    f"{instance.creator.id}"),
+                user_id=instance.creator.id,
+            )
             instance.delete()
             return response_body(data=True)
         return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
