@@ -110,9 +110,6 @@ class UsersAPIView(
                     user=item["id"]).values_list(
                     "role__code",
                     flat=True))
-            user_dir = os.path.join(settings.TASK_RESULT_DIR, str(item["id"]))
-            res = subprocess.Popen(f'du -sh {user_dir}', shell=True, stdout=subprocess.PIPE, encoding='utf8')
-            item['used_disk'] = res.stdout.read().split("\t")[0]
             item['running_task'] = Task.objects.filter(creator_id=item["id"], status=2).count()
         return response_body(
             data={"item_list": item_list, "total_count": accounts.count()}
