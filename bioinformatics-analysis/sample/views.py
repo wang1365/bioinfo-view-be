@@ -65,7 +65,7 @@ class SampleView(CustomeViewSets):
 
 class SampleMetaView(CustomeViewSets):
     queryset = SampleMeta.objects.all()
-    serializer_class = SampleSerializer
+    serializer_class = SampleMetaSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter]
