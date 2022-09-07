@@ -45,12 +45,12 @@ SAMPLE_META_MODEL_ATTRS = [
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
-    {
-        'key': 'project_index',
-        'name': '项目编码',
-        'value_type': 'string',
-        'search_type': SearchType.exact
-    },
+    # {
+    #     'key': 'project_index',
+    #     'name': '项目编码',
+    #     'value_type': 'string',
+    #     'search_type': SearchType.exact
+    # },
     {
         'key': 'sample_componet',
         'name': '采样部位',
