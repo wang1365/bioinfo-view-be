@@ -8,6 +8,7 @@ from project.utils import get_sampleids_by_projectids, get_user_by_project_ids
 class SampleUserFilter:
 
     def filter_queryset(self, request, queryset, view):
+        projects = {}
         if "admin" in request.role_list:
             return queryset
 
