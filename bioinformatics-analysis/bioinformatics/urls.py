@@ -76,7 +76,8 @@ def run_task():
                         os.getenv("TASK_RESULT_DIR"): {
                             'bind': os.getenv("TASK_DIR"),
                             'mode': 'rw'}},
-                    detach=True
+                    detach=True,
+                    network_mode="host"
                 )
                 beto_run_task.status = 2
                 beto_run_task.pid = container.id

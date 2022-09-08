@@ -228,7 +228,7 @@ class TaskView(ModelViewSet):
         })
         out_dir = self._normal_task_dir(task)
         env["OUT_DIR"] = out_dir
-        env["TASK_URL"] = f"http://{get_host_ip()}:8080" + \
+        env["TASK_URL"] = f"http://127.0.0.1:8080" + \
             reverse('task:single', kwargs={'pk': task.id})
         env["SAMPLE_INFO"] = self._write_samples_txt(task)
         env["IS_MERGE"] = "0"
