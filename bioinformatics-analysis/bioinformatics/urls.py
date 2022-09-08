@@ -25,6 +25,7 @@ from django.urls import include
 from task.models import Task
 from config.models import Config
 from utils.memory import SystemMemory
+from flow.core import G_CLIENT
 
 urlpatterns = [
     url(r"^admin/", admin.site.urls),
@@ -37,7 +38,8 @@ urlpatterns = [
     url(r"^sample", include(("sample.urls", "sample"), namespace="sample")),
     url(r"^task", include(("task.urls", "task"), namespace="task")),
     url(r"^config", include(("config.urls", "config"), namespace="config")),
-    url(r"^site_config/", include(("appearance.urls", "appearance"), namespace="appearance")),
+    url(r"^site_config/", include(("appearance.urls",
+        "appearance"), namespace="appearance")),
     url(r"^patient", include(("patient.urls", "patient"), namespace="patient")),
     # 资源限制和使用放在account model上, 直接使用account的接口
     # url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
@@ -63,12 +65,21 @@ def run_task():
             "-priority", "create_time")[0:max_task - running_tasks_count]
         for beto_run_task in beto_run_tasks:
             if used_memory + beto_run_task.memory < totol_memory * memory_rate:
-                shell_location = beto_run_task.flow.location
-                s = subprocess.Popen(f"/bin/sh -c {shell_location}",
-                                     env=beto_run_task.env,
-                                     shell=True)
+                # shell_location = beto_run_task.flow.location
+                # s = subprocess.Popen(f"/bin/sh -c {shell_location}",
+                #                      env=beto_run_task.env,
+                #                      shell=True)
+                container = G_CLIENT.containers.run(
+                    image=beto_run_task.flow.image_name,
+                    environment=beto_run_task.env,
+                    volumes={
+                        os.getenv("TASK_RESULT_DIR"): {
+                            'bind': os.getenv("TASK_DIR"),
+                            'mode': 'rw'}},
+                    detach=True
+                )
                 beto_run_task.status = 2
-                beto_run_task.pid = s.pid
+                beto_run_task.pid = container.id
                 beto_run_task.save()
                 used_memory += beto_run_task.memory
 
