@@ -1,5 +1,3 @@
-from shutil import ExecError
-from tkinter.tix import Tree
 import docker
 
 
