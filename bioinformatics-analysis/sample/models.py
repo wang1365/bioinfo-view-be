@@ -1,10 +1,7 @@
-from dbm.ndbm import library
-from operator import mod
-import os
-
-from django.db import models
-from account.models import Account
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+
+from account.models import Account
 
 
 class SampleMeta(models.Model):
