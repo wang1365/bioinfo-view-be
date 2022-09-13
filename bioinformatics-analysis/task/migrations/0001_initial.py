@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('keep_bam', models.BooleanField(default=False)),
                 ('has_cleaned', models.BooleanField(default=False)),
                 ('is_qc', models.BooleanField(default=False)),
-                ('env', models.JSONField()),
+                ('env', models.JSONField(blank=True, null=True, default=dict)),
                 ('priority', models.SmallIntegerField(default=1)),
                 ('memory', models.BigIntegerField()),
                 ('samples', models.JSONField()),
