@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from flow.models import Flow
 from flow.core import load_image
+import os
 
 
 class FlowSerializer(serializers.ModelSerializer):
@@ -19,6 +20,8 @@ class FlowSerializer(serializers.ModelSerializer):
         return code
 
     def validate_tar_path(self, tar_path, **params):
+        if not os.getenv('FLOW_DOCKER_VALIDATE'):
+            return tar_path
         try:
             load_image(tar_path, self.initial_data['image_name'])
         except Exception:

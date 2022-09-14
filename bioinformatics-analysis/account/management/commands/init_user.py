@@ -18,8 +18,10 @@ class Command(BaseCommand):
         super_role = Role.objects.get(code="super")
         admin_role = Role.objects.get(code="admin")
         super_account, _ = Account.objects.update_or_create(
-                    defaults={'username': "super@super.com", 'password':  get_md5("1234qwer"), 'is_active': True}, email="super@super.com")
+            defaults={'username': "super", 'nickname': '超级管理员', 'password': get_md5("1234qwer"), 'is_active': True},
+            email="super@super.com")
         admin_account, _ = Account.objects.update_or_create(
-            defaults={'username': "admin@admin.com", 'password': get_md5("1234qwer"), 'is_active': True}, email="admin@admin.com")
+            defaults={'username': "admin", 'nickname': '管理员', 'password': get_md5("1234qwer"), 'is_active': True},
+            email="admin@admin.com")
         User2Role.objects.update_or_create(user=super_account, role=super_role)
         User2Role.objects.update_or_create(user=admin_account, role=admin_role)

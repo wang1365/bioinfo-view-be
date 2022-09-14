@@ -1,7 +1,11 @@
 import docker
+from docker.errors import DockerException
 
-
-G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock')
+G_CLIENT = None
+try:
+    G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock')
+except DockerException as e:
+    print(e)
 
 
 def has_image(image_name):

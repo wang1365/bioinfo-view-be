@@ -25,7 +25,7 @@ class Task(models.Model):
     keep_bam = models.BooleanField(default=False)
     has_cleaned = models.BooleanField(default=False)
     is_qc = models.BooleanField(default=False)
-    env = JSONField()
+    env = JSONField(blank=True, null=True, default=dict)
     priority = models.SmallIntegerField(default=1)
     memory = models.BigIntegerField()  # 单位MB
     samples = JSONField()
