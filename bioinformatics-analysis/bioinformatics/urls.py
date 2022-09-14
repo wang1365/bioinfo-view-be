@@ -13,19 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import subprocess
-import os
-#
-# from apscheduler.scheduler import Scheduler
-from django.conf import settings
 from django.urls import re_path as url
 from django.contrib import admin
 from django.urls import include
-
-from task.models import Task
-from config.models import Config
-from utils.memory import SystemMemory
-from flow.core import G_CLIENT
 
 urlpatterns = [
     url(r"^admin/", admin.site.urls),
@@ -44,90 +34,4 @@ urlpatterns = [
     # 资源限制和使用放在account model上, 直接使用account的接口
     # url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
 ]
-
-# sched = Scheduler()
-#
-
-
-
-
-# @sched.interval_schedule(seconds=3600 * 24 * 30)
-# def clear_task():
-#     print("Hello Scheduler!Start clean task disk")
-#     beto_clean_tasks = Task.objects.filter(
-#         status=3, has_cleaned=False).order_by("create_time").all()
-#     for beto_clean_task in beto_clean_tasks:
-#         out_dir = beto_clean_task.env.get("OUT_DIR")
-#         if out_dir:
-#             subprocess.Popen(f"rm -rf {out_dir}", shell=True)
-#             beto_clean_task.has_cleaned = True
-#             beto_clean_task.save()
-#
-#
-# @sched.interval_schedule(seconds=3600 * 24 * 30)
-# def clean_task_log():
-#     print("Hello Scheduler!Start clean task_data dir")
-#     base = os.path.join(os.path.dirname(settings.BASE_DIR), "task_data")
-#     os.makedirs(base, exist_ok=True)
-#     subprocess.Popen(f"rm -rf {base}/*", shell=True)
-
-
-# sched.start()
-
-from apscheduler.schedulers.background import BackgroundScheduler
-import time
-
-# scheduler = BackgroundScheduler()
-# @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
-# def run_task():
-#     max_task = Config.objects.filter(name="max_task").first().value
-#     max_task = int(max_task) if max_task else 10
-#     print(f"Hello Scheduler!Start run task, max_task: {max_task}")
-#     memory_rate = Config.objects.filter(name="memory_rate").first().value
-#     memory_rate = memory_rate if memory_rate < 1.0 else 1
-#     running_tasks = Task.objects.filter(status=2).all()
-#     used_memory = sum(task.memory for task in running_tasks)
-#     totol_memory = SystemMemory().totol_memory
-#     running_tasks_count = len(running_tasks)
-#     if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
-#         # run task
-#         beto_run_tasks = Task.objects.filter(status=1).order_by(
-#             "-priority", "create_time")[0:max_task - running_tasks_count]
-#         for beto_run_task in beto_run_tasks:
-#             if used_memory + beto_run_task.memory < totol_memory * memory_rate:
-#                 # shell_location = beto_run_task.flow.location
-#                 # s = subprocess.Popen(f"/bin/sh -c {shell_location}",
-#                 #                      env=beto_run_task.env,
-#                 #                      shell=True)
-#                 container = G_CLIENT.containers.run(
-#                     image=beto_run_task.flow.image_name,
-#                     environment=beto_run_task.env,
-#                     volumes={
-#                         os.getenv("TASK_RESULT_DIR"): {
-#                             'bind': os.getenv("TASK_DIR"),
-#                             'mode': 'rw'}},
-#                     detach=True,
-#                     network_mode="host"
-#                 )
-#                 beto_run_task.status = 2
-#                 beto_run_task.pid = container.id
-#                 beto_run_task.save()
-#                 used_memory += beto_run_task.memory
-# import logging
-#
-# logger = logging.getLogger('job')
-# logging.basicConfig(level=logging.INFO,
-#                     format = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-#                     datefmt = '%Y-%m-%d %H:%M:%S',
-#                     filename = 'mylog.txt',
-#                     filemode = 'a')
-# # 定时任务，打印当前的时间
-# @scheduler.scheduled_job(trigger='interval', seconds=5, id='test')
-# def test_job():
-#     with open("/bioinformatics-analysis/task_data/test.txt", "w") as f:
-#         f.write("xxxx")
-#     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-#
-# scheduler._logger=logger
-# scheduler.start()
 
