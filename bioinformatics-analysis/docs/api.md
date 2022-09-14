@@ -17,7 +17,7 @@ curl --location --request GET 'http://127.0.0.1:9001/account/summary' \
 ```
 curl --location --request POST 'http://127.0.0.1:8080/account/login' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'username=admin@admin.com' \
+--data-urlencode 'username=admin' \
 --data-urlencode 'password=1234qwer'
 ```
 

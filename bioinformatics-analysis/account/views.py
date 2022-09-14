@@ -170,8 +170,8 @@ class UsersAPIView(
             username = obj_form.cleaned_data.get("username", None)
             password = obj_form.cleaned_data.get("password", None)
             user = authenticate(username=username, password=password)
-            user.save()
             if user and user.is_active:
+                user.save()
                 access_token_expires = timedelta(
                     minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)
                 )
