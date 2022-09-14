@@ -21,12 +21,18 @@ class ProjectsAPIView(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         response_data = serializer.data
-        response_data["total_task_count"] = Task.objects.filter(project=instance).count()
-        response_data["pending_task_count"] = Task.objects.filter(project=instance, status=1).count()
-        response_data["running_task_count"] = Task.objects.filter(project=instance, status=2).count()
-        response_data["finished_task_count"] = Task.objects.filter(project=instance, status=3).count()
-        response_data["failured_task_count"] = Task.objects.filter(project=instance, status=4).count()
-        response_data["canceled_task_count"] = Task.objects.filter(project=instance, status=5).count()
+        response_data["total_task_count"] = Task.objects.filter(
+            project=instance).count()
+        response_data["pending_task_count"] = Task.objects.filter(
+            project=instance, status=1).count()
+        response_data["running_task_count"] = Task.objects.filter(
+            project=instance, status=2).count()
+        response_data["finished_task_count"] = Task.objects.filter(
+            project=instance, status=3).count()
+        response_data["failured_task_count"] = Task.objects.filter(
+            project=instance, status=4).count()
+        response_data["canceled_task_count"] = Task.objects.filter(
+            project=instance, status=5).count()
         return response_body(data=response_data)
 
     def _code_exists(self, code):
@@ -38,11 +44,13 @@ class ProjectsAPIView(ModelViewSet):
         # project_name = request.data.get("name", "")
         # if Project.objects.filter(owner=request.account, name=project_name).exists():
         #     return response_body(code=1, msg=f"您已创建了名为{project_name}的项目")
-        samples = [Sample.objects.get(pk=i) for i in request.data.get("samples", [])]
+        samples = [
+            Sample.objects.get(
+                pk=i) for i in request.data.get(
+                "samples", [])]
         members = [request.account]
-        members.extend(
-            [Account.objects.get(pk=i) for i in request.data.get("members", [])]
-        )
+        members.extend([Account.objects.get(pk=i)
+                        for i in request.data.get("members", [])])
         # code = request.data.get("code", "")
         # if self._code_exists(code):
         #     return response_body(code=1, msg=f"已存在项目编码{code}的项目")
@@ -62,7 +70,10 @@ class ProjectsAPIView(ModelViewSet):
         if samples:
             project.samples.set(samples)
         if members:
-            members_list = [ProjectMembers(account=member, project=project) for member in set(members)]
+            members_list = [
+                ProjectMembers(
+                    account=member,
+                    project=project) for member in set(members)]
             ProjectMembers.objects.bulk_create(objs=members_list)
         bs = self.serializer_class(project, many=False)
         return response_body(data=bs.data)
@@ -73,15 +84,17 @@ class ProjectsAPIView(ModelViewSet):
         if "admin" in request.role_list:
             projects = Project.objects.filter(is_visible=True)
         else:
-            projects = Project.objects.filter(members__id__in=[request.account.id],
-                                              is_visible=True
-                                              )
+            projects = Project.objects.filter(
+                members__id__in=[
+                    request.account.id],
+                is_visible=True)
         if query_name:
             projects = projects.filter(name__contains=query_name)
         if query_parent:
             projects = projects.filter(parent_id=int(query_parent))
-        else:
+        if not request.GET.get("all_level", ""):
             projects = projects.filter(parent__isnull=True)
+
         projects = projects.order_by("-create_time")
         page = self.paginate_queryset(projects)
         if page is not None:
@@ -94,7 +107,8 @@ class ProjectsAPIView(ModelViewSet):
         instance = self.get_object()
         if instance.is_builtin:
             return response_body(code=1, msg="内置项目不能删除")
-        if request.account.id == instance.owner.id or ("admin" in request.role_list):
+        if request.account.id == instance.owner.id or (
+                "admin" in request.role_list):
             tasks = Task.objects.filter(project=instance).all()
             for task in tasks:
                 out_dir = task.env.get("OUT_DIR")
@@ -107,17 +121,25 @@ class ProjectsAPIView(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if request.account.id == instance.owner.id or ("admin" in request.role_list):
+        if request.account.id == instance.owner.id or (
+                "admin" in request.role_list):
             samples = [
-                Sample.objects.get(pk=i) for i in set(request.data.get("samples", []))
-            ]
+                Sample.objects.get(
+                    pk=i) for i in set(
+                    request.data.get(
+                        "samples",
+                        []))]
             members = [
-                Account.objects.get(pk=i) for i in request.data.get("members", [])
-            ]
+                Account.objects.get(
+                    pk=i) for i in request.data.get(
+                    "members", [])]
             instance.samples.set(samples)
             if members:
                 instance.members.clear()
-                members_list = [ProjectMembers(account=member, project=instance) for member in members]
+                members_list = [
+                    ProjectMembers(
+                        account=member,
+                        project=instance) for member in members]
                 ProjectMembers.objects.bulk_create(objs=members_list)
             if request.data.get("name"):
                 instance.name = request.data.get("name")
