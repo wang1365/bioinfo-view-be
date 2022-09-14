@@ -1,7 +1,8 @@
-FROM python:3.10-slim
+FROM python:3.10
 # install system dependencies
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r /requirements.txt
 COPY . /bioinformatics-analysis/
+RUN chmod +x /bioinformatics-analysis/wait-for-postgres.sh
 WORKDIR /bioinformatics-analysis
 CMD sh start.sh
