@@ -20,13 +20,17 @@ class FlowSerializer(serializers.ModelSerializer):
         return code
 
     def validate_tar_path(self, tar_path, **params):
+        real_tar_path = tar_path
+        if not tar_path.startswith("/"):
+            real_tar_path = os.path.join("/data/bioinfo/image_dir", tar_path)
+
         if not os.getenv('FLOW_DOCKER_VALIDATE'):
-            return tar_path
+            return real_tar_path
         try:
-            load_image(tar_path, self.initial_data['image_name'])
+            load_image(real_tar_path, self.initial_data['image_name'])
         except Exception:
             raise ValidationError("无法加载镜像")
-        return tar_path
+        return real_tar_path
 
     class Meta:
         model = Flow
