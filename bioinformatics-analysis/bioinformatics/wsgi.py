@@ -46,7 +46,7 @@ def convert(get_response):
             try:
                 response = get_response(request)
 
-                if response.status_code >= 400:
+                if response.status_code >= 403:
                     response = HttpResponse(status=200,
                                             content=json.dumps({
                                                 'code':
