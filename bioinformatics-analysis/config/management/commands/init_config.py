@@ -11,8 +11,7 @@ class Command(BaseCommand):
     help = 'init config'
 
     def handle(self, *args, **options):
-        Config.objects.all().delete()
-        Config.objects.bulk_create([
-            Config(name="max_task", value=10, create_time=now(), update_time=now()),
-            Config(name="memory_rate", value=10000, create_time=now(), update_time=now()),
-        ])
+        if not Config.objects.filter(name="max_task").exists():
+            Config.objects.create(name="max_task", value=10, create_time=now(), update_time=now())
+        if not Config.objects.filter(name="memory_rate").exists():
+            Config.objects.create(name="memory_rate", value=10000, create_time=now(), update_time=now())

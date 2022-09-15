@@ -13,22 +13,22 @@ import subprocess
 scheduler = BackgroundScheduler()
 
 
-@scheduler.scheduled_job(trigger='interval', seconds=1000, id='test_image')
-def test_image():
-    with open("/bioinformatics-analysis/task_data/test.txt", "w") as f:
-        container = G_CLIENT.containers.run(
-            image="test",
-            environment={
-                "a": 1,
-                "result": os.getenv("TASK_RESULT_DIR"),
-                "ip": get_host_ip()},
-            volumes={
-                os.getenv("TASK_RESULT_DIR"): {
-                    'bind': os.getenv("TASK_RESULT_DIR"),
-                    'mode': 'rw'}},
-            detach=True,
-            network_mode="host")
-        f.write(container.id)
+# @scheduler.scheduled_job(trigger='interval', seconds=1000, id='test_image')
+# def test_image():
+#     with open("/bioinformatics-analysis/task_data/test.txt", "w") as f:
+#         container = G_CLIENT.containers.run(
+#             image="test",
+#             environment={
+#                 "a": 1,
+#                 "result": os.getenv("TASK_RESULT_DIR"),
+#                 "ip": get_host_ip()},
+#             volumes={
+#                 os.getenv("TASK_RESULT_DIR"): {
+#                     'bind': os.getenv("TASK_RESULT_DIR"),
+#                     'mode': 'rw'}},
+#             detach=True,
+#             network_mode="host")
+#         f.write(container.id)
 
 
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
@@ -54,7 +54,12 @@ def run_task():
                     volumes={
                         os.getenv("TASK_RESULT_DIR"): {
                             'bind': os.getenv("TASK_RESULT_DIR"),
-                            'mode': 'rw'}
+                            'mode': 'rw'
+                        },
+                        os.getenv("BIO_ROOT"): {
+                            'bind': os.getenv("BIO_ROOT"),
+                            'mode': 'rw'
+                        },
                     },
                     detach=True,
                     network_mode="host"
