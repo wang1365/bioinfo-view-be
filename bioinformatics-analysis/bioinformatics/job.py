@@ -62,6 +62,7 @@ def run_task():
                         },
                     },
                     detach=True,
+                    remove=True,
                     network_mode="host"
                 )
                 beto_run_task.status = 2

@@ -32,7 +32,7 @@ from utils.message import send_email
 from utils.merge_files import merge_files
 from utils.paginator import PageNumberPagination
 from utils.response import response_body
-from utils.kill_process import kill
+from utils.kill_process import stop_docker
 from django.conf import settings
 from flow.models import Flow2Sample
 from utils.disk import cal_dir_size
@@ -465,7 +465,7 @@ class TaskView(ModelViewSet):
 
     def _kill_running_task(self, task):
         if task.pid and task.status == 2:
-            kill(task.pid)
+            stop_docker(task.pid)
 
     def resolve_task_result_path(self, task):
         if task.is_qc:

@@ -29,10 +29,9 @@ class Patient(models.Model):
     family_history = models.CharField(max_length=256, null=True, blank=True)  # 家族史
     medication_history = models.CharField(max_length=256, null=True, blank=True)  # 用药史
     treatment_history = models.CharField(max_length=256, null=True, blank=True)  # 治疗史
+    creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
     prognosis_time = models.IntegerField(default=0)  # 预后时间
     recurrence_time = models.IntegerField(default=0)  # 复发时间
     survival_time = models.IntegerField(default=0)  # 存活时间
-    creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
-
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
