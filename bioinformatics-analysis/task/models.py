@@ -17,7 +17,7 @@ class Task(models.Model):
     status = models.SmallIntegerField(choices=status_choices, default=1)
     progress = models.SmallIntegerField(default=0)
     creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
-    pid = models.BigIntegerField(null=True)
+    pid = models.CharField(max_length=256, blank=True, null=True)
     is_merge = models.BooleanField(default=False)  # 是否归并任务结果
     flow = models.ForeignKey(to=Flow, on_delete=models.CASCADE)
     result_path = models.TextField(null=True)
