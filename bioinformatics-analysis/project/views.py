@@ -92,9 +92,10 @@ class ProjectsAPIView(ModelViewSet):
             projects = projects.filter(name__contains=query_name)
         if query_parent:
             projects = projects.filter(parent_id=int(query_parent))
-        if not request.GET.get("all_level", ""):
+        elif not request.GET.get("all_level", ""):
             projects = projects.filter(parent__isnull=True)
-
+        else:
+            pass
         projects = projects.order_by("-create_time")
         page = self.paginate_queryset(projects)
         if page is not None:
