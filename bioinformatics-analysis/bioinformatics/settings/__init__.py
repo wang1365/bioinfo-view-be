@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     "config",
     "appearance",
     "patient",
-    "resource_limit"
+    "resource_limit",
+    # "django_filters"
 ]
 
 MIDDLEWARE = [
@@ -195,6 +196,7 @@ SAMPLE_SHELL_ENV = {
     # "backup10": "backup10",
 }
 
+
 BAM_PATH = os.getenv("BAM_PATH", "/nano/bam")
 
 TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/tmp")
@@ -205,7 +207,7 @@ MOVE_QC_DIR = os.getenv("MOVE_QC_DIR", "/nano/result/qc")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",  #这里直接使用redis别名作为host ip地址
+        "LOCATION": "redis://redis:6379/1",  # 这里直接使用redis别名作为host ip地址
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             # "PASSWORD": "yourpassword", # 换成你自己密码
@@ -224,3 +226,9 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
+# REST_FRAMEWORK = {
+#    # 过滤器默认后端
+#     'DEFAULT_FILTER_BACKENDS': (
+#            'django_filters.rest_framework.DjangoFilterBackend',),
+# }

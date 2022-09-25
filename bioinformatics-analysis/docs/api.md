@@ -1009,18 +1009,16 @@ curl --location --request PUT 'http://127.0.0.1:8000/config/1' \
 ## 创建患者
 
 ```buildoutcfg
-curl --location --request POST 'http://127.0.0.1:8080/patient/patients' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+curl --location --request POST 'http://127.0.0.1:9001/patient/patients' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjU5Mjg2MDgsInN1YiI6ImFjY2VzcyJ9.HkevLhrihpOzo5cDzqyW7vOJe-oOm_lqUl6YP8-21x0' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "age": 23,
     "birthday": "2022-08-05",
     "name": "张三",
-    "id_card": "3402111999111106501",
+    "id_card": "34021119991111065011",
     "medical_doctor": "李四",
     "gender": "male",
     "location": "location",
-    "identifier": "7983f7a0-d824-49da-807c-217a6d1d1473",
     "inspection_agency": "xxx",
     "tumor_stage": "tumor_stage",
     "diagnosis": "diagnosis",
@@ -1028,9 +1026,9 @@ curl --location --request POST 'http://127.0.0.1:8080/patient/patients' \
     "family_history": "family_history",
     "medication_history": "medication_history",
     "treatment_history": "treatment_history",
-    "prognosis_time": "2022-08-05 12:00:00",
-    "recurrence_time": "2022-08-05 12:00:00",
-    "survival_time": "2022-08-05 12:00:00"
+    "prognosis_time": 10,
+    "recurrence_time": 10,
+    "survival_time": 10
 }'
 ```
 
@@ -1064,8 +1062,8 @@ curl --location --request POST 'http://127.0.0.1:8080/patient/patients' \
 ## 查询患者
 
 ```buildoutcfg
-curl --location --request GET 'http://127.0.0.1:8080/patient/patients' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
+curl --location --request GET 'http://127.0.0.1:8080/patient/patients?search=12&identifiers=age,name' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjU5MjI0NDgsInN1YiI6ImFjY2VzcyJ9.c-MmJN3tyYtjP9aSDOp4o_mAJ2KuPpSloS0HRHIE_8Y' \
 --header 'Content-Type: application/json'
 ```
 
@@ -1145,17 +1143,22 @@ curl --location --request PATCH 'http://127.0.0.1:8080/patient/patients/2' \
 ## 下载模板
 
 ```buildoutcfg
-curl --location --request GET 'http://127.0.0.1:8080/patient/patients/dl_patient_template' \
+curl --location --request GET 'http://127.0.0.1:8080/patient/patients/template' \
 --header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
 --header 'Content-Type: application/json' 
 ```
 
-## 上传csv文件
+## 上传文件
 
 ```buildoutcfg
-curl --location --request POST 'http://127.0.0.1:8080/patient/patients/import_patients' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjMwNjQxOTcsInN1YiI6ImFjY2VzcyJ9.F_GfkaaIEk-QZhyf9UjEH2sruKCzdWCSlSGLXHBE6qs' \
---form 'file=@"/Users/guwanhua/Documents/patient_template.csv"'
+curl --location --request POST 'http://127.0.0.1:9001/patient/patients/upload' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjYxODYzMDUsInN1YiI6ImFjY2VzcyJ9.zZ-GWmSh_0ZtFYMsAPaj9d1dX0OuWdh3sa5udWlVfbE' \
+--form 'file=@"/Users/guwanhua/Documents/patient.xlsx"'
+```
+## 导出患者数据
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/patient/patients/export' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NjYxODYzMDUsInN1YiI6ImFjY2VzcyJ9.zZ-GWmSh_0ZtFYMsAPaj9d1dX0OuWdh3sa5udWlVfbE'
 ```
 
 # 资源

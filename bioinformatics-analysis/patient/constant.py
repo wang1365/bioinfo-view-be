@@ -18,3 +18,155 @@ PATIENT_ZH_TO_EN = {
     "存活时间": "survival_time",
     "肿瘤分期": "tumor_stage",
 }
+
+
+class SearchType:
+    ranges = 'range'
+    choices = 'choices'
+    exact = 'exact'
+    not_support = 'not_support'
+
+
+PATIENT_MODEL_ATTRS = [
+    {
+        'key': 'id',
+        'name': '患者Id',
+        'value_type': 'string',
+        'search_type': SearchType.exact,
+    },
+    {
+        'key': 'name',
+        'name': '姓名',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'gender',
+        'name': '性别',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'blood_type',
+        'name': '血型',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'birthday',
+        'name': '出生日期',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'age',
+        'name': '年龄',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'id_card',
+        'name': '身份证',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'location',
+        'name': '家庭住址',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'identifier',
+        'name': '患者识别号',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'inspection_agency',
+        'name': '送检机构',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'medical_doctor',
+        'name': '诊疗医生',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+
+
+    {
+        'key': 'diagnosis',
+        'name': '临床诊断',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'tumor_stage',
+        'name': '肿瘤分期',
+        'value_type': 'string',
+        'search_type': SearchType.exact,
+    },
+    {
+        'key': 'disease',
+        'name': '遗传病',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'family_history',
+        'name': '家族史',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'treatment_history',
+        'name': '治疗史',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+
+    {
+        'key': 'smoking',
+        'name': '吸烟',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'drinking',
+        'name': '饮酒',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'viral_infection',
+        'name': '病毒感染',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'prognosis',
+        'name': '预后信息',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'diagnosis_time',
+        'name': '诊断时间',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'recurrence_time',
+        'name': '复发时间',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'survival_time',
+        'name': '存活时间',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+]

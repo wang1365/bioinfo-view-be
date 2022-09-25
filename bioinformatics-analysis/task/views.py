@@ -36,6 +36,9 @@ from utils.kill_process import stop_docker
 from django.conf import settings
 from flow.models import Flow2Sample
 from utils.disk import cal_dir_size
+from task.constants import SAMPLE_HEADERS
+from sample.models import SampleMeta
+from patient.models import Patient
 
 
 class TaskView(ModelViewSet):
@@ -53,23 +56,68 @@ class TaskView(ModelViewSet):
         file_path = os.path.join(
             self._normal_task_dir(task),
             f"samples.txt")
-        # TODO 加入样本品
-        value_items = list(settings.SAMPLE_SHELL_ENV.values())
 
         with open(file_path, "w") as f:
-            # f_csv = csv.writer(f, delimiter='\t')
-            # f_csv.writerow(headers)
-            # f.write("\t".join(headers))
-            # f.write("\n")
+            f.write("\t".join(SAMPLE_HEADERS))
+            f.write("\n")
             for sample in [
                 Sample.objects.get(
                     id=sample_id) for sample_id in sorted(
                     task.samples)]:
-                row = [getattr(sample, item) for item in value_items]
+                row = self._build_row(task, sample)
                 f.write("\t".join(row))
                 f.write("\n")
-                # f_csv.writerow(row)
         return file_path
+
+    def _build_row(self, task, sample):
+        row = []
+        sample_meta = SampleMeta.objects.filter(id=sample.sample_meta_id).first()
+        patient = None
+        if sample_meta:
+            patient = Patient.objects.filter(id=sample_meta.patient_id).first()
+        row.append(sample.project_index)
+        row.append(sample_meta.patient_identifier if sample_meta else "")
+        row.append(sample_meta.identifier if sample_meta else "")
+        row.append(sample.identifier if sample else "")
+        row.append(sample.library_number if sample else "")
+        row.append(sample.fastq1_path if sample else "")
+        row.append(sample.fastq2_path if sample else "")
+        row.append(sample.reagent_box if sample else "")
+        row.append(sample.library_input if sample else "")
+        row.append(sample.index_type if sample else "")
+        row.append(sample.index_number if sample else "")
+        row.append(sample.nucleic_break_type if sample else "")
+        row.append(sample.sample_meta_id if sample else "")
+        row.append(sample.company if sample else "")
+        row.append(sample.risk if sample else "")
+        row.append(sample.nucleic_type if sample else "")
+        row.append(sample.nucleic_level if sample else "")
+        row.append(sample_meta.sample_date if sample_meta else "")
+        row.append(sample_meta.test_date if sample_meta else "")
+        row.append(sample_meta.sample_componet if sample_meta else "")
+        row.append(sample_meta.sample_type if sample_meta else "")
+        row.append(sample_meta.panel_proportion if sample_meta else "")
+        row.append(sample_meta.is_panel if sample_meta else "")
+        row.append(sample_meta.patient_id if sample_meta else "")
+        row.append(patient.name if patient else "")
+        row.append(patient.gender if patient else "")
+        row.append(patient.age if patient else "")
+        row.append(patient.birthday if patient else "")
+        row.append(patient.id_card if patient else "")
+        row.append(patient.location if patient else "")
+        row.append(patient.inspection_agency if patient else "")
+        row.append(patient.medical_doctor if patient else "")
+        row.append(patient.diagnosis if patient else "")
+        row.append(patient.tumor_stage if patient else "")
+        row.append(patient.disease if patient else "")
+        row.append(patient.family_history if patient else "")
+        row.append(patient.medication_history if patient else "")
+        row.append(patient.treatment_history if patient else "")
+        row.append(patient.prognosis_time if patient else "")
+        row.append(patient.recurrence_time if patient else "")
+        row.append(patient.survival_time if patient else "")
+
+        return row
 
     def _normal_task_dir(self, task):
         out_dir = os.path.join(

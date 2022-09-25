@@ -4,7 +4,7 @@ import logging
 
 
 from django.db.models import Q
-from patient.constant import PATIENT_ZH_TO_EN
+from patient.constant import PATIENT_ZH_TO_EN, PATIENT_MODEL_ATTRS
 from rest_framework.exceptions import APIException
 
 from patient.models import Patient
@@ -98,7 +98,10 @@ def import_patients_by_csv(user, f):
     importer = _FileImporter(user, f)
     return importer.import_file()
 
+from openpyxl import load_workbook
 
 def download_patient_template(response):
+    load_workbook(response)
     writer = csv.writer(response)
-    writer.writerow([f for f in PATIENT_ZH_TO_EN.values()])
+    exclude_keys = ["id", "identifier", "age"]
+    writer.writerow([f.get("name") for f in PATIENT_MODEL_ATTRS if f.get("key") not in exclude_keys])
