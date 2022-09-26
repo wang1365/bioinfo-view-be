@@ -1,7 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import DO_NOTHING
 
 from account.models import Account
+from patient.models import Patient
 
 
 class SampleMeta(models.Model):
@@ -32,7 +34,10 @@ class SampleMeta(models.Model):
     patient_id = models.BigIntegerField(default=1)
 
     # 患者识别号
-    patient_identifier = models.CharField(max_length=256)
+    # patient_identifier = models.CharField(max_length=256)
+    patient_identifier = models.ForeignKey(to=Patient, to_field='identifier', db_column='patient_identifier',
+                                           max_length=256, db_constraint=False, on_delete=DO_NOTHING, null=True,
+                                           related_name='patient', default=None)
 
     # 样本识别号
     identifier = models.CharField(max_length=256, unique=True)
@@ -103,7 +108,7 @@ class Sample(models.Model):
     nucleic_level = models.CharField(max_length=4, choices=NucleicLevelChoices.choices)
 
     # 样本元信息 ID
-    sample_meta_id = models.BigIntegerField(default=-1)
+    sample_meta = models.ForeignKey(to=SampleMeta, db_constraint=False, null=True, default=None, on_delete=DO_NOTHING)
 
     # 样本识别号
     sample_identifier = models.CharField(max_length=256)

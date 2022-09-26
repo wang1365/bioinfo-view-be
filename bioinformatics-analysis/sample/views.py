@@ -21,7 +21,7 @@ from sample.constants import SAMPLE_META_MODEL_ATTRS, SAMPLE_MODEL_ATTRS, FIELDS
 
 
 class SampleView(CustomeViewSets):
-    queryset = Sample.objects.all()
+    queryset = Sample.objects.prefetch_related('sample_meta', 'sample_meta__patient_identifier').all()
     serializer_class = SampleSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
