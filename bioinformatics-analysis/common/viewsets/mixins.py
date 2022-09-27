@@ -42,10 +42,15 @@ class ListModelMixin:
 
 
 class RetrieveModelMixin:
+    def post_retrieve(self, data, request, *args, **kwargs):
+        pass
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return response_body(data=serializer.data, msg="success")
+        data = dict(serializer.data)
+        self.post_retrieve(data, request, *args, **kwargs)
+        return response_body(data=data, msg="success")
 
     def serializer_data(self, data, **args):
         return data

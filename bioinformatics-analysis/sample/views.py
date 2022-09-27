@@ -2,6 +2,8 @@ import tempfile
 import time
 import os
 
+from task.models import Task
+from task.serializers import TaskSerializer
 from utils.response import response_body
 
 from rest_framework.parsers import MultiPartParser
@@ -26,6 +28,13 @@ class SampleView(CustomeViewSets):
     pagination_class = PageNumberPaginationWithWrapper
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter, SampleKeywordFilters]
+
+    def post_retrieve(self, data, request, *args, **kwargs):
+        pk = int(kwargs['pk'])
+        # 添加样本数据关联的任务列表
+        tasks = list(Task.objects.filter(samples__contains=[pk]))
+        task_data = TaskSerializer(instance=tasks, many=True).data
+        data.update({'tasks': task_data})
 
     def query(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -107,7 +116,7 @@ class SampleMetaView(CustomeViewSets):
 
 
 class SampleUploadView(CustomeViewSets):
-    parser_classes = (MultiPartParser, )
+    parser_classes = (MultiPartParser,)
 
     def upload(self, request, suffix=".xlxs"):
         info = {
