@@ -12,7 +12,7 @@ from sample.models import Sample, SampleMeta
 from sample.core import ExcelHandler, ValueProcess, export_to_csv
 from sample.serializers import SampleMetaSerializer, SampleSerializer, SampleMeta
 from sample.filters import (SampleFilters, SampleProjectFilters,
-                            SampleUserFilter)
+                            SampleUserFilter, SampleKeywordFilters)
 from utils.paginator import PageNumberPaginationWithWrapper
 
 from common.viewsets.viewsets import CustomeViewSets
@@ -21,11 +21,11 @@ from sample.constants import SAMPLE_META_MODEL_ATTRS, SAMPLE_MODEL_ATTRS, FIELDS
 
 
 class SampleView(CustomeViewSets):
-    queryset = Sample.objects.prefetch_related('sample_meta', 'sample_meta__patient_identifier').all()
+    queryset = Sample.objects.prefetch_related('sample_meta').all()
     serializer_class = SampleSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
-    filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter]
+    filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter, SampleKeywordFilters]
 
     def query(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -64,7 +64,7 @@ class SampleView(CustomeViewSets):
 
 
 class SampleMetaView(CustomeViewSets):
-    queryset = SampleMeta.objects.all()
+    queryset = SampleMeta.objects.prefetch_related('patient').all()
     serializer_class = SampleMetaSerializer
     pagination_class = PageNumberPaginationWithWrapper
 

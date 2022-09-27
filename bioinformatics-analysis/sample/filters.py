@@ -48,6 +48,19 @@ class SampleProjectFilters:
         return queryset
 
 
+class SampleKeywordFilters:
+    def filter_queryset(self, request, queryset, view):
+        if request.method != 'POST':
+            return queryset
+
+        body = json.loads(request.parser_context['request'].body)
+        keyword = body.get('keyword', '')
+        if len(keyword) == 0:
+            return queryset
+
+        return queryset.filter(sample_meta__patient__name__icontains=keyword)
+
+
 class SampleFilters(CommonFilters):
     SEARCH_FIELDS = ['company', 'index_type']
 
