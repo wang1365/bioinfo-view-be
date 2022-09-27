@@ -55,7 +55,7 @@ class SampleKeywordFilters:
 
         body = json.loads(request.parser_context['request'].body)
         keyword = body.get('keyword', '')
-        if len(keyword) == 0:
+        if not keyword:
             return queryset
 
         return queryset.filter(sample_meta__patient__name__icontains=keyword)
