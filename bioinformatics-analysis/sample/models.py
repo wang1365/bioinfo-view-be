@@ -31,13 +31,10 @@ class SampleMeta(models.Model):
     user_id = models.BigIntegerField(default=1)
 
     # 患者 ID
-    patient_id = models.BigIntegerField(default=1)
+    patient = models.ForeignKey(to=Patient, null=True, db_constraint=False, default=None, on_delete=DO_NOTHING)
 
     # 患者识别号
-    # patient_identifier = models.CharField(max_length=256)
-    patient_identifier = models.ForeignKey(to=Patient, to_field='identifier', db_column='patient_identifier',
-                                           max_length=256, db_constraint=False, on_delete=DO_NOTHING, null=True,
-                                           related_name='patient', default=None)
+    patient_identifier = models.CharField(max_length=256)
 
     # 样本识别号
     identifier = models.CharField(max_length=256, unique=True)
@@ -108,7 +105,7 @@ class Sample(models.Model):
     nucleic_level = models.CharField(max_length=4, choices=NucleicLevelChoices.choices)
 
     # 样本元信息 ID
-    sample_meta = models.ForeignKey(to=SampleMeta, db_constraint=False, null=True, default=None, on_delete=DO_NOTHING)
+    sample_meta = models.ForeignKey(to=SampleMeta, null=True, db_constraint=False, default=None, on_delete=DO_NOTHING)
 
     # 样本识别号
     sample_identifier = models.CharField(max_length=256)
