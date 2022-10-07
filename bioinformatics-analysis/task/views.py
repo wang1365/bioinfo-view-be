@@ -65,7 +65,7 @@ class TaskView(ModelViewSet):
                     id=sample_id) for sample_id in sorted(
                     task.samples)]:
                 row = self._build_row(task, sample)
-                f.write("\t".join(row))
+                f.write("\t".join([str(item) for item in row]))
                 f.write("\n")
         return file_path
 
@@ -113,7 +113,7 @@ class TaskView(ModelViewSet):
         row.append(patient.family_history if patient else "")
         row.append(patient.medication_history if patient else "")
         row.append(patient.treatment_history if patient else "")
-        row.append(patient.prognosis_time if patient else "")
+        # row.append(patient.prognosis_time if patient else "")
         row.append(patient.recurrence_time if patient else "")
         row.append(patient.survival_time if patient else "")
 
