@@ -8,7 +8,7 @@ from sample.constants import SAMPLE_MODEL_ATTRS, SAMPLE_META_MODEL_ATTRS
 
 
 class SampleMetaSerializer(serializers.ModelSerializer):
-    # patient = PatientSerializer(read_only=True)
+    patient = PatientSerializer()
     # patient_id = serializers.IntegerField(source='patient.id')
 
     class Meta:
