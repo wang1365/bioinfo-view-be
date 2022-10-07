@@ -19,7 +19,7 @@ other_urls = [
     ),
 
     url(
-        r"^/samples/(?P<pk>\d+)",
+        r"^/samples/(?P<pk>\d+)/detail",
         views.SampleView.as_view({"get": "retrieve"}),
     ),
     url(
