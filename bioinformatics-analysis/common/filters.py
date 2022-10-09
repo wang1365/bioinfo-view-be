@@ -7,6 +7,7 @@ from django.db.models import Q
 
 class CommonFilters:
     SEARCH_FIELDS = []
+    SEARCH_KEY = None
 
     def filter_queryset(self, request, queryset, view):
         queryset = queryset.order_by('create_time')
@@ -27,12 +28,12 @@ class CommonFilters:
         payload = {}
 
         if request.method == 'GET':
-            keyword = request.GET.get('s', '')
+            keyword = request.GET.get(self.SEARCH_KEY or 's', '')
 
         elif request.method == 'POST':
             body = json.loads(request.body)
             payload = body.get('filters', {})
-            keyword = body.get('search_keyword')
+            keyword = body.get(self.SEARCH_KEY or 'search_keyword')
 
         return {
             "search_keyword": keyword,

@@ -4,8 +4,13 @@ from rest_framework import routers
 from flow import views
 
 router = routers.DefaultRouter()
-
 router.register(r'^/flows', views.FlowView, basename="flows")
+
+group_router = routers.DefaultRouter()
+group_router.register(r'^/panelGroups', views.PanelGroupView, basename="panelGroups")
+
+panel_router = routers.DefaultRouter()
+panel_router.register(r'^/panels', views.PanelView, basename="panels")
 
 other_urls = [
     url(
@@ -31,5 +36,4 @@ other_urls = [
     ),
 ]
 
-
-urlpatterns = router.urls + other_urls
+urlpatterns = group_router.urls + panel_router.urls + router.urls + other_urls

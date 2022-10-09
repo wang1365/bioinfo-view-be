@@ -9,6 +9,7 @@ class FlowFilters(CommonFilters):
     SEARCH_FIELDS = [
         'flow_category', 'name', 'desp', 'location', 'alignment_tool'
     ]
+    SEARCH_KEY = 'keyword'
 
 
 class FilterByAccount:
@@ -33,3 +34,8 @@ class FilterByAccount:
             account_id=account_id).values_list('flow_id')
         queryset = queryset.filter(id__in=flow_ids)
         return queryset
+
+
+class PanelFilters(CommonFilters):
+    SEARCH_FIELDS = ['name']
+    SEARCH_KEY = 'keyword'

@@ -3,9 +3,25 @@ from shutil import ExecError
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
-from flow.models import Flow
+from flow.models import Flow, PanelGroup, Panel
 from flow.core import load_image
 import os
+
+
+class PanelSerializer(serializers.ModelSerializer):
+    panel_group_name = serializers.CharField(source='panel_group.name', read_only=True)
+
+    class Meta:
+        model = Panel
+        fields = '__all__'
+
+
+class PanelGroupSerializer(serializers.ModelSerializer):
+    panels = PanelSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = PanelGroup
+        fields = '__all__'
 
 
 class FlowSerializer(serializers.ModelSerializer):

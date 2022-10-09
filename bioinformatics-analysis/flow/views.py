@@ -2,10 +2,27 @@ import json
 from utils.response import response_body
 
 from common.viewsets.viewsets import CustomeViewSets
-from flow.models import Flow, FlowMembers, Flow2Sample
-from flow.filters import FlowFilters, FilterByAccount
-from flow.serializers import FlowSerializer
+from flow.models import Flow, FlowMembers, Flow2Sample, PanelGroup, Panel
+from flow.filters import FlowFilters, FilterByAccount, PanelFilters
+from flow.serializers import FlowSerializer, PanelGroupSerializer, PanelSerializer
 from utils.paginator import PageNumberPaginationWithWrapper
+
+
+class PanelGroupView(CustomeViewSets):
+    queryset = PanelGroup.objects.all()
+    serializer_class = PanelGroupSerializer
+
+    filter_backends = [FilterByAccount]
+
+
+
+
+class PanelView(CustomeViewSets):
+    queryset = Panel.objects.prefetch_related('panel_group').all()
+    serializer_class = PanelSerializer
+    pagination_class = PageNumberPaginationWithWrapper
+
+    filter_backends = [FilterByAccount, PanelFilters]
 
 
 class FlowView(CustomeViewSets):

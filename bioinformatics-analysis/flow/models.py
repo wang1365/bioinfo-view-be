@@ -1,17 +1,50 @@
 import json
-from operator import mod
-from statistics import mode
 
 from django.db import models
+from django.db.models import DO_NOTHING, RESTRICT, SET_NULL
 from django.utils.timezone import now
 
 from account.models import Account
 from flow.constants import BUILTIN_PARAMETER_SCHEMA
 
 
+class PanelGroup(models.Model):
+    name = models.CharField(max_length=100, blank=True, unique=True)
+    desp = models.TextField(blank=True, default='')
+    sort = models.IntegerField(default=0)
+    enabled = models.BooleanField(default=True)
+    create_time = models.DateTimeField("创建时间", default=now)
+    update_time = models.DateTimeField("修改时间", default=now)
+
+    class Meta:
+        db_table = "panel_group"
+        ordering = ["sort", "-id"]
+        get_latest_by = "id"
+
+
+class Panel(models.Model):
+    name = models.CharField(max_length=100, blank=True, unique=True)
+    panel_group = models.ForeignKey(to=PanelGroup, related_name='panels', db_constraint=False, null=True, on_delete=SET_NULL)
+    enabled = models.BooleanField(default=True)
+    sort = models.IntegerField(default=0)
+    desp = models.TextField(blank=True, default='')
+    detail = models.TextField(blank=True, default='')
+    create_time = models.DateTimeField("创建时间", default=now)
+    update_time = models.DateTimeField("修改时间", default=now)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = "panel"
+        ordering = ["sort", "-id"]
+        get_latest_by = "id"
+
+
 class Flow(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
     code = models.CharField(max_length=128, blank=True, unique=True)
+    panel = models.ForeignKey(to=Panel, db_constraint=False, on_delete=SET_NULL, null=True, default=None)
 
     desp = models.TextField(blank=True, default='')
 
