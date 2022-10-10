@@ -2,7 +2,8 @@
 import json
 from common.filters import CommonFilters
 
-from flow.models import FlowMembers
+from flow.models import FlowMembers, Panel
+from django_filters import filterset
 
 
 class FlowFilters(CommonFilters):
@@ -39,3 +40,11 @@ class FilterByAccount:
 class PanelFilters(CommonFilters):
     SEARCH_FIELDS = ['name']
     SEARCH_KEY = 'keyword'
+
+
+class CustomPanelFilterSet(filterset.FilterSet):
+    panel_group_id = filterset.NumberFilter(field_name='panel_group')
+
+    class Meta:
+        model = Panel
+        fields = ['panel_group_id']

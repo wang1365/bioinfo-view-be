@@ -1,9 +1,12 @@
 import json
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 from utils.response import response_body
 
 from common.viewsets.viewsets import CustomeViewSets
 from flow.models import Flow, FlowMembers, Flow2Sample, PanelGroup, Panel
-from flow.filters import FlowFilters, FilterByAccount, PanelFilters
+from flow.filters import FlowFilters, FilterByAccount, PanelFilters, CustomPanelFilterSet
 from flow.serializers import FlowSerializer, PanelGroupSerializer, PanelSerializer
 from utils.paginator import PageNumberPaginationWithWrapper
 
@@ -22,7 +25,8 @@ class PanelView(CustomeViewSets):
     serializer_class = PanelSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
-    filter_backends = [FilterByAccount, PanelFilters]
+    filter_backends = [DjangoFilterBackend, FilterByAccount, PanelFilters]
+    filterset_class = CustomPanelFilterSet
 
 
 class FlowView(CustomeViewSets):
