@@ -44,7 +44,8 @@ class Panel(models.Model):
 class Flow(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
     code = models.CharField(max_length=128, blank=True, unique=True)
-    panel = models.ForeignKey(to=Panel, db_constraint=False, on_delete=SET_NULL, null=True, default=None)
+    panel = models.ForeignKey(to=Panel, related_name='flows', db_constraint=False,
+                              on_delete=SET_NULL, null=True, default=None)
 
     desp = models.TextField(blank=True, default='')
 

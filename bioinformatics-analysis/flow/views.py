@@ -23,7 +23,7 @@ class PanelGroupView(CustomeViewSets):
 class PanelView(CustomeViewSets):
     queryset = Panel.objects.prefetch_related('panel_group').all()
     serializer_class = PanelSerializer
-    pagination_class = PageNumberPaginationWithWrapper
+    # pagination_class = PageNumberPaginationWithWrapper
 
     filter_backends = [DjangoFilterBackend, FilterByAccount, PanelFilters]
     filterset_class = CustomPanelFilterSet
