@@ -1,0 +1,23 @@
+POST http://192.168.31.10:8000/model_query/project HTTP/1.1
+content-type: application/json
+cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2Njc2NTI5MjksInN1YiI6ImFjY2VzcyJ9.xO2Cqga1jIsgWtT6m-vJEOs7M-UZkBL2Lw3zXlHfyUg
+
+{
+    "_connector":"AND",
+    "_negated":false,
+    "args":[
+        {
+            "_connector":"OR",
+            "_negated":false,
+            "args": [
+               ["name__icontains", "test"],
+               ["name__icontains", "asdf"]
+            ]
+        },
+        ["name__icontains", "test"],
+    ],
+    "kwargs":{
+        "id__in":[1,2,3,4,5],
+        "owner__username":"super"
+    }
+}
