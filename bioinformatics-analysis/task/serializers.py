@@ -39,5 +39,6 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "is_qc",
             "env",
             "priority",
+            "error_message",
             "create_time"
         ]
