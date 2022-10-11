@@ -20,7 +20,7 @@ class Patient(models.Model):
         (TRUE, "是"),
         (FALSE, "否"),
     )
-    age = models.CharField(default="0", max_length=32, null=True, blank=True)
+    age = models.IntegerField(default=0, null=True, blank=True)
     birthday = models.DateField()
     name = models.CharField(max_length=256, null=True, blank=True)
     id_card = models.CharField(max_length=32, unique=True, null=True, blank=True)
@@ -40,6 +40,7 @@ class Patient(models.Model):
     viral_infection = models.CharField(max_length=16, default=False, choices=BOOL)  # 病毒感染
     treatment_history = models.CharField(max_length=256, null=True, blank=True)  # 治疗史
     prognosis = models.CharField(max_length=512, blank=True, null=True)  # 预后信息
+    prognosis_time = models.IntegerField(default=0)  # 预后时间
     diagnosis_time = models.IntegerField(default=0)  # 诊断时间
     recurrence_time = models.IntegerField(default=0)  # 复发时间
     survival_time = models.IntegerField(default=0)  # 存活时间

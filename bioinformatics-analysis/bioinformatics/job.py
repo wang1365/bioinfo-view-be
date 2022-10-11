@@ -60,6 +60,14 @@ def run_task():
                             'bind': os.getenv("BIO_ROOT"),
                             'mode': 'rw'
                         },
+                        os.getenv("SAMPLE_DIR"): {
+                            'bind': os.getenv("SAMPLE_DIR"),
+                            'mode': 'rw'
+                        },
+                        os.getenv("DATA_DIR"): {
+                            'bind': os.getenv("DATA_DIR"),
+                            'mode': 'rw'
+                        },
                     },
                     detach=True,
                     remove=True,

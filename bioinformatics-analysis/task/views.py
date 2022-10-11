@@ -71,24 +71,27 @@ class TaskView(ModelViewSet):
 
     def _build_row(self, task, sample):
         row = []
-        sample_meta = SampleMeta.objects.filter(id=sample.sample_meta_id).first()
+        sample_meta = SampleMeta.objects.filter(
+            id=sample.sample_meta_id).first()
         patient = None
         if sample_meta:
             patient = Patient.objects.filter(id=sample_meta.patient_id).first()
-        row.append(sample.project_index)
-        row.append(sample_meta.patient_identifier if sample_meta else "")
-        row.append(sample_meta.identifier if sample_meta else "")
-        row.append(sample.identifier if sample else "")
-        row.append(sample.library_number if sample else "")
-        row.append(sample.fastq1_path if sample else "")
-        row.append(sample.fastq2_path if sample else "")
-        row.append(sample.reagent_box if sample else "")
-        row.append(sample.library_input if sample else "")
-        row.append(sample.index_type if sample else "")
-        row.append(sample.index_number if sample else "")
-        row.append(sample.nucleic_break_type if sample else "")
-        row.append(sample.sample_meta_id if sample else "")
-        row.append(sample.company if sample else "")
+        row.append(sample.project_index)  # 项目编码
+        row.append(
+            sample_meta.patient_identifier if sample_meta else "")  # 患者识别号
+        row.append(sample_meta.identifier if sample_meta else "")  # 样本识别号
+        row.append(sample.identifier if sample else "")  # 数据识别号
+        row.append(sample.library_number if sample else "")  # 文库编号
+        row.append(sample.fastq1_path if sample else "")  # R1文件
+        row.append(sample.fastq2_path if sample else "")  # R2文件
+        row.append(sample.reagent_box if sample else "")  # 捕获试剂盒
+        row.append(sample.library_input if sample else "")  # 建库input
+        row.append(sample.index_type if sample else "")  # index类型
+        row.append(sample.index_number if sample else "")  # index编号
+        row.append(sample.hybrid_input if sample else "")  # 杂交input
+        row.append(sample.nucleic_break_type if sample else "")  # 核酸打断方式
+        row.append(sample.sample_meta_id if sample else "")  # 样本元信息ID
+        row.append(sample.company if sample else "")  # 送检机构
         row.append(sample.risk if sample else "")
         row.append(sample.nucleic_type if sample else "")
         row.append(sample.nucleic_level if sample else "")
@@ -113,7 +116,7 @@ class TaskView(ModelViewSet):
         row.append(patient.family_history if patient else "")
         row.append(patient.medication_history if patient else "")
         row.append(patient.treatment_history if patient else "")
-        # row.append(patient.prognosis_time if patient else "")
+        row.append(patient.prognosis_time if patient else "")
         row.append(patient.recurrence_time if patient else "")
         row.append(patient.survival_time if patient else "")
 
