@@ -68,6 +68,10 @@ def run_task():
                             'bind': os.getenv("DATA_DIR"),
                             'mode': 'rw'
                         },
+                        os.getenv("DATABASE_DIR"): {
+                            'bind': os.getenv("DATABASE_DIR"),
+                            'mode': 'rw'
+                        },
                     },
                     detach=True,
                     remove=True,
