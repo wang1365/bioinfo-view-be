@@ -19,13 +19,13 @@ MODEL_MAP = {
 }
 
 
-
 class SampleMetaSerializer(ModelSerializer):
 
     class Meta:
         model = SampleMeta
         fields = '__all__'
         depth = 1
+
 
 class PatientSerializer(ModelSerializer):
     samplemeta_set = SampleMetaSerializer(many=True, read_only=True)
@@ -36,9 +36,19 @@ class PatientSerializer(ModelSerializer):
         depth = 1
 
 
+class SampleSerializer(ModelSerializer):
+    sample_meta= SampleMetaSerializer( read_only=True)
+
+    class Meta:
+        model = Sample
+        fields = '__all__'
+        depth = 1
+
+
 SERIALIZER_MAP = {
     # 'sample': SampleSerializer,
     'patient': PatientSerializer,
+    'sample': SampleSerializer
 }
 
 
