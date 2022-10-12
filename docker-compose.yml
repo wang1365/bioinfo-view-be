@@ -62,5 +62,8 @@ services:
     volumes:
       - ./storage/uwsgi:/tmp # 挂载uwsgi日志
       - ${BIO_ROOT}:${BIO_ROOT}
+      - ${SAMPLE_DIR}:${SAMPLE_DIR}
+      - ${DATA_DIR}:${DATA_DIR}
+      - ${DATABASE_DIR}:${DATABASE_DIR}
       - /var/run/docker.sock:/var/run/docker.sock
     command: ["./wait-for-postgres.sh", "db", "./start.sh"]
