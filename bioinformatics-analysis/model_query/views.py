@@ -8,6 +8,7 @@ from sample.models import Sample, SampleMeta
 from patient.models import Patient
 from project.models import Project
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from utils.query_filter import build_q
 
 MODEL_MAP = {
@@ -17,16 +18,27 @@ MODEL_MAP = {
     'patient': Patient
 }
 
-#
-# class SampleSerializer(ModelSerializer):
-#
-#     class Meta:
-#         model = Sample
-#         fields = '__all__'
-#         depth = 1
+
+
+class SampleMetaSerializer(ModelSerializer):
+
+    class Meta:
+        model = SampleMeta
+        fields = '__all__'
+        depth = 1
+
+class PatientSerializer(ModelSerializer):
+    samplemeta_set = SampleMetaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Patient
+        fields = '__all__'
+        depth = 1
+
 
 SERIALIZER_MAP = {
     # 'sample': SampleSerializer,
+    'patient': PatientSerializer,
 }
 
 
@@ -40,7 +52,7 @@ def post_query(request: HttpRequest, model_name: str):
         return JsonResponse({'code': 1, 'msg': f'只支持{MODEL_MAP.keys()}'})
     q = build_q(q_st)
     query_set = model.objects.filter(q)
-    page_size = request.GET.get('page_size', 10)
+    page_size = request.GET.get('size', 10)
     page = request.GET.get('page', 1)
     paginator = Paginator(query_set, page_size)
     objs = paginator.page(page)
@@ -57,6 +69,8 @@ def post_query(request: HttpRequest, model_name: str):
             })
         SERIALIZER_MAP[model_name] = serializer
     sobj = serializer(objs, many=True)
+    # import ipdb
+    # ipdb.set_trace()
     return JsonResponse({
         'code': 0,
         'data': {
