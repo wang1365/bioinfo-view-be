@@ -14,7 +14,7 @@ DATABASES = {
     }
 }
 
-log_dir = os.path.join(os.getenv('BIO_ROOT', 'logs/bioinformatics'))
+log_dir = os.path.join(os.getenv('BIO_ROOT', '/logs/'))
 os.makedirs(log_dir, exist_ok=True)
 LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
 LOGGING = {
@@ -61,7 +61,7 @@ LOGGING = {
             'handlers': ['console', 'file'],
         },
         'django.db.backends': {
-            'handlers': ['db'],
+            'handlers': ['db', 'file'],
             'propagate': False,
             'level': 'DEBUG',
         },
