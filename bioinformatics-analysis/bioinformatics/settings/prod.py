@@ -14,7 +14,7 @@ DATABASES = {
     }
 }
 
-log_dir = os.path.join(os.getenv('BIO_ROOT', '/logs/'))
+log_dir = os.path.join(os.getenv('BIO_ROOT'), 'logs', 'web')
 os.makedirs(log_dir, exist_ok=True)
 LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
 LOGGING = {
