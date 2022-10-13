@@ -51,6 +51,11 @@ class TaskView(ModelViewSet):
         for field in fields:
             envs[f"sample_{field}_list".upper()] = ",".join(
                 str(getattr(sample, field)) for sample in sample_objs)
+        envs["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
+        envs["BIO_ROOT"] = os.getenv("BIO_ROOT")
+        envs["DATA_DIR"] = os.getenv("DATA_DIR")
+        envs["DATABASE_DIR"] = os.getenv("DATABASE_DIR")
+        envs["TASK_RESULT_DIR"] = os.getenv("TASK_RESULT_DIR")
 
     def _write_samples_txt(self, task):
         file_path = os.path.join(
