@@ -216,7 +216,13 @@ class TaskView(ModelViewSet):
             "IS_MERGE": "1",
             "MERGE_SAMPLE_FILES": ",".join(filepath_list),
         }
+        env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
+        env["BIO_ROOT"] = os.getenv("BIO_ROOT")
+        env["DATA_DIR"] = os.getenv("DATA_DIR")
+        env["DATABASE_DIR"] = os.getenv("DATABASE_DIR")
+        env["TASK_RESULT_DIR"] = os.getenv("TASK_RESULT_DIR")
         task.env = env
+
         task.save()
         # async_func(merge_files, origin_file_list=filepath_list, dest_dir=out_dir, task_id=task.id)
         serializer = self.get_serializer(task)
@@ -282,6 +288,11 @@ class TaskView(ModelViewSet):
             "creator_id": req_data.get('creator_id'),
             "is_merge": False,
         })
+        env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
+        env["BIO_ROOT"] = os.getenv("BIO_ROOT")
+        env["DATA_DIR"] = os.getenv("DATA_DIR")
+        env["DATABASE_DIR"] = os.getenv("DATABASE_DIR")
+        env["TASK_RESULT_DIR"] = os.getenv("TASK_RESULT_DIR")
         out_dir = self._normal_task_dir(task)
         env["OUT_DIR"] = out_dir
         env["TASK_URL"] = f"http://127.0.0.1:8080" + \
