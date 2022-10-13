@@ -25,7 +25,8 @@ class PanelView(CustomeViewSets):
     serializer_class = PanelSerializer
     # pagination_class = PageNumberPaginationWithWrapper
 
-    filter_backends = [DjangoFilterBackend, FilterByAccount, PanelFilters]
+    # filter_backends = [DjangoFilterBackend, FilterByAccount, PanelFilters]
+    filter_backends = [DjangoFilterBackend, PanelFilters]
     filterset_class = CustomPanelFilterSet
 
 
