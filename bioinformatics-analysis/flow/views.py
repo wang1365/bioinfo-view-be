@@ -34,7 +34,9 @@ class FlowView(CustomeViewSets):
     serializer_class = FlowSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
-    filter_backends = [FilterByAccount, FlowFilters]
+    # 暂不进行权限过滤
+    # filter_backends = [FilterByAccount, FlowFilters]
+    filter_backends = [FlowFilters]
 
     def create_data(self, request, *args, **kwargs):
         data = super().create_data(request, *args, **kwargs)
