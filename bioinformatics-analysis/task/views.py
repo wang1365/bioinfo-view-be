@@ -216,7 +216,7 @@ class TaskView(ModelViewSet):
             "IS_MERGE": "1",
             "MERGE_SAMPLE_FILES": ",".join(filepath_list),
         }
-        env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
+        # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
         env["BIO_ROOT"] = os.getenv("BIO_ROOT")
         env["DATA_DIR"] = os.getenv("DATA_DIR")
         env["DATABASE_DIR"] = os.getenv("DATABASE_DIR")
@@ -288,7 +288,7 @@ class TaskView(ModelViewSet):
             "creator_id": req_data.get('creator_id'),
             "is_merge": False,
         })
-        env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
+        # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
         env["BIO_ROOT"] = os.getenv("BIO_ROOT")
         env["DATA_DIR"] = os.getenv("DATA_DIR")
         env["DATABASE_DIR"] = os.getenv("DATABASE_DIR")
