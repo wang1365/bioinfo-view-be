@@ -6,15 +6,15 @@ from bioinformatics.settings import *  # noqa
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
+        "NAME": os.getenv("POSTGRES_DB") or "bioinfo",
+        "USER": os.getenv("POSTGRES_USER") or "postgres",
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": "db",
-        "PORT": os.getenv("POSTGRES_PORT"),
+        "HOST": os.getenv("POSTGRES_HOST") or "db",
+        "PORT": os.getenv("POSTGRES_PORT") or "5432",
     }
 }
 
-log_dir = os.path.join(os.getenv('BIO_ROOT'), 'logs', 'web')
+log_dir = os.path.join(os.getenv('BIO_ROOT') or "/data/bioinfo/", 'logs', 'web')
 os.makedirs(log_dir, exist_ok=True)
 LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
 LOGGING = {
