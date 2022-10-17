@@ -46,6 +46,8 @@ class SampleView(CustomeViewSets):
         for task in tasks:
             for id in task.samples:
                 if int(id) in sample_ids:
+                    out_dir = task.env.get('OUT_DIR') or ''
+                    exist_igv = os.path.exists(os.path.join(out_dir, 'result', 'IGV_file.txt'))
                     result[id].append({
                         'id': task.id,
                         'name': task.name,
@@ -53,7 +55,8 @@ class SampleView(CustomeViewSets):
                         'flow_id': task.flow.id,
                         'status': task.status,
                         'result_dir': task.result_dir,
-                        'out_dir': task.env.get('OUT_DIR')
+                        'out_dir': task.env.get('OUT_DIR'),
+                        'exist_igv': exist_igv
                     })
         return result
 
