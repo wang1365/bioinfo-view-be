@@ -29,16 +29,22 @@ class CreateModelMixin:
 
 
 class ListModelMixin:
+
+    def post_list(self, data, request, *args, **kwargs):
+        return data
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            data = self.post_list(serializer.data, request, *args, **kwargs)
+            return self.get_paginated_response(data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return response_body(data=serializer.data, msg="success")
+        data = self.post_list(serializer.data, request, *args, **kwargs)
+        return response_body(data=data, msg="success")
 
 
 class RetrieveModelMixin:

@@ -308,7 +308,15 @@ class TaskView(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return response_body(data=serializer.data)
+        data = serializer.data
+
+        # 填充igv所需相关信息
+        igv_file = os.path.join(instance.env.get('OUT_DIR'), 'result', 'IGV_file.txt')
+        # os.makedirs(igv_file, exist_ok=True)
+        if os.path.exists(igv_file) and os.path.isfile(igv_file):
+            with open(igv_file) as f:
+                data['igv'] = [line for line in f]
+        return response_body(data=data)
 
     def _clean_out_dir(self, task):
         out_dir = task.env.get("OUT_DIR")

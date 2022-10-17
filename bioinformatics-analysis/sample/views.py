@@ -5,6 +5,7 @@ import os
 from task.models import Task
 from task.serializers import TaskSerializer
 from utils.response import response_body
+from collections import defaultdict
 
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
@@ -36,8 +37,38 @@ class SampleView(CustomeViewSets):
         task_data = TaskSerializer(instance=tasks, many=True).data
         data.update({'tasks': task_data})
 
+    def _get_related_tasks(self, sample_ids):
+        # 添加样本数据关联的任务列表
+        tasks = list(Task.objects.filter(samples__has_any_keys=sample_ids))
+        # TODO 任务还需要进行状态过滤
+
+        result = defaultdict(list)
+        for task in tasks:
+            for id in task.samples:
+                if int(id) in sample_ids:
+                    result[id].append({
+                        'id': task.id,
+                        'name': task.name,
+                        'flow_name': task.flow.name,
+                        'flow_id': task.flow.id,
+                        'status': task.status,
+                        'result_dir': task.result_dir,
+                        'out_dir': task.env.get('OUT_DIR')
+                    })
+        return result
+
+    def post_list(self, data, request, *args, **kwargs):
+        ret = data
+        sample_ids = [t['id'] for t in data]
+        # 查询样本数据关联的任务列表
+        task_map = self._get_related_tasks(sample_ids)
+        for sample in data:
+            sample['tasks'] = task_map.get(str(sample['id'])) or []
+        return ret
+
     def query(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        ret = self.list(request, *args, **kwargs)
+        return ret
 
     def list_fields(self, request, *args, **kwargs):
         data = {}
