@@ -315,7 +315,7 @@ class TaskView(ModelViewSet):
         # os.makedirs(igv_file, exist_ok=True)
         if os.path.exists(igv_file) and os.path.isfile(igv_file):
             with open(igv_file) as f:
-                data['igv'] = [line for line in f]
+                data['igv'] = [line.strip().split('\t') for line in f]
         return response_body(data=data)
 
     def _clean_out_dir(self, task):
