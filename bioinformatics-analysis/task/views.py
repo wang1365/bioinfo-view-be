@@ -572,7 +572,8 @@ class TaskView(ModelViewSet):
         data = []
         try:
             with open(log_file, "r") as f:
-                data.append(json.loads(f.readline().strip()))
+                for line in f:
+                    data.append(json.loads(line.strip()))
         except Exception as e:
             print(f"{instance.id} parse log.txt error: {e}")
         return json.dumps(data, ensure_ascii=False)
