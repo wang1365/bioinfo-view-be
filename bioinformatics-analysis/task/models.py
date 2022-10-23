@@ -29,6 +29,7 @@ class Task(models.Model):
     priority = models.SmallIntegerField(default=1)
     memory = models.BigIntegerField()  # 单位MB
     samples = JSONField()
+    log = models.TextField(null=True)
     parameter = JSONField(null=True)
     error_message = models.TextField(null=True, default="")
     create_time = models.DateTimeField("创建时间", default=now)

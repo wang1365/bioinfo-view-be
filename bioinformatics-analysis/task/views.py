@@ -316,6 +316,10 @@ class TaskView(ModelViewSet):
         if os.path.exists(igv_file) and os.path.isfile(igv_file):
             with open(igv_file) as f:
                 data['igv'] = [line.strip().split('\t') for line in f]
+        log_data = instance.log
+        if not log_data:
+            log_data = self._load_log_data(instance)
+        data["log"] = json.loads(log_data)
         return response_body(data=data)
 
     def _clean_out_dir(self, task):
@@ -563,6 +567,16 @@ class TaskView(ModelViewSet):
             attach={
                 "file": task.result_path.split(",")})
 
+    def _load_log_data(self, instance):
+        log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
+        data = []
+        try:
+            with open(log_file, "r") as f:
+                data.append(json.loads(f.readline().strip()))
+        except Exception as e:
+            print(f"{instance.id} parse log.txt error: {e}")
+        return json.dumps(data, ensure_ascii=False)
+
     def update(self, request, pk, *args, **kwargs):
         instance = self.get_object()
         action = request.query_params.get("action", "")
@@ -603,6 +617,14 @@ class TaskView(ModelViewSet):
                     # 更新bam, 发送邮件等
                     self.resolve_task_result_path(task=instance)
                 instance.progress = 100
+                log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
+                data = []
+                try:
+                    with open(log_file, "r") as f:
+                        data.append(json.loads(f.readline().strip()))
+                except Exception as e:
+                    print(f"{instance.id} parse log.txt error: {e}")
+                instance.data = self._load_log_data(instance)
                 # TODO 定期删除task_data数据
                 # self._delete_test_update_task_by_shell(instance)
 

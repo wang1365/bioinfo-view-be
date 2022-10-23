@@ -40,5 +40,6 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "env",
             "priority",
             "error_message",
-            "create_time"
+            "create_time",
+            "log"
         ]
