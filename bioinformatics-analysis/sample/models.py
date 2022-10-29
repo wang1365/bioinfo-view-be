@@ -31,10 +31,14 @@ class SampleMeta(models.Model):
     user_id = models.BigIntegerField(default=1)
 
     # 患者 ID
-    patient = models.ForeignKey(to=Patient, null=True, db_constraint=False, default=None, on_delete=DO_NOTHING)
+    patient = models.ForeignKey(to=Patient,
+                                null=True,
+                                db_constraint=False,
+                                default=None,
+                                on_delete=DO_NOTHING)
 
     # 患者识别号
-    patient_identifier = models.CharField(max_length=256)
+    patient_identifier = models.CharField(max_length=256, null=True)
 
     # 样本识别号
     identifier = models.CharField(max_length=256, unique=True)
@@ -102,10 +106,15 @@ class Sample(models.Model):
     risk = models.BooleanField()
 
     # 核酸降解等级
-    nucleic_level = models.CharField(max_length=4, choices=NucleicLevelChoices.choices)
+    nucleic_level = models.CharField(max_length=4,
+                                     choices=NucleicLevelChoices.choices)
 
     # 样本元信息 ID
-    sample_meta = models.ForeignKey(to=SampleMeta, null=True, db_constraint=False, default=None, on_delete=DO_NOTHING)
+    sample_meta = models.ForeignKey(to=SampleMeta,
+                                    null=True,
+                                    db_constraint=False,
+                                    default=None,
+                                    on_delete=DO_NOTHING)
 
     # 样本识别号
     sample_identifier = models.CharField(max_length=256)
@@ -117,7 +126,8 @@ class Sample(models.Model):
     company = models.CharField(max_length=1024)
 
     # 核酸类型
-    nucleic_type = models.CharField(max_length=16, choices=NucleicTypeChoices.choices)
+    nucleic_type = models.CharField(max_length=16,
+                                    choices=NucleicTypeChoices.choices)
 
     # R1 / R2 数据名称
     fastq1_path = models.CharField(max_length=1024)
