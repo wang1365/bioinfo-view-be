@@ -2,7 +2,7 @@
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
-from config.models import Config
+from config.models import Config, Resource
 
 
 class ConfigSerializer(serializers.ModelSerializer):
@@ -10,3 +10,9 @@ class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Config
         fields = ['id', 'name', 'value']
+
+class ResourceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Resource
+        fields = "__all__"
