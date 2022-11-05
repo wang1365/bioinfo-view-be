@@ -6,6 +6,7 @@ venv
 start-pg.sh
 .vscode
 .DS_Store
+zr.py
 
 # C extensions
 *.so
