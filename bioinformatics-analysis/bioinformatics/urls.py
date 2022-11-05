@@ -33,6 +33,8 @@ urlpatterns = [
         include(("appearance.urls", "appearance"), namespace="appearance")),
     url(r"^patient", include(("patient.urls", "patient"),
                              namespace="patient")),
+    url(r"^report", include(("report.urls", "report"),
+                             namespace="report")),
     url(r'^model_query',
         include(('model_query.urls', 'model_query'), 'model_query'))
     # 资源限制和使用放在account model上, 直接使用account的接口

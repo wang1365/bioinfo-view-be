@@ -44,7 +44,7 @@ curl --location --request POST 'http://127.0.0.1:8000/account/?action=register' 
 
 ```
 curl --location --request GET 'http://127.0.0.1:8000/account/' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDIzMjA1MjgsInN1YiI6ImFjY2VzcyJ9.ndWPp-OEwdsM0cYnK6z2pk0KyHbqMhyiUj3LVN8ejjY' 
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDIzMjA1MjgsInN1YiI6ImFjY2VzcyJ9.ndWPp-OEwdsM0cYnK6z2pk0KyHbqMhyiUj3LVN8ejjY'
 ```
 
 ```
@@ -389,5 +389,26 @@ curl --location --request DELETE 'http://127.0.0.1:8000/project/2' \
 {"code": 1, "msg": "非项目创建者不能删除项目", "data": false}
 ```
 
+## 报告
 
+example query
 
+```
+{
+    "select": ["RANK", "word", "TOTAL"],
+    "query": [
+        {"column": "Known", "op": "==", "value": "Y"}
+    ],
+    "sort": {
+        "column": "SPOKEN",
+        "type": "asc"
+    },
+    "stat": [
+        {"column": "PoS", "agg": "count"}
+    ],
+    "page": {
+        "index": 3,
+        "page_size": 20
+    }
+}
+```
