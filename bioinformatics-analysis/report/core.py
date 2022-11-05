@@ -66,5 +66,5 @@ def extract_meta_data(df, columns):
     return results
 
 
-def generate_df(df, filepath, sep=",", header=None):
+def generate_df(filepath, sep=",", header=None):
     return pandas.read_csv(filepath, sep=sep, header=header)
