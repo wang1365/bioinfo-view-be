@@ -39,6 +39,7 @@ from utils.disk import cal_dir_size
 from task.constants import SAMPLE_HEADERS
 from sample.models import SampleMeta
 from patient.models import Patient
+from config.models import Config
 
 
 class TaskView(ModelViewSet):
@@ -239,12 +240,15 @@ class TaskView(ModelViewSet):
         return True
 
     def _check_disk(self, request, *args, **kwargs):
-        if request.account.disk_limit and request.account.disk_limit <= request.account.used_disk:
-            return False
-        return True
+        disk_ratio = float(os.getenv("DISK_RATIO", 1))
+        disk_config = Config.objects.filter(name="disk").first()
+        if (request.account.disk_limit
+                and request.account.disk_limit >= request.account.used_disk * disk_ratio) or (disk_config.used >= disk_config.value * disk_ratio):
+            return True
+        return False
 
     def create(self, request, *args, **kwargs):
-        if not self._check_disk(request, *args, **kwargs):
+        if self._check_disk(request, *args, **kwargs):
             return response_body(
                 code=1,
                 status_code=400,

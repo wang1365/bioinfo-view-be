@@ -963,8 +963,8 @@ curl --location --request POST 'http://127.0.0.1:8000/task/run_qc' \
 **两个配置参数，最大运行任务数max_task(value > 1的整数)，内存使用率memory_rate(0-1.0)**
 
 ```
-curl --location --request GET 'http://127.0.0.1:8000/config' \
---header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE2MDgxMDU0MDMsInN1YiI6ImFjY2VzcyJ9.lffnFLgXbDrIL0RICyDcnUf3hpj8wxUNtNoowJoh5XU'
+curl --location --request GET 'http://127.0.0.1:9001/config' \
+--header 'Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2Njk3OTQxNjIsInN1YiI6ImFjY2VzcyJ9.qxME5B2RL_oB1ddbyT7wozdoU6gCVwr0Cm74wu1LukY'
 ```
 
 ```
@@ -1198,4 +1198,10 @@ curl --location --request GET 'http://127.0.0.1:9001/resource_limit/resource_lim
 
 ```buildoutcfg
 {"code": 0, "msg": "", "data": {"memory": {"all": 16384, "used": 8417}, "disk": {"all": 476802, "used": 399280}}}
+```
+
+# 查看每周/每月磁盘占用情况
+```buildoutcfg
+curl --location --request GET 'http://127.0.0.1:9001/resource/resources?day__gte=2022-12-11&day__lte=2022-12-23' \
+--header 'Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2Njk3OTQxNjIsInN1YiI6ImFjY2VzcyJ9.qxME5B2RL_oB1ddbyT7wozdoU6gCVwr0Cm74wu1LukY'
 ```

@@ -1,7 +1,6 @@
 import logging
 from datetime import timedelta
-import os
-import subprocess
+from django.db.models import Sum
 
 from django.conf import settings
 from django.db.models import Q
@@ -24,6 +23,7 @@ from utils.response import response_body
 from utils.site import get_md5
 from account import constants as account_constant
 from task.models import Task
+from config.models import Config
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,13 @@ class UsersAPIView(
         return response_body(data="重置密码成功")
 
     def update(self, request, *args, **kwargs):
+        sum_dict = Account.objects.all().aggregate(sum_disk=Sum('disk_limit'))
+        disk_limit = request.data.get("disk_limit")
+        if disk_limit:
+            disk_config = Config.objects.filter(name="disk").first()
+            sum_disk = sum_dict.get("sum_disk", 0)
+            if sum_disk + int(disk_limit) > disk_config.value:
+                return response_body(status_code=200, code=1, msg=f"您最多只剩下{disk_config.value-sum_disk}MB的空间可配置")
         resp = super().update(request, *args, **kwargs)
         return response_body(
             data=resp.data

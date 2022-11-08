@@ -7,6 +7,13 @@ from account.models import Account
 def cal_dir_size(dirctory, user_id):
     if not os.path.exists(dirctory):
         return
+    size = dir_size(dirctory)
+    Account.objects.filter(pk=user_id).update(used_disk=size)
+
+
+def dir_size(dirctory):
+    if not os.path.exists(dirctory):
+        return 0
     res = subprocess.Popen(
         f'du -sh {dirctory}',
         shell=True,
@@ -23,4 +30,4 @@ def cal_dir_size(dirctory, user_id):
         size = int(size[:-1]) / 1024
     elif size[-1] == "B":
         size = int(size[:-1]) / (1024 * 1024)
-    Account.objects.filter(pk=user_id).update(used_disk=size)
+    return size

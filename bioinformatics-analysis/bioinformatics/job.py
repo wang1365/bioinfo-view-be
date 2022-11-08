@@ -109,4 +109,28 @@ def clean_task_log():
     subprocess.Popen(f"rm -rf {base}/*", shell=True)
 
 
+@scheduler.scheduled_job("cron", day_of_week='*', hour='1', minute='0', second='0')
+def cal_disk_config():
+    from config.models import Config
+    from utils.disk import dir_size
+    result_dir = os.getenv("TASK_RESULT_DIR")
+    Config.objects.filter(name="disk").update(used=dir_size(result_dir))
+
+
+@scheduler.scheduled_job("cron", day_of_week='*', hour='23', minute='59', second='0')
+def cal_day_disk():
+    from task.models import Task
+    from datetime import datetime, date
+    from utils.disk import dir_size
+    from config.models import Resource
+    now = datetime.now()
+    begin = now.replace(hour=0, minute=0, second=0)
+    end = now.replace(hour=23, minute=59, second=59)
+    tasks = Task.objects.filter(create_time__gte=begin, create_time__lte=end)
+    day_used_disk = 0
+    for task in tasks:
+        day_used_disk += dir_size(task.env.get("OUT_DIR"))
+    Resource.objects.create(typ="disk", value=day_used_disk, day=date.today(), name="task")
+
+
 scheduler.start()
