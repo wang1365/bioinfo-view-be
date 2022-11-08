@@ -43,13 +43,16 @@ def extract_data(df, query):
         }
         df.sort_values(**params)
 
-    df = df.query(format_query(query['query']))
+    if 'query' in query:
+        df = df.query(format_query(query['query']))
+
     if 'page' in query:
         start, end = get_index(query['page'])
         df = df.iloc[start:end]
 
-    for stat in query['stat']:
-        stats.append(statistic(df, stat))
+    if 'stat' in query:
+        for stat in query['stat']:
+            stats.append(statistic(df, stat))
 
     results['stat'] = stats
     results['table'] = select_columns(df, query.get("select", "*"))

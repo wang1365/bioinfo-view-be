@@ -389,18 +389,22 @@ curl --location --request DELETE 'http://127.0.0.1:8000/project/2' \
 {"code": 1, "msg": "非项目创建者不能删除项目", "data": false}
 ```
 
-## 报告
+# 报告
+
+## query by raw data
+
+url: /report/data/<task_id>/<name>
 
 example query
 
 ```
 {
-    "select": ["RANK", "word", "TOTAL"],
+    "select": ["Start", "End"],
     "query": [
         {"column": "Known", "op": "==", "value": "Y"}
     ],
     "sort": {
-        "column": "SPOKEN",
+        "column": "Start",
         "type": "asc"
     },
     "stat": [
@@ -411,4 +415,14 @@ example query
         "page_size": 20
     }
 }
+```
+
+## query by meta data
+
+url: /report/metadata/<task_id>/<name>
+
+example query
+
+```
+["Start", "End"]
 ```

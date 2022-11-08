@@ -1,18 +1,18 @@
 QC = {
     "filepath": "QC/QC_info",
-    "sep": ",",
+    "sep": "\t",
     "header": 0,
 }
 
 QN11 = {
     "filepath": "QC/QN11.depth",
-    "sep": ",",
+    "sep": "\t",
     "header": 0,
 }
 
 QT11 = {
     "filepath": "QC/QT11.depth",
-    "sep": ",",
+    "sep": "\t",
     "header": 0,
 }
 

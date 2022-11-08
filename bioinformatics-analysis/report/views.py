@@ -4,6 +4,7 @@ import json
 from task.models import Task
 from report.core import generate_df, extract_meta_data, extract_data
 from report.constant import FILE_MAPPINGS
+from utils.response import response_body
 
 
 def get_meta_data(request, taskid, name):
@@ -12,7 +13,7 @@ def get_meta_data(request, taskid, name):
     filename = os.path.join(task.result_dir, config['filepath'])
     columns = json.loads(request.body)
     df = generate_df(filename, sep=config['sep'], header=config['header'])
-    return extract_meta_data(df, columns)
+    return response_body(data=extract_meta_data(df, columns))
 
 
 def get_raw_data(request, taskid, name):
@@ -21,4 +22,4 @@ def get_raw_data(request, taskid, name):
     filename = os.path.join(task.result_dir, config['filepath'])
     query = json.loads(request.body)
     df = generate_df(filename, sep=config['sep'], header=config['header'])
-    return extract_data(df, query)
+    return response_body(data=extract_data(df, query))
