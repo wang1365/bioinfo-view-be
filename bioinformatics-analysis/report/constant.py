@@ -61,6 +61,11 @@ FILE_MAPPINGS = {
         "sep": "\t",
         "header": 0
     },
+    "FUSION_QN11_SOMATIC": {
+        "filepath": "fusion_germline/QN11_QT11.somatic_fusions",
+        "sep": "\t",
+        "header": 0
+    },
 
     # 拷贝数变异分析
 
