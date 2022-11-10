@@ -1,3 +1,13 @@
+ONTARGET = {
+    "filepath": "QC/ontarget.txt",
+    "type": "raw"
+}
+
+QC_TIP = {
+    "filepath": "QC/QC_tip",
+    "type": "raw"
+}
+
 QC = {
     "filepath": "QC/QC_info",
     "sep": "\t",
@@ -33,5 +43,7 @@ FILE_MAPPINGS = {
     "QN11": QN11,
     "QT11": QT11,
     "MUT_GERMLINE": MUT_GERMLINE,
-    "MUT_SOMATIC": MUT_SOMATIC
+    "MUT_SOMATIC": MUT_SOMATIC,
+    "ONTARGET": ONTARGET,
+    "QC_TIP": QC_TIP,
 }

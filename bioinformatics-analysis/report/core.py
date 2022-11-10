@@ -71,3 +71,9 @@ def extract_meta_data(df, columns):
 
 def generate_df(filepath, sep=",", header=None):
     return pandas.read_csv(filepath, sep=sep, header=header)
+
+
+def read_raw_data(filepath):
+    with open(filepath) as fp:
+        data = fp.read()
+    return data
