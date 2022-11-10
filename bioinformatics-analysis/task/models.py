@@ -1,7 +1,10 @@
 # Create your models here.
+import os
+
 from django.db import models
 from django.utils.timezone import now
 # from django_mysql.models import JSONField
+
 from django.db.models import JSONField
 
 from account.models import Account
@@ -45,3 +48,8 @@ class Task(models.Model):
         verbose_name = "任务"
         verbose_name_plural = verbose_name
         get_latest_by = "id"
+
+    @property
+    def result_dir(self):
+        result_dir = self.result_dir if self.result_dir else self.env.get("OUT_DIR", "")
+        return os.path.join(result_dir, "result")

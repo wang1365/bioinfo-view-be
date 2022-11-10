@@ -305,6 +305,7 @@ class TaskView(ModelViewSet):
         env["IS_MERGE"] = "0"
         self._upload_task_files(request, env)
         task.env = env
+        task.result_dir = os.path.join(out_dir, "result")
         task.save()
         serializer = self.get_serializer(task)
         return response_body(data=serializer.data)
