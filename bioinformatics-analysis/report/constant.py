@@ -62,7 +62,7 @@ FILE_MAPPINGS = {
         "header": 0
     },
     "FUSION_QN11_SOMATIC": {
-        "filepath": "fusion_germline/QN11_QT11.somatic_fusions",
+        "filepath": "fusion_somatic/QN11_QT11.somatic_fusions",
         "sep": "\t",
         "header": 0
     },
