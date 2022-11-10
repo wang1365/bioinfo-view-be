@@ -53,12 +53,12 @@ FILE_MAPPINGS = {
     # 融合分析
     "FUSION_QT11": {
         "filepath": "fusion_germline/QT11.fusions",
-        "sep": ",",
+        "sep": "\t",
         "header": 0
     },
     "FUSION_QN11": {
         "filepath": "fusion_germline/QN11.fusions",
-        "sep": ",",
+        "sep": "\t",
         "header": 0
     },
 
