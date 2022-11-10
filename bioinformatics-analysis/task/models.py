@@ -48,8 +48,3 @@ class Task(models.Model):
         verbose_name = "任务"
         verbose_name_plural = verbose_name
         get_latest_by = "id"
-
-    @property
-    def result_dir(self):
-        result_dir = self.result_dir if self.result_dir else self.env.get("OUT_DIR", "")
-        return os.path.join(result_dir, "result")
