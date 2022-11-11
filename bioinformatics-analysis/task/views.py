@@ -717,8 +717,8 @@ def read_file(request, pk):
         return response_body(data=None, status_code=200, msg=f'文件不存在:{file_path}')
 
     with open(file_path) as f:
-        lines = f.readlines()
-        return response_body(data=lines)
+        content = f.read()
+        return response_body(data=content)
 
 
 class RunQcView(APIView):
