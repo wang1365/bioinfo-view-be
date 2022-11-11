@@ -7,6 +7,7 @@ from jwt import PyJWTError
 from account.models import Account
 from rbac.models import User2Role
 from utils.response import response_body
+import os, sys
 
 ALGORITHM = "HS256"
 access_token_jwt_subject = "access"
@@ -14,6 +15,8 @@ access_token_jwt_subject = "access"
 
 class SecurityMiddleware(MiddlewareMixin):
     def process_request(self, request):
+        if 'AUTH_DISABLED' in os.environ:
+            return
         token = request.META.get("HTTP_AUTHORIZATION") or request.COOKIES.get("token")
         if not token:
             if (

@@ -213,7 +213,7 @@ class TaskView(ModelViewSet):
         env = {
             "OUT_DIR": out_dir,
             "TASK_URL": f"http://{get_host_ip()}:8000" +
-            reverse('task:single', kwargs={'pk': task.id}),
+                        reverse('task:single', kwargs={'pk': task.id}),
             "IS_MERGE": "1",
             "MERGE_SAMPLE_FILES": ",".join(filepath_list),
         }
@@ -243,7 +243,8 @@ class TaskView(ModelViewSet):
         disk_ratio = float(os.getenv("DISK_RATIO", 1))
         disk_config = Config.objects.filter(name="disk").first()
         if (request.account.disk_limit
-                and request.account.disk_limit >= request.account.used_disk * disk_ratio) or (disk_config.used >= disk_config.value * disk_ratio):
+            and request.account.disk_limit >= request.account.used_disk * disk_ratio) or (
+                disk_config.used >= disk_config.value * disk_ratio):
             return True
         return False
 
@@ -300,7 +301,7 @@ class TaskView(ModelViewSet):
         out_dir = self._normal_task_dir(task)
         env["OUT_DIR"] = out_dir
         env["TASK_URL"] = f"http://127.0.0.1:8080" + \
-            reverse('task:single', kwargs={'pk': task.id})
+                          reverse('task:single', kwargs={'pk': task.id})
         env["SAMPLE_INFO"] = self._write_samples_txt(task)
         env["IS_MERGE"] = "0"
         self._upload_task_files(request, env)
@@ -346,7 +347,7 @@ class TaskView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if (request.account.id == instance.creator.id) or (
-            "admin" in request.role_list
+                "admin" in request.role_list
         ):
             self._clean_out_dir(instance)
             self._unset_sample_task_id(instance)
@@ -395,7 +396,7 @@ class TaskView(ModelViewSet):
             tasks = tasks.filter(project_id=project_id)
         if status:
             status_code = {value: key for key,
-                           value in Task.status_choices}.get(status)
+                                          value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)
@@ -709,6 +710,17 @@ def task_summary(request, *args, **kwargs):
         })
 
 
+def read_file(request, pk):
+    task = Task.objects.get(pk=pk)
+    file_path = os.path.join(task.result_dir, request.GET['path'])
+    if not os.path.isfile(file_path) or not os.path.exists(file_path):
+        return response_body(data=None, status_code=200, msg=f'文件不存在:{file_path}')
+
+    with open(file_path) as f:
+        lines = f.readlines()
+        return response_body(data=lines)
+
+
 class RunQcView(APIView):
     def _qc_task_dir(self, sample):
         return os.path.join(settings.TASK_RESULT_DIR, "qc", f"{sample.id}")
@@ -736,7 +748,7 @@ class RunQcView(APIView):
             "INPUT_DIR": os.path.dirname(sample.bam1_path),
             "OUT_DIR": TaskView()._normal_task_dir(task),
             "TASK_URL": f"http://{get_host_ip()}:8000" +
-            reverse('task:single', kwargs={'pk': task.id}),
+                        reverse('task:single', kwargs={'pk': task.id}),
             "SAMPLE_INFO": sample_csv_location,
             "SAMPLE_URL": f"http://{get_host_ip()}:8000/sample/samples/{sample.id}",
         }
