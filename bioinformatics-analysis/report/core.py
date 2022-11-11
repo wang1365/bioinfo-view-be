@@ -74,6 +74,6 @@ def generate_df(filepath, sep=",", header=None):
 
 
 def read_raw_data(filepath):
-    with open(filepath) as fp:
+    with open(filepath, encoding='utf8') as fp:
         data = fp.read()
     return data

@@ -605,7 +605,7 @@ class TaskView(ModelViewSet):
             if key == "status":
                 value = {
                     value: key for key,
-                    value in Task.status_choices}.get(value)
+                                   value in Task.status_choices}.get(value)
 
                 async_func(
                     cal_dir_size,
