@@ -358,6 +358,10 @@ class TaskView(ModelViewSet):
                     f"{instance.creator.id}"),
                 user_id=instance.creator.id,
             )
+            try:
+                stop_docker(instance.pid)
+            except Exception as e:
+                print("删除任务时删除容器失败: ", e)
             instance.delete()
             return response_body(data=True)
         return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
