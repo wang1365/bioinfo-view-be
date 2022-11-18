@@ -9,4 +9,7 @@ urlpatterns = [
     url(
         r"^/data/(?P<taskid>\d+)/(?P<name>[0-9a-zA-Z_]+)/", views.get_raw_data
     ),
+    url(
+        r"^/file/", views.read_file
+    ),
 ]

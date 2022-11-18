@@ -31,3 +31,18 @@ def get_raw_data(request, taskid, name):
     query = json.loads(request.body)
     df = generate_df(filename, sep=config['sep'], header=config['header'])
     return response_body(data=extract_data(df, query))
+
+
+def read_file(request):
+    """
+    读取系统文件
+    """
+    path = request.GET['path']
+    root = os.getenv("BIO_ROOT")
+    file = os.path.join(root, path)
+    if not os.path.isfile(file) or not os.path.exists(file):
+        return response_body(data=None, status_code=200, code=-1,
+                             msg=f'文件不存在:{file}, root:{root}')
+    with open(file) as f:
+        content = f.read()
+        return response_body(data=content)
