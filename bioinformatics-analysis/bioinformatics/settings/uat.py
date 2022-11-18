@@ -6,10 +6,10 @@ from bioinformatics.settings import *  # noqa
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "bioinfo_uat",
+        "NAME": "bioinfo",
         "USER": "postgres",
         "PASSWORD": "Bio@2022",
-        "HOST": "47.116.137.79",
+        "HOST": "10.10.0.208",
         "PORT": "5432",
     }
 }

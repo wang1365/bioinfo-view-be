@@ -618,19 +618,12 @@ class TaskView(ModelViewSet):
                 return response_body(code=1, msg="非管理员用户不能调整优先级")
             setattr(instance, key, value)
             if key == "result_path":
-                if not instance.is_merge:
-                    # 处理result_path
-                    self._update_task_result_path(task=instance)
-                    # 更新bam, 发送邮件等
-                    self.resolve_task_result_path(task=instance)
+                # if not instance.is_merge:
+                #     # 处理result_path
+                #     self._update_task_result_path(task=instance)
+                #     # 更新bam, 发送邮件等
+                #     self.resolve_task_result_path(task=instance)
                 instance.progress = 100
-                log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
-                data = []
-                try:
-                    with open(log_file, "r") as f:
-                        data.append(json.loads(f.readline().strip()))
-                except Exception as e:
-                    print(f"{instance.id} parse log.txt error: {e}")
                 instance.data = self._load_log_data(instance)
                 # TODO 定期删除task_data数据
                 # self._delete_test_update_task_by_shell(instance)
