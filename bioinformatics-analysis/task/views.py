@@ -672,7 +672,7 @@ def download(request, pk):
 
 def task_summary(request, *args, **kwargs):
     queryset = Task.objects.all()
-    if "admin" in request.role_list:
+    if ("admin" in request.role_list) or ("super" in request.role_list):
         if request.GET.get("start_time__gte"):
             queryset = queryset.filter(
                 create_time__gte=request.GET.get("start_time__gte"))

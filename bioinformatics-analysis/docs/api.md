@@ -954,6 +954,15 @@ curl --location --request POST 'http://127.0.0.1:8000/task/run_qc' \
 }'
 ```
 
+## 任务运行概览
+
+```buildoutcfg
+```
+curl --location --request GET 'http://127.0.0.1:8000/task/summary?start_time__gte=2011-10-10 10:00:00&start_time__lte=2011-10-10 10:00:00' \
+--header 'Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJleHAiOjE2MDgwMTYyMzAsInN1YiI6ImFjY2VzcyJ9.Pa2iVecIencT3XpgripoCRu9etnfu565tTXtYBgARaQ' \
+--header 'Content-Type: application/json'
+```
+```
 
 
 # 系统配置
@@ -1200,8 +1209,9 @@ curl --location --request GET 'http://127.0.0.1:9001/resource_limit/resource_lim
 {"code": 0, "msg": "", "data": {"memory": {"all": 16384, "used": 8417}, "disk": {"all": 476802, "used": 399280}}}
 ```
 
-# 查看每周/每月磁盘占用情况
+# 查看每周/每月磁盘占用情况(单位MB)
 ```buildoutcfg
 curl --location --request GET 'http://127.0.0.1:9001/resource/resources/week' \
 --header 'Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2Njk3OTQxNjIsInN1YiI6ImFjY2VzcyJ9.qxME5B2RL_oB1ddbyT7wozdoU6gCVwr0Cm74wu1LukY'
 ```
+
