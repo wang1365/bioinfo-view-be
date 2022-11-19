@@ -1202,6 +1202,6 @@ curl --location --request GET 'http://127.0.0.1:9001/resource_limit/resource_lim
 
 # 查看每周/每月磁盘占用情况
 ```buildoutcfg
-curl --location --request GET 'http://127.0.0.1:9001/resource/resources?day__gte=2022-12-11&day__lte=2022-12-23' \
+curl --location --request GET 'http://127.0.0.1:9001/resource/resources/week' \
 --header 'Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2Njk3OTQxNjIsInN1YiI6ImFjY2VzcyJ9.qxME5B2RL_oB1ddbyT7wozdoU6gCVwr0Cm74wu1LukY'
 ```

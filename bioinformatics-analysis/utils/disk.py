@@ -21,13 +21,13 @@ def dir_size(dirctory):
         encoding='utf8')
     size = res.stdout.read().split("\t")[0]
     if size[-1] == "G":
-        size = int(size[:-1]) * 1024
+        size = float(size[:-1]) * 1024
     elif size[-1] == "T":
-        size = int(size[:-1]) * 1024 * 1024
+        size = float(size[:-1]) * 1024 * 1024
     elif size[-1] == "M":
-        size = int(size[:-1])
+        size = float(size[:-1])
     elif size[-1] == "K":
-        size = int(size[:-1]) / 1024
+        size = float(size[:-1]) / 1024
     elif size[-1] == "B":
-        size = int(size[:-1]) / (1024 * 1024)
+        size = float(size[:-1]) / (1024 * 1024)
     return size
