@@ -59,17 +59,15 @@ class TaskView(ModelViewSet):
         envs["TASK_RESULT_DIR"] = os.getenv("TASK_RESULT_DIR")
 
     def _write_samples_txt(self, task):
-        file_path = os.path.join(
-            self._normal_task_dir(task),
-            f"samples.txt")
+        file_path = os.path.join(self._normal_task_dir(task), f"samples.txt")
 
         with open(file_path, "w") as f:
             f.write("\t".join(SAMPLE_HEADERS))
             f.write("\n")
             for sample in [
-                Sample.objects.get(
-                    id=sample_id) for sample_id in sorted(
-                    task.samples)]:
+                    Sample.objects.get(id=sample_id)
+                    for sample_id in sorted(task.samples)
+            ]:
                 row = self._build_row(task, sample)
                 f.write("\t".join([str(item) for item in row]))
                 f.write("\n")
@@ -129,14 +127,10 @@ class TaskView(ModelViewSet):
         return row
 
     def _normal_task_dir(self, task):
-        out_dir = os.path.join(
-            settings.TASK_RESULT_DIR,
-            f"{task.creator.id}",
-            f"{task.project.id}",
-            datetime.now().strftime('%Y%m%d'),
-            f"{task.flow.code}",
-            f"{task.id}"
-        )
+        out_dir = os.path.join(settings.TASK_RESULT_DIR, f"{task.creator.id}",
+                               f"{task.project.id}",
+                               datetime.now().strftime('%Y%m%d'),
+                               f"{task.flow.code}", f"{task.id}")
         os.makedirs(out_dir, exist_ok=True, mode=0o733)
         return out_dir
 
@@ -145,11 +139,10 @@ class TaskView(ModelViewSet):
         if req_data.get("samples"):
             req_data["samples"] = req_data.get("samples").split(",")
         if req_data.get("is_merge") and json.loads(req_data.get("is_merge")):
-            task = Task.objects.filter(
-                flow_id=flow_id,
-                samples=sorted(req_data.get("samples", [])),
-                is_merge=True
-            ).first()
+            task = Task.objects.filter(flow_id=flow_id,
+                                       samples=sorted(
+                                           req_data.get("samples", [])),
+                                       is_merge=True).first()
         else:
             if req_data.get("parameter"):
                 req_data["parameter"] = json.loads(req_data.get("parameter"))
@@ -186,36 +179,41 @@ class TaskView(ModelViewSet):
             req_data["samples"] = req_data.get("samples").split(",")
         req_data["samples"] = sorted(req_data.get("samples", []))
         has_filepath_samples = Flow2Sample.objects.filter(
-            flow_id=flow_id).values_list(
-            "sample_id", flat=True)
-        interation = set(
-            [int(item) for item in req_data["samples"]]) - set(has_filepath_samples)
+            flow_id=flow_id).values_list("sample_id", flat=True)
+        interation = set([int(item) for item in req_data["samples"]
+                          ]) - set(has_filepath_samples)
         if interation:
             interation = [str(item) for item in interation]
-            return response_body(
-                code=1, msg="如下样本id在该流程没有结果: {}".format(
-                    ",".join(interation)))
+            return response_body(code=1,
+                                 msg="如下样本id在该流程没有结果: {}".format(
+                                     ",".join(interation)))
         # TODO 没有结果的样本不能创建归并
         filepath_list = Flow2Sample.objects.filter(
-            flow_id=flow_id, sample_id__in=req_data["samples"]).values_list(
-            "filepath", flat=True)
-        task = Task.objects.create(**{
-            "name": req_data.get('name'),
-            "memory": self.get_flow_memory(flow_id),
-            "project_id": req_data.get('project_id'),
-            "flow_id": req_data.get('flow_id'),
-            "samples": req_data["samples"],
-            "parameter": req_data.get('parameter', []),
-            "creator_id": request.account.id,
-            "is_merge": True,
-        })
+            flow_id=flow_id,
+            sample_id__in=req_data["samples"]).values_list("filepath",
+                                                           flat=True)
+        task = Task.objects.create(
+            **{
+                "name": req_data.get('name'),
+                "memory": self.get_flow_memory(flow_id),
+                "project_id": req_data.get('project_id'),
+                "flow_id": req_data.get('flow_id'),
+                "samples": req_data["samples"],
+                "parameter": req_data.get('parameter', []),
+                "creator_id": request.account.id,
+                "is_merge": True,
+            })
         out_dir = self._normal_task_dir(task)
         env = {
-            "OUT_DIR": out_dir,
-            "TASK_URL": f"http://{get_host_ip()}:8000" +
-                        reverse('task:single', kwargs={'pk': task.id}),
-            "IS_MERGE": "1",
-            "MERGE_SAMPLE_FILES": ",".join(filepath_list),
+            "OUT_DIR":
+            out_dir,
+            "TASK_URL":
+            f"http://{get_host_ip()}:8000" +
+            reverse('task:single', kwargs={'pk': task.id}),
+            "IS_MERGE":
+            "1",
+            "MERGE_SAMPLE_FILES":
+            ",".join(filepath_list),
         }
         # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
         env["BIO_ROOT"] = os.getenv("BIO_ROOT")
@@ -242,18 +240,17 @@ class TaskView(ModelViewSet):
     def _check_disk(self, request, *args, **kwargs):
         disk_ratio = float(os.getenv("DISK_RATIO", 1))
         disk_config = Config.objects.filter(name="disk").first()
-        if (request.account.disk_limit
-            and request.account.disk_limit >= request.account.used_disk * disk_ratio) or (
-                disk_config.used >= disk_config.value * disk_ratio):
+        if (request.account.disk_limit and request.account.disk_limit >=
+                request.account.used_disk * disk_ratio) or (
+                    disk_config.used >= disk_config.value * disk_ratio):
             return True
         return False
 
     def create(self, request, *args, **kwargs):
         if self._check_disk(request, *args, **kwargs):
-            return response_body(
-                code=1,
-                status_code=400,
-                msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
+            return response_body(code=1,
+                                 status_code=400,
+                                 msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
         req_data = request.POST.copy()
         check_duplicate = request.query_params.get("check_duplicate")
         if check_duplicate:
@@ -261,11 +258,11 @@ class TaskView(ModelViewSet):
             if flag:
                 return response_body(
                     code=1,
-                    msg=f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建")
+                    msg=
+                    f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建"
+                )
             else:
-                return response_body(code=200,
-                                     msg="",
-                                     data="")
+                return response_body(code=200, msg="", data="")
         if req_data.get("is_merge") and json.loads(req_data.get("is_merge")):
             return self.create_merge_task(request)
         # TODO flow 和 样本标准品的校验
@@ -274,25 +271,27 @@ class TaskView(ModelViewSet):
         if req_data.get("samples"):
             req_data["samples"] = req_data.get("samples").split(",")
         req_data["samples"] = sorted(req_data.get("samples", []))
-        if not self._check_standard(
-                req_data["samples"],
-                req_data.get('flow_id')):
+        if not self._check_standard(req_data["samples"],
+                                    req_data.get('flow_id')):
             return response_body(code=1, msg="该流程只能运行非标准品的样本, 请重新选择")
         req_data["creator_id"] = request.user_id
 
-        env = {item["key"]: str(item["value"])
-               for item in req_data.get("parameter", [])}
+        env = {
+            item["key"]: str(item["value"])
+            for item in req_data.get("parameter", [])
+        }
 
-        task = Task.objects.create(**{
-            "name": req_data.get('name'),
-            "memory": self.get_flow_memory(req_data.get('flow_id')),
-            "project_id": req_data.get('project_id'),
-            "flow_id": req_data.get('flow_id'),
-            "samples": req_data.get('samples'),
-            "parameter": req_data.get('parameter'),
-            "creator_id": req_data.get('creator_id'),
-            "is_merge": False,
-        })
+        task = Task.objects.create(
+            **{
+                "name": req_data.get('name'),
+                "memory": self.get_flow_memory(req_data.get('flow_id')),
+                "project_id": req_data.get('project_id'),
+                "flow_id": req_data.get('flow_id'),
+                "samples": req_data.get('samples'),
+                "parameter": req_data.get('parameter'),
+                "creator_id": req_data.get('creator_id'),
+                "is_merge": False,
+            })
         # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
         env["BIO_ROOT"] = os.getenv("BIO_ROOT")
         env["DATA_DIR"] = os.getenv("DATA_DIR")
@@ -317,7 +316,8 @@ class TaskView(ModelViewSet):
         data = serializer.data
 
         # 填充igv所需相关信息
-        igv_file = os.path.join(instance.env.get('OUT_DIR'), 'result', 'IGV_file.txt')
+        igv_file = os.path.join(instance.env.get('OUT_DIR'), 'result',
+                                'IGV_file.txt')
         # os.makedirs(igv_file, exist_ok=True)
         if os.path.exists(igv_file) and os.path.isfile(igv_file):
             with open(igv_file) as f:
@@ -346,16 +346,14 @@ class TaskView(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if (request.account.id == instance.creator.id) or (
-                "admin" in request.role_list
-        ):
+        if (request.account.id
+                == instance.creator.id) or ("admin" in request.role_list):
             self._clean_out_dir(instance)
             self._unset_sample_task_id(instance)
             async_func(
                 cal_dir_size,
-                dirctory=os.path.join(
-                    settings.TASK_RESULT_DIR,
-                    f"{instance.creator.id}"),
+                dirctory=os.path.join(settings.TASK_RESULT_DIR,
+                                      f"{instance.creator.id}"),
                 user_id=instance.creator.id,
             )
             try:
@@ -393,14 +391,13 @@ class TaskView(ModelViewSet):
             tasks = Task.objects.all()
         else:
             project = Project.objects.filter(
-                projectmembers__account__in=[
-                    request.account]).all()
+                projectmembers__account__in=[request.account]).all()
             tasks = Task.objects.filter(project__in=project)
         if project_id:
             tasks = tasks.filter(project_id=project_id)
         if status:
-            status_code = {value: key for key,
-                                          value in Task.status_choices}.get(status)
+            status_code = {value: key
+                           for key, value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)
@@ -408,35 +405,25 @@ class TaskView(ModelViewSet):
             serializer = ListTaskSerializer(page, many=True)
             return response_body(
                 data={
-                    "item_list": self._enrich_task_list(
-                        serializer.data),
-                    "total_count": tasks.count()})
+                    "item_list": self._enrich_task_list(serializer.data),
+                    "total_count": tasks.count()
+                })
 
     def _update_sample_bam(self, task):
         if task.is_qc:
             sample = Sample.objects.get(id=task.samples[0])
             out_dir = task.env["OUT_DIR"]
-            bam1_path = os.path.join(
-                settings.BAM_PATH,
-                f"{sample.name}",
-                f"{task.flow.alignment_tool}")
+            bam1_path = os.path.join(settings.BAM_PATH, f"{sample.name}",
+                                     f"{task.flow.alignment_tool}")
             os.makedirs(bam1_path, exist_ok=True)
             self._copy_files(
-                os.path.join(
-                    out_dir,
-                    "work",
-                    sample.name,
-                    f"{sample.name}.sorted.bam"),
-                bam1_path)
+                os.path.join(out_dir, "work", sample.name,
+                             f"{sample.name}.sorted.bam"), bam1_path)
             self._copy_files(
-                os.path.join(
-                    out_dir,
-                    "work",
-                    sample.name,
-                    f"{sample.name}.sorted.bam.bai"),
-                bam1_path)
-            sample.bam1_path = os.path.join(
-                bam1_path, f"{sample.name}.sorted.bam")
+                os.path.join(out_dir, "work", sample.name,
+                             f"{sample.name}.sorted.bam.bai"), bam1_path)
+            sample.bam1_path = os.path.join(bam1_path,
+                                            f"{sample.name}.sorted.bam")
             sample.save()
 
     def _copy_files(self, original, dest):
@@ -447,19 +434,15 @@ class TaskView(ModelViewSet):
         if task.is_qc:
             # 用户/项目/流程/时间
             dest_dir = os.path.join(settings.MOVE_QC_DIR,
-                                    task.creator.username,
-                                    task.flow.code,
+                                    task.creator.username, task.flow.code,
                                     str(task.project.id),
-                                    task.create_time.strftime('%Y%m%d')
-                                    )
+                                    task.create_time.strftime('%Y%m%d'))
         else:
             # 流程/样本/用户/项目/时间/task_id
             dest_dir = os.path.join(settings.MOVE_OTHERS_DIR,
-                                    task.creator.username,
-                                    task.flow.code,
+                                    task.creator.username, task.flow.code,
                                     str(task.project.id),
-                                    task.create_time.strftime('%Y%m%d')
-                                    )
+                                    task.create_time.strftime('%Y%m%d'))
         os.makedirs(dest_dir, exist_ok=True)
         dest_filepath = os.path.join(dest_dir, filename)
         self._copy_files(task.result_path, dest_filepath)
@@ -475,63 +458,58 @@ class TaskView(ModelViewSet):
 
     def _update_qc_task_result_path(self, task):
         sample = Sample.objects.get(id=task.samples[0])
-        dest_dir = os.path.join(settings.MOVE_QC_DIR,
-                                task.creator.username,
-                                str(task.project.id),
-                                task.flow.code,
+        dest_dir = os.path.join(settings.MOVE_QC_DIR, task.creator.username,
+                                str(task.project.id), task.flow.code,
                                 task.create_time.strftime('%Y%m%d'),
-                                str(task.id),
-                                sample.name
-                                )
+                                str(task.id), sample.name)
         os.makedirs(dest_dir, exist_ok=True)
-        dest_filepath = os.path.join(
-            dest_dir, os.path.basename(
-                task.result_path))
+        dest_filepath = os.path.join(dest_dir,
+                                     os.path.basename(task.result_path))
         self._copy_files(task.result_path, dest_filepath)
 
         task.result_path = dest_filepath
 
-        Flow2Sample.objects.create(**{
-            "flow_id": task.flow.id,
-            "sample_id": task.samples[0],
-            "task_id": task.id,
-            "project_id": task.project.id,
-            "filepath": dest_filepath
-        })
-
-    def _get_sample_by_name(self, name):
-        library_type, index_number = name.split("--")
-        return Sample.objects.filter(
-            library_type=library_type,
-            index_number=index_number).first()
-
-    def _update_normal_task_result_path(self, task):
-        result_path_list = [item.strip()
-                            for item in task.result_path.split(",")]
-        sample_name_list = [os.path.basename(file_path).split(
-            ".")[0] for file_path in result_path_list]
-        dest_filepath_list = []
-        for index, sample_name in enumerate(sample_name_list):
-            dest_dir = os.path.join(settings.MOVE_OTHERS_DIR,
-                                    task.creator.username,
-                                    str(task.project.id),
-                                    task.flow.code,
-                                    task.create_time.strftime('%Y%m%d'),
-                                    str(task.id),
-                                    sample_name
-                                    )
-            os.makedirs(dest_dir, exist_ok=True)
-            dest_filepath = os.path.join(
-                dest_dir, os.path.basename(
-                    result_path_list[index]))
-            self._copy_files(result_path_list[index], dest_filepath)
-            Flow2Sample.objects.create(**{
+        Flow2Sample.objects.create(
+            **{
                 "flow_id": task.flow.id,
-                "sample_id": self._get_sample_by_name(sample_name).id,
+                "sample_id": task.samples[0],
                 "task_id": task.id,
                 "project_id": task.project.id,
                 "filepath": dest_filepath
             })
+
+    def _get_sample_by_name(self, name):
+        library_type, index_number = name.split("--")
+        return Sample.objects.filter(library_type=library_type,
+                                     index_number=index_number).first()
+
+    def _update_normal_task_result_path(self, task):
+        result_path_list = [
+            item.strip() for item in task.result_path.split(",")
+        ]
+        sample_name_list = [
+            os.path.basename(file_path).split(".")[0]
+            for file_path in result_path_list
+        ]
+        dest_filepath_list = []
+        for index, sample_name in enumerate(sample_name_list):
+            dest_dir = os.path.join(settings.MOVE_OTHERS_DIR,
+                                    task.creator.username,
+                                    str(task.project.id), task.flow.code,
+                                    task.create_time.strftime('%Y%m%d'),
+                                    str(task.id), sample_name)
+            os.makedirs(dest_dir, exist_ok=True)
+            dest_filepath = os.path.join(
+                dest_dir, os.path.basename(result_path_list[index]))
+            self._copy_files(result_path_list[index], dest_filepath)
+            Flow2Sample.objects.create(
+                **{
+                    "flow_id": task.flow.id,
+                    "sample_id": self._get_sample_by_name(sample_name).id,
+                    "task_id": task.id,
+                    "project_id": task.project.id,
+                    "filepath": dest_filepath
+                })
             dest_filepath_list.append(dest_filepath)
         task.result_path = ",".join(dest_filepath_list)
 
@@ -573,9 +551,9 @@ class TaskView(ModelViewSet):
             send_email,
             subject="任务完成通知",
             to_addr=task.creator.email,
-            content=f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
-            attach={
-                "file": task.result_path.split(",")})
+            content=
+            f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
+            attach={"file": task.result_path.split(",")})
 
     def _load_log_data(self, instance):
         log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
@@ -591,8 +569,9 @@ class TaskView(ModelViewSet):
     def update(self, request, pk, *args, **kwargs):
         instance = self.get_object()
         action = request.query_params.get("action", "")
-        if instance.status == 5 and (
-                "progress" in request.data or "status" in request.data or "result_path" in request.data):
+        if instance.status == 5 and ("progress" in request.data
+                                     or "status" in request.data
+                                     or "result_path" in request.data):
             return response_body(code=1, msg="任务已取消,无法上报信息")
         if action == "cancel" and instance.status in [1, 2]:
             self._kill_running_task(instance)
@@ -604,18 +583,17 @@ class TaskView(ModelViewSet):
             instance.status = 1
         for key, value in request.data.items():
             # TODO 换成logger
-            self._test_update_task_by_shell(
-                task=instance, key=key, value=value)
+            self._test_update_task_by_shell(task=instance,
+                                            key=key,
+                                            value=value)
             if key == "status":
-                value = {
-                    value: key for key,
-                                   value in Task.status_choices}.get(value)
+                value = {value: key
+                         for key, value in Task.status_choices}.get(value)
 
                 async_func(
                     cal_dir_size,
-                    dirctory=os.path.join(
-                        settings.TASK_RESULT_DIR,
-                        f"{instance.creator.id}"),
+                    dirctory=os.path.join(settings.TASK_RESULT_DIR,
+                                          f"{instance.creator.id}"),
                     user_id=instance.creator.id,
                 )
             if key == "priority" and "admin" not in request.role_list:
@@ -651,8 +629,8 @@ def download(request, pk):
         with tempfile.TemporaryDirectory() as tmpdirname:
             for filepath in file_list:
                 if not os.path.exists(filepath):
-                    return response_body(
-                        code=1, msg="要下载的文件不存在,请检查有没有上报结果文件或重新创建任务")
+                    return response_body(code=1,
+                                         msg="要下载的文件不存在,请检查有没有上报结果文件或重新创建任务")
                 dest = os.path.join(tmpdirname, os.path.basename(filepath))
                 os.popen("cp -a {} {}".format(filepath, dest)).readlines()
 
@@ -679,17 +657,17 @@ def task_summary(request, *args, **kwargs):
         if request.GET.get("start_time__lte"):
             queryset = queryset.filter(
                 create_time__lte=request.GET.get("start_time__lte"))
-        return response_body(data={
-            "pending_task_count": queryset.filter(status=1).count(),
-            "running_task_count": queryset.filter(status=2).count(),
-            "finished_task_count": queryset.filter(status=3).count(),
-            "failured_task_count": queryset.filter(status=4).count(),
-            "canceled_task_count": queryset.filter(status=5).count(),
-        })
+        return response_body(
+            data={
+                "pending_task_count": queryset.filter(status=1).count(),
+                "running_task_count": queryset.filter(status=2).count(),
+                "finished_task_count": queryset.filter(status=3).count(),
+                "failured_task_count": queryset.filter(status=4).count(),
+                "canceled_task_count": queryset.filter(status=5).count(),
+            })
     else:
         project = Project.objects.filter(
-            projectmembers__account__in=[
-                request.account]).all()
+            projectmembers__account__in=[request.account]).all()
         if request.GET.get("start_time__gte"):
             queryset = queryset.filter(
                 create_time__gte=request.GET.get("start_time__gte"),
@@ -698,28 +676,59 @@ def task_summary(request, *args, **kwargs):
             queryset = queryset.filter(
                 create_time__lte=request.GET.get("start_time__lte"),
                 project__in=project)
-        return response_body(data={
-            "pending_task_count": queryset.filter(status=1).count(),
-            "running_task_count": queryset.filter(status=2).count(),
-            "finished_task_count": queryset.filter(status=3).count(),
-            "failured_task_count": queryset.filter(status=4).count(),
-            "canceled_task_count": queryset.filter(status=5).count(),
-        })
+        return response_body(
+            data={
+                "pending_task_count": queryset.filter(status=1).count(),
+                "running_task_count": queryset.filter(status=2).count(),
+                "finished_task_count": queryset.filter(status=3).count(),
+                "failured_task_count": queryset.filter(status=4).count(),
+                "canceled_task_count": queryset.filter(status=5).count(),
+            })
 
 
 def read_file(request, pk):
     task = Task.objects.get(pk=pk)
     file_path = os.path.join(task.result_dir, request.GET['path'])
     if not os.path.isfile(file_path) or not os.path.exists(file_path):
-        return response_body(data=None, status_code=200, code=-1,
-                             msg=f'文件不存在:{file_path}, result_dir:f{task.result_dir}')
+        return response_body(
+            data=None,
+            status_code=200,
+            code=-1,
+            msg=f'文件不存在:{file_path}, result_dir:f{task.result_dir}')
 
     with open(file_path) as f:
         content = f.read()
         return response_body(data=content)
 
 
+def read_mut_standard_file(request, pk):
+    """读取突变 combined.standard-new.csv 文件."""
+    task = Task.objects.get(pk=pk)
+    name = request.GET['name']
+
+    if name == 'Mut_germline':
+        parent_dir = os.path.join(task.result_dir, 'Mut_germline')
+    else:
+        parent_dir = os.path.join(task.result_dir, 'Mut_somatic')
+
+    files = os.listdir(parent_dir)
+    file_path = None
+    for item in files:
+        if item.endswith('combined.standard-new.csv'):
+            file_path = os.path.join(parent_dir, item)
+            break
+    if file_path is None:
+        return response_body(data=None,
+                             status_code=200,
+                             code=-1,
+                             msg=f'文件不存在:{file_path}, result_dir:{parent_dir}')
+    with open(file_path) as f:
+        content = f.read()
+        return response_body(data=content)
+
+
 class RunQcView(APIView):
+
     def _qc_task_dir(self, sample):
         return os.path.join(settings.TASK_RESULT_DIR, "qc", f"{sample.id}")
 
@@ -743,12 +752,17 @@ class RunQcView(APIView):
         task = Task.objects.create(**qc_data)
         sample_csv_location = TaskView()._write_samples_txt(task)
         env = {
-            "INPUT_DIR": os.path.dirname(sample.bam1_path),
-            "OUT_DIR": TaskView()._normal_task_dir(task),
-            "TASK_URL": f"http://{get_host_ip()}:8000" +
-                        reverse('task:single', kwargs={'pk': task.id}),
-            "SAMPLE_INFO": sample_csv_location,
-            "SAMPLE_URL": f"http://{get_host_ip()}:8000/sample/samples/{sample.id}",
+            "INPUT_DIR":
+            os.path.dirname(sample.bam1_path),
+            "OUT_DIR":
+            TaskView()._normal_task_dir(task),
+            "TASK_URL":
+            f"http://{get_host_ip()}:8000" +
+            reverse('task:single', kwargs={'pk': task.id}),
+            "SAMPLE_INFO":
+            sample_csv_location,
+            "SAMPLE_URL":
+            f"http://{get_host_ip()}:8000/sample/samples/{sample.id}",
         }
         task.env = env
         task.save()
