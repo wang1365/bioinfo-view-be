@@ -38,5 +38,5 @@ urlpatterns = [
     url(r'^model_query',
         include(('model_query.urls', 'model_query'), 'model_query'))
     # 资源限制和使用放在account model上, 直接使用account的接口
-    # url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
+    url(r"^resource_limit", include(("resource_limit.urls", "resource_limit"), namespace="resource_limit")),
 ]

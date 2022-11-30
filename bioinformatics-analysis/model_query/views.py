@@ -7,6 +7,7 @@ from django.http.response import JsonResponse
 from sample.models import Sample, SampleMeta
 from patient.models import Patient
 from project.models import Project
+from task.models import Task
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from utils.query_filter import build_q
@@ -15,7 +16,8 @@ MODEL_MAP = {
     'sample': Sample,
     'sample_meta': SampleMeta,
     'project': Project,
-    'patient': Patient
+    'patient': Patient,
+    'task': Task
 }
 
 
@@ -37,7 +39,7 @@ class PatientSerializer(ModelSerializer):
 
 
 class SampleSerializer(ModelSerializer):
-    sample_meta= SampleMetaSerializer( read_only=True)
+    sample_meta = SampleMetaSerializer(read_only=True)
 
     class Meta:
         model = Sample
