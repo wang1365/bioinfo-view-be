@@ -5,7 +5,7 @@ from utils.memory import SystemMemory
 from config.models import Config
 from task.models import Task
 
-from utils.hostip import get_host_ip
+from django.db import close_old_connections
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 
@@ -33,6 +33,8 @@ scheduler = BackgroundScheduler()
 
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
 def run_task():
+    close_old_connections()
+
     max_task = Config.objects.filter(name="max_task").first().value
     max_task = int(max_task) if max_task else 10
     print(f"Hello Scheduler!Start run task, max_task: {max_task}")
