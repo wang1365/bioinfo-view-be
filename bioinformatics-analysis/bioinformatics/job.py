@@ -34,6 +34,9 @@ scheduler = BackgroundScheduler()
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
 def run_task():
     close_old_connections()
+    # from django import db
+    # for conn in db.connections.all():
+    #     conn.close_if_unusable_or_obsolete()
 
     max_task = Config.objects.filter(name="max_task").first().value
     max_task = int(max_task) if max_task else 10
