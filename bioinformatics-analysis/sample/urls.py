@@ -30,8 +30,12 @@ other_urls = [
         r"^/samples/export",
         views.SampleView.as_view({"get": "export"}),
     ),
+     url(
+        r"^/samplemeta/export",
+        views.SampleView.as_view({"get": "export"}),
+    ),
     url(r"^/samples/list_fields",
-        views.SampleView.as_view({"get": "list_fields"})),
+        views.SampleMetaView.as_view({"get": "list_fields"})),
 
     url(
         r"^/samplemeta/template/download",
