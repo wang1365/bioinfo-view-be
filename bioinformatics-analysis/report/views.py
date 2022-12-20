@@ -84,10 +84,9 @@ class ReportView(CustomeViewSets):
 
         # execute script with input parameter
 
-
-#        script_path = os.path.join(os.getenv("BIO_ROOT"), report.script)
-#        returncode = subprocess.call(["python3", script_path, filepath])
-        if returncode != 0:
-            return response_body(msg="execute command error")
+        # script_path = os.path.join(os.getenv("BIO_ROOT"), report.script)
+        # returncode = subprocess.call(["python3", script_path, filepath])
+        # if returncode != 0:
+        #     return response_body(msg="execute command error")
 
         return response_body(data=serializer.data, msg="success")
