@@ -54,6 +54,7 @@ class TaskSerializer(ModelSerializer):
 
     class Meta:
         model = Task
+        fields = '__all__'
 
 
 class ReportSerializer(ModelSerializer):
@@ -61,6 +62,7 @@ class ReportSerializer(ModelSerializer):
 
     class Meta:
         model = Report
+        fields = '__all__'
 
 
 SERIALIZER_MAP = {
