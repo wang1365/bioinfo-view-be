@@ -104,7 +104,7 @@ class ReportView(CustomeViewSets):
         sample_identifier = request.GET.get('sample_identifier', None)
 
         filtered = False
-        samples = Sample.objects()
+        samples = Sample.objects
         if sample_identifier:
             filtered = True
             samples = samples.filter(identifier=sample_identifier)
@@ -117,13 +117,12 @@ class ReportView(CustomeViewSets):
             samples = samples.filter(
                 sample_meta__patient__identifier=patient_identifier)
         if filtered:
-            sample_ids = [item.id for item in samples.all()]
-            query = f'select id from task where samples ?| %s'
-            args = [sample_ids]
+            sample_ids = [str(item.id) for item in samples.all()]
+            query = f'select id from task where samples ?| ARRAY{sample_ids}'
             if search:
-                query = f'{query} and name ilike %{search}%'
+                query = f'{query} and name ilike \'%%{search}%%\''
             task_ids = []
-            for item in Task.objects.raw(query, args):
+            for item in Task.objects.raw(query):
                 task_ids.append(item.id)
 
             queryset = Report.objects.filter(task__id__in=task_ids).all()
