@@ -7,13 +7,14 @@ from django.db.models import DO_NOTHING
 
 # Create your models here.
 
+
 class Report(models.Model):
     task = models.ForeignKey(to=Task,
-                                db_constraint=False,
-                                default=None,
-                                on_delete=DO_NOTHING)
+                             db_constraint=False,
+                             default=None,
+                             on_delete=DO_NOTHING)
 
-    script = models.CharField(max_length=512)
+    #    script = models.CharField(max_length=512)
 
     creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
 
