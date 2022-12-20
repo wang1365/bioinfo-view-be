@@ -134,8 +134,6 @@ class ReportView(CustomeViewSets):
             else:
                 queryset = Report.objects.all()
 
-        queryset = self.filter_queryset(self.get_queryset())
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
