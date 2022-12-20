@@ -11,13 +11,15 @@ from task.models import Task
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from utils.query_filter import build_q
+from report.models import Report
 
 MODEL_MAP = {
     'sample': Sample,
     'sample_meta': SampleMeta,
     'project': Project,
     'patient': Patient,
-    'task': Task
+    'task': Task,
+    'report': Report
 }
 
 
@@ -47,10 +49,25 @@ class SampleSerializer(ModelSerializer):
         depth = 1
 
 
+class TaskSerializer(ModelSerializer):
+    sample_set = SampleSerializer(read_only=True)
+
+    class Meta:
+        model = Task
+
+
+class ReportSerializer(ModelSerializer):
+    task = TaskSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+
+
 SERIALIZER_MAP = {
     # 'sample': SampleSerializer,
     'patient': PatientSerializer,
-    'sample': SampleSerializer
+    'sample': SampleSerializer,
+    'report': ReportSerializer
 }
 
 
