@@ -10,8 +10,10 @@ from report.constant import FILE_MAPPINGS
 from report.serializers import ReportSerializer
 from utils.response import response_body
 from utils.paginator import PageNumberPaginationWithWrapper
-
+from sample.models import Sample, SampleMeta
+from patient.models import Patient
 from common.viewsets.viewsets import CustomeViewSets
+from model_query.views import ReportSerializer as MReportSerializer
 
 
 def get_meta_data(request, taskid, name):
@@ -90,3 +92,56 @@ class ReportView(CustomeViewSets):
         #     return response_body(msg="execute command error")
 
         return response_body(data=serializer.data, msg="success")
+
+    def post_list(self, data, request, *args, **kwargs):
+        return data
+
+    def list(self, request, *args, **kwargs):
+        search = request.GET.get('search', None)
+        patient_identifier = request.GET.get('patient_identifier', None)
+        sample_meta_identifier = request.GET.get('sample_meta_identifier',
+                                                 None)
+        sample_identifier = request.GET.get('sample_identifier', None)
+
+        filtered = False
+        samples = Sample.objects()
+        if sample_identifier:
+            filtered = True
+            samples = samples.filter(identifier=sample_identifier)
+        if sample_meta_identifier:
+            filtered = True
+            samples = samples.filter(
+                sample_meta__identifier=sample_meta_identifier)
+        if patient_identifier:
+            filtered = True
+            samples = samples.filter(
+                sample_meta__patient__identifier=patient_identifier)
+        if filtered:
+            sample_ids = [item.id for item in samples.all()]
+            query = f'select id from task where samples ?| %s'
+            args = [sample_ids]
+            if search:
+                query = f'{query} and name ilike %{search}%'
+            task_ids = []
+            for item in Task.objects.raw(query, args):
+                task_ids.append(item.id)
+
+            queryset = Report.objects.filter(task__id__in=task_ids).all()
+        else:
+            if search:
+                queryset = Report.objects.filter(
+                    task__name__icontains=search).all()
+            else:
+                queryset = Report.objects.all()
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = MReportSerializer(page, many=True)
+            data = self.post_list(serializer.data, request, *args, **kwargs)
+            return self.get_paginated_response(data)
+
+        serializer = MReportSerializer(queryset, many=True)
+        data = self.post_list(serializer.data, request, *args, **kwargs)
+        return response_body(data=data, msg="success")

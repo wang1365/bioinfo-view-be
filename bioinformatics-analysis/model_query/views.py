@@ -50,7 +50,15 @@ class SampleSerializer(ModelSerializer):
 
 
 class TaskSerializer(ModelSerializer):
-    sample_set = SampleSerializer(read_only=True)
+
+    def to_representation(self, instance):
+        """Convert `username` to lowercase."""
+        ret = super().to_representation(instance)
+        ret['samples'] = SampleSerializer(
+            Sample.objects.filter(id__in=instance.samples).all(),
+            many=True).to_representation(
+                Sample.objects.filter(id__in=instance.samples).all())
+        return ret
 
     class Meta:
         model = Task
