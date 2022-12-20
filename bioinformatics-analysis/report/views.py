@@ -48,7 +48,9 @@ def read_file(request):
     root = os.getenv("BIO_ROOT")
     file = os.path.join(root, path)
     if not os.path.isfile(file) or not os.path.exists(file):
-        return response_body(data=None, status_code=200, code=-1,
+        return response_body(data=None,
+                             status_code=200,
+                             code=-1,
                              msg=f'文件不存在:{file}, root:{root}')
     with open(file) as f:
         content = f.read()
@@ -74,14 +76,17 @@ class ReportView(CustomeViewSets):
         report.save()
 
         # save query to a txt file
-        filepath = os.path.join(report.task.result_dir, "report", str(report.id))
+        filepath = os.path.join(report.task.result_dir, "report",
+                                str(report.id))
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w") as fp:
             fp.write(data['query'])
 
         # execute script with input parameter
-        script_path = os.path.join(os.getenv("BIO_ROOT"), report.script)
-        returncode = subprocess.call(["python3", script_path, filepath])
+
+
+#        script_path = os.path.join(os.getenv("BIO_ROOT"), report.script)
+#        returncode = subprocess.call(["python3", script_path, filepath])
         if returncode != 0:
             return response_body(msg="execute command error")
 
