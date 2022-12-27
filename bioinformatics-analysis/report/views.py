@@ -74,22 +74,35 @@ class ReportView(CustomeViewSets):
         if not is_valid:
             return self.deal_with_create_error(serializer)
 
+        script_path = '/data/bioinfo/database_dir/individual_report.py'
+        if not os.path.isfile(script_path):
+            return response_body(msg='报告脚本不存在')
+
         report = Report.objects.create(**data)
         report.save()
 
         # save query to a txt file
-        filepath = os.path.join(report.task.result_dir, "report",
-                                str(report.id))
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w") as fp:
+        json_filepath = os.path.join(report.task.result_dir, "report",
+                                     str(report.id))
+        os.makedirs(os.path.dirname(json_filepath), exist_ok=True)
+        with open(json_filepath, "w") as fp:
             fp.write(data['query'])
 
-        # execute script with input parameter
+        report_file_path = os.path.join(report.task.result_dir, 'report',
+                                        f'{report.id}.docx')
 
-        # script_path = os.path.join(os.getenv("BIO_ROOT"), report.script)
-        # returncode = subprocess.call(["python3", script_path, filepath])
-        # if returncode != 0:
-        #     return response_body(msg="execute command error")
+        return_code = subprocess.call([
+            'python3', script_path, '-i', json_filepath, '-d',
+            os.path.dirname(json_filepath), '-o', report_file_path
+        ])
+        if return_code != 0:
+            report.status = '创建失败'
+            report.save()
+            return response_body(msg="脚本执行异常")
+
+        report.report_path = report_file_path
+        report.status = '创建成功'
+        report.save()
 
         return response_body(data=serializer.data, msg="success")
 
