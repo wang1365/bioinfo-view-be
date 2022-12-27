@@ -138,14 +138,14 @@ class ReportView(CustomeViewSets):
             for item in Task.objects.raw(query):
                 task_ids.append(item.id)
 
-            queryset = Report.objects.filter(task__id__in=task_ids).all()
+            queryset = Report.objects.filter(
+                task__id__in=task_ids).order_by('-id').all()
         else:
             if search:
                 queryset = Report.objects.filter(
-                    task__name__icontains=search).all()
+                    task__name__icontains=search).order_by('-id').all()
             else:
-                queryset = Report.objects.all()
-
+                queryset = Report.objects.order_by('-id').all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
