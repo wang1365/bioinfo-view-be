@@ -95,7 +95,7 @@ class ReportView(CustomeViewSets):
             'python3', script_path, '-i', json_filepath, '-d',
             os.path.dirname(json_filepath), '-o', report_file_path
         ])
-        if return_code != 0:
+        if not os.path.isfile(report_file_path):
             report.status = '创建失败'
             report.save()
             return response_body(msg="脚本执行异常")
