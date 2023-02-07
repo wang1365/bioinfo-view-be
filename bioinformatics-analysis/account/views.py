@@ -199,10 +199,13 @@ class UsersAPIView(
 
     @action(detail=False, methods=["delete"])
     def delete_user(self, request, *args, **kwargs):
+        # count = Account.objects.filter(
+        #     pk__in=request.data.get(
+        #         "ids", [])).update(
+        #     is_delete=1)
         count = Account.objects.filter(
             pk__in=request.data.get(
-                "ids", [])).update(
-            is_delete=1)
+                "ids", [])).delete()
         User2Role.objects.filter(
             user_id__in=request.data.get(
                 "ids", [])).delete()
