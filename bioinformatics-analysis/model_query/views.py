@@ -11,13 +11,15 @@ from task.models import Task
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from utils.query_filter import build_q
+from report.models import Report
 
 MODEL_MAP = {
     'sample': Sample,
     'sample_meta': SampleMeta,
     'project': Project,
     'patient': Patient,
-    'task': Task
+    'task': Task,
+    'report': Report
 }
 
 
@@ -47,10 +49,35 @@ class SampleSerializer(ModelSerializer):
         depth = 1
 
 
+class TaskSerializer(ModelSerializer):
+
+    def to_representation(self, instance):
+        """Convert `username` to lowercase."""
+        ret = super().to_representation(instance)
+        ret['samples'] = SampleSerializer(
+            Sample.objects.filter(id__in=instance.samples).all(),
+            many=True).to_representation(
+                Sample.objects.filter(id__in=instance.samples).all())
+        return ret
+
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+
+class ReportSerializer(ModelSerializer):
+    task = TaskSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+        fields = '__all__'
+
+
 SERIALIZER_MAP = {
     # 'sample': SampleSerializer,
     'patient': PatientSerializer,
-    'sample': SampleSerializer
+    'sample': SampleSerializer,
+    'report': ReportSerializer
 }
 
 

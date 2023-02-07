@@ -38,3 +38,4 @@ wrapt==1.14.1
 docker==6.0.0
 concurrent-log-handler==0.9.20
 pandas==1.5.1
+python-docx
