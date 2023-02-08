@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
+from account import constants as account_constant
 
 from patient.models import Patient
 from patient.serializer import PatientSerializer, FileSerializer
@@ -42,6 +43,8 @@ class PatientViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        if account_constant.NORMAL not in request.role_list:
+            queryset = queryset.filter(creator=request.account)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
