@@ -6,6 +6,7 @@ import uuid
 import os
 import json
 import csv
+from django.db.models import Q
 import shutil
 import subprocess
 from datetime import datetime
@@ -37,6 +38,7 @@ from django.conf import settings
 from flow.models import Flow2Sample
 from utils.disk import cal_dir_size
 from task.constants import SAMPLE_HEADERS
+from account import constants as account_constant
 from sample.models import SampleMeta
 from patient.models import Patient
 from config.models import Config
@@ -258,8 +260,7 @@ class TaskView(ModelViewSet):
             if flag:
                 return response_body(
                     code=1,
-                    msg=
-                    f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建"
+                    msg=f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建"
                 )
             else:
                 return response_body(code=200, msg="", data="")
@@ -387,18 +388,23 @@ class TaskView(ModelViewSet):
 
         project_id = request.query_params.get("project_id")
         status = request.query_params.get("status")
-        if "admin" in request.role_list:
+        if account_constant.SUPER in request.role_list:
             tasks = Task.objects.all()
+        elif account_constant.ADMIN in request.role_list:
+            # project = Project.objects.filter(
+            #     projectmembers__account__in=[request.account]).all()
+            # tasks = Task.objects.filter(project__in=project)
+            tasks = Task.objects.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
         else:
-            project = Project.objects.filter(
-                projectmembers__account__in=[request.account]).all()
-            tasks = Task.objects.filter(project__in=project)
+            tasks = Task.objects.filter(creator=request.account)
         if project_id:
             tasks = tasks.filter(project_id=project_id)
         if status:
             status_code = {value: key
                            for key, value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
+
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)
         if page is not None:
@@ -551,9 +557,9 @@ class TaskView(ModelViewSet):
             send_email,
             subject="任务完成通知",
             to_addr=task.creator.email,
-            content=
-            f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
-            attach={"file": task.result_path.split(",")})
+            content=f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
+            attach={
+                "file": task.result_path.split(",")})
 
     def _load_log_data(self, instance):
         log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
