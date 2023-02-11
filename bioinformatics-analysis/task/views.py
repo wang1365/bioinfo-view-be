@@ -656,7 +656,25 @@ def download(request, pk):
 
 def task_summary(request, *args, **kwargs):
     queryset = Task.objects.all()
-    if ("admin" in request.role_list) or ("super" in request.role_list):
+
+    if "super" in request.role_list:
+        if request.GET.get("start_time__gte"):
+            queryset = queryset.filter(
+                create_time__gte=request.GET.get("start_time__gte"))
+        if request.GET.get("start_time__lte"):
+            queryset = queryset.filter(
+                create_time__lte=request.GET.get("start_time__lte"))
+        return response_body(
+            data={
+                "pending_task_count": queryset.filter(status=1).count(),
+                "running_task_count": queryset.filter(status=2).count(),
+                "finished_task_count": queryset.filter(status=3).count(),
+                "failured_task_count": queryset.filter(status=4).count(),
+                "canceled_task_count": queryset.filter(status=5).count(),
+            })
+    elif "admin" in request.role_list:
+        queryset = queryset.filter(
+            Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
         if request.GET.get("start_time__gte"):
             queryset = queryset.filter(
                 create_time__gte=request.GET.get("start_time__gte"))

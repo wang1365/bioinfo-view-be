@@ -10,6 +10,8 @@ from project.models import Project
 from task.models import Task
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
+from django.db.models import Q
+from account import constants as account_constant
 from utils.query_filter import build_q
 from report.models import Report
 
@@ -91,6 +93,11 @@ def post_query(request: HttpRequest, model_name: str):
         return JsonResponse({'code': 1, 'msg': f'只支持{MODEL_MAP.keys()}'})
     q = build_q(q_st)
     query_set = model.objects.filter(q)
+    if model_name == "patient":
+        if account_constant.NORMAL in request.role_list:
+            query_set = query_set.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            query_set = query_set.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
     page_size = request.GET.get('size', 10)
     page = request.GET.get('page', 1)
     paginator = Paginator(query_set, page_size)

@@ -46,7 +46,7 @@ class PatientViewSet(ModelViewSet):
         if account_constant.NORMAL in request.role_list:
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
-            queryset = Patient.objects.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+            queryset = queryset.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
