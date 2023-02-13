@@ -97,8 +97,7 @@ class UsersAPIView(
         # 获取所有数据
         if account_constant.ADMIN in request.role_list:
             accounts = Account.objects.filter(
-                is_delete=False, user2role__role__code__in=[
-                    account_constant.NORMAL, account_constant.ADMIN]).all()
+                Q(is_delete=False) & (Q(user2role__role__code=account_constant.NORMAL) | Q(pk=request.account.id))).all()
         elif account_constant.SUPER in request.role_list:
             accounts = Account.objects.filter(
                 is_delete=False, user2role__role__code__in=[
