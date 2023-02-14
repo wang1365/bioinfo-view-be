@@ -1,3 +1,4 @@
+import uuid
 import tempfile
 import time
 import os
@@ -9,8 +10,9 @@ from collections import defaultdict
 
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 
+from patient.models import Patient
 from sample.models import Sample, SampleMeta
 from sample.core import ExcelHandler, ValueProcess, export_to_csv
 from sample.serializers import SampleMetaSerializer, SampleSerializer, SampleMeta
@@ -29,6 +31,16 @@ class SampleView(CustomeViewSets):
     pagination_class = PageNumberPaginationWithWrapper
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter, SampleKeywordFilters]
+
+    def create_data(self, request, *args, **kwargs):
+        data = request.data
+        if isinstance(request.data, QueryDict):
+            data = request.data.dict()
+
+        if 'identifier' not in data or not data['identifier']:
+            data['identifier'] = str(uuid.uuid4())
+
+        return data
 
     def post_retrieve(self, data, request, *args, **kwargs):
         pk = int(kwargs['pk'])
@@ -113,6 +125,16 @@ class SampleMetaView(CustomeViewSets):
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter]
 
+    def create_data(self, request, *args, **kwargs):
+        data = request.data
+        if isinstance(request.data, QueryDict):
+            data = request.data.dict()
+
+        if 'identifier' not in data or not data['identifier']:
+            data['identifier'] = str(uuid.uuid4())
+
+        return data
+
     def query(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -155,14 +177,18 @@ class SampleUploadView(CustomeViewSets):
     def upload(self, request, suffix=".xlxs"):
         info = {
             "attrs": SAMPLE_MODEL_ATTRS,
-            "serializer": SampleSerializer
+            "serializer": SampleSerializer,
+            "identifiers": SampleMeta.objects.values_list("identifier", flat=True),
+            "key": "sample_identifier",
         }
         return self._upload(request, info, suffix)
 
     def upload_meta(self, request, suffix=".xlxs"):
         info = {
             "attrs": SAMPLE_META_MODEL_ATTRS,
-            "serializer": SampleMetaSerializer
+            "serializer": SampleMetaSerializer,
+            "identifiers": Patient.objects.values_list("identifier", flat=True),
+            "key": "patient_identifier",
         }
         return self._upload(request, info, suffix)
 
@@ -182,8 +208,12 @@ class SampleUploadView(CustomeViewSets):
         value_process = ValueProcess(user_id=request.account.id)
 
         for record in records:
-            sample_serializer = info['serializer'](
-                data=value_process.process(record))
+            data = value_process.process(record)
+            if data[info['key']] not in info['identifiers']:
+                unsuccessful_records.append(record)
+                continue
+
+            sample_serializer = info['serializer'](data=value_process.process(record))
             if sample_serializer.is_valid():
                 sample_serializer.save()
             else:
