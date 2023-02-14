@@ -213,7 +213,7 @@ class SampleUploadView(CustomeViewSets):
                 unsuccessful_records.append(record)
                 continue
 
-            sample_serializer = info['serializer'](data=value_process.process(record))
+            sample_serializer = info['serializer'](data=data)
             if sample_serializer.is_valid():
                 sample_serializer.save()
             else:
