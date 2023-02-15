@@ -22,6 +22,6 @@ class Command(BaseCommand):
             email="super@super.com")
         admin_account, _ = Account.objects.update_or_create(
             defaults={'username': "admin", 'nickname': '管理员', 'password': get_md5("1234qwer"), 'is_active': True},
-            email="admin@admin.com")
+            email="admin@admin.com", parent=super_account)
         User2Role.objects.update_or_create(user=super_account, role=super_role)
         User2Role.objects.update_or_create(user=admin_account, role=admin_role)

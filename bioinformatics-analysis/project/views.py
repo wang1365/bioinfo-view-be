@@ -10,6 +10,7 @@ from sample.models import Sample
 from task.models import Task
 from utils.paginator import PageNumberPagination
 from utils.response import response_body
+from django.db.models import Q
 
 
 class ProjectsAPIView(ModelViewSet):
@@ -81,9 +82,13 @@ class ProjectsAPIView(ModelViewSet):
     def list(self, request, *args, **kwargs):
         query_name = request.GET.get("name")
         query_parent = request.GET.get("parent_id")
-        if "admin" in request.role_list:
+        if "super" in request.role_list:
             projects = Project.objects.filter(is_visible=True)
-        else:
+        elif "admin" in request.role_list:
+            projects = Project.objects.filter(Q(is_visible=True) &
+                                              (Q(members__id__in=[request.account.id])
+                                               | Q(members__parent=request.account.id)))
+        elif "normal" in request.role_list:
             projects = Project.objects.filter(
                 members__id__in=[
                     request.account.id],

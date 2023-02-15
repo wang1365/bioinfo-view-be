@@ -97,7 +97,9 @@ def post_query(request: HttpRequest, model_name: str):
         if account_constant.NORMAL in request.role_list:
             query_set = query_set.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
-            query_set = query_set.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+            # query_set = query_set.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+            query_set = query_set.filter(
+                Q(creator__parent=request.account) | Q(creator=request.account))
     page_size = request.GET.get('size', 10)
     page = request.GET.get('page', 1)
     paginator = Paginator(query_set, page_size)
