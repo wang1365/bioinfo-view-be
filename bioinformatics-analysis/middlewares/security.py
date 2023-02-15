@@ -5,6 +5,7 @@ from django.utils.deprecation import MiddlewareMixin
 from jwt import PyJWTError
 
 from account.models import Account
+from config.models import Config
 from rbac.models import User2Role
 from utils.response import response_body
 import os, sys
@@ -39,5 +40,15 @@ class SecurityMiddleware(MiddlewareMixin):
                 roles = User2Role.objects.filter(user=user).values("role__code")
                 request.role_list = [role.get('role__code') for role in roles]
 
+                if not self.check_license_expired(user):
+                    return response_body(code=1, msg="系统使用期限已到！", status_code=401)
             except PyJWTError:
                 return response_body(code=1, msg="token已失效", status_code=401)
+
+    def check_license_expired(self, user):
+        if user.username == 'super':
+            return True
+
+        config = Config.objects.get(name="allowed_running_days")
+        if config.value < config.used:
+            return False
