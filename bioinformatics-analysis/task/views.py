@@ -394,8 +394,10 @@ class TaskView(ModelViewSet):
             # project = Project.objects.filter(
             #     projectmembers__account__in=[request.account]).all()
             # tasks = Task.objects.filter(project__in=project)
+            # tasks = Task.objects.filter(
+            #     Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
             tasks = Task.objects.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+                Q(creator__parent=request.account) | Q(creator=request.account))
         else:
             tasks = Task.objects.filter(creator=request.account)
         if project_id:
@@ -673,8 +675,10 @@ def task_summary(request, *args, **kwargs):
                 "canceled_task_count": queryset.filter(status=5).count(),
             })
     elif "admin" in request.role_list:
+        # queryset = queryset.filter(
+        #     Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
         queryset = queryset.filter(
-            Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+            Q(creator__parent=request.account) | Q(creator=request.account))
         if request.GET.get("start_time__gte"):
             queryset = queryset.filter(
                 create_time__gte=request.GET.get("start_time__gte"))

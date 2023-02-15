@@ -96,8 +96,11 @@ class UsersAPIView(
     def list(self, request, *args, **kwargs):
         # 获取所有数据
         if account_constant.ADMIN in request.role_list:
+            # accounts = Account.objects.filter(
+            #     Q(is_delete=False) & (Q(user2role__role__code=account_constant.NORMAL) | Q(pk=request.account.id))).all()
             accounts = Account.objects.filter(
-                Q(is_delete=False) & (Q(user2role__role__code=account_constant.NORMAL) | Q(pk=request.account.id))).all()
+                Q(is_delete=False) & (
+                            Q(parent=request.account) | Q(pk=request.account.id))).all()
         elif account_constant.SUPER in request.role_list:
             accounts = Account.objects.filter(
                 is_delete=False, user2role__role__code__in=[
@@ -145,7 +148,8 @@ class UsersAPIView(
                     nickname=nickname,
                     email=email,
                     password=password,
-                    is_active=True
+                    is_active=True,
+                    parent=request.account
                 )
                 account.save()
             except Exception as e:
