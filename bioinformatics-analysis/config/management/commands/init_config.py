@@ -18,3 +18,5 @@ class Command(BaseCommand):
         if not Config.objects.filter(name="disk").exists():
             # MB
             Config.objects.create(name="disk", value=20 * 1024, create_time=now(), update_time=now())
+        if not Config.objects.filter(name="allowed_running_days").exists():
+            Config.objects.create(name="allowed_running_days", value=365, used=0, create_time=now(), update_time=now())
