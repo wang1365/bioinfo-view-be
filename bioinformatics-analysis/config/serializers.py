@@ -9,7 +9,7 @@ class ConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Config
-        fields = ['id', 'name', 'value']
+        fields = ['id', 'name', 'value', 'used']
 
 class ResourceSerializer(serializers.ModelSerializer):
 

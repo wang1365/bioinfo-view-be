@@ -1,5 +1,10 @@
-
+import logging
 import os
+
+from apscheduler.triggers.interval import IntervalTrigger
+from django.core.cache import cache
+from django.utils.timezone import now
+
 from flow.core import G_CLIENT
 from utils.memory import SystemMemory
 from config.models import Config
@@ -136,6 +141,25 @@ def cal_day_disk():
     for task in tasks:
         day_used_disk += dir_size(task.env.get("OUT_DIR"))
     Resource.objects.create(typ="disk", value=day_used_disk, day=date.today(), name="task")
+
+@scheduler.scheduled_job("cron", day_of_week='*', hour='0', minute='10', second='0')
+def update_running_days():
+    key, value = f'job_lock', os.getpid()
+    if not cache.add(key, value, 30):
+        logging.getLogger().warning(f'Job已被{cache.get(key)}加锁, 忽略执行')
+        return
+    else:
+        logging.getLogger().warning(f'Job加锁 {key} - {value}')
+    logging.getLogger('job').info("==========> update_running_days +1")
+
+    # Config.objects.create(name="allowed_running_days", value=365, used=0, create_time=now(), update_time=now())
+    if not Config.objects.filter(name="allowed_running_days").exists():
+        Config.objects.create(name="allowed_running_days", value=365, used=0, create_time=now(), update_time=now())
+        logging.getLogger('job').info("==========> 配置项不存在，新建配置项")
+
+    config = Config.objects.filter(name="allowed_running_days").get()
+    config.used += 1
+    config.save()
 
 
 scheduler.start()
