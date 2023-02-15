@@ -50,5 +50,4 @@ class SecurityMiddleware(MiddlewareMixin):
             return True
 
         config = Config.objects.get(name="allowed_running_days")
-        if config.value < config.used:
-            return False
+        return config.value >= config.used
