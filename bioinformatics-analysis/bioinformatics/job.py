@@ -143,6 +143,7 @@ def cal_day_disk():
     Resource.objects.create(typ="disk", value=day_used_disk, day=date.today(), name="task")
 
 @scheduler.scheduled_job("cron", day_of_week='*', hour='0', minute='10', second='0')
+# @scheduler.scheduled_job("cron", day_of_week='*', hour='*', minute='*', second='*')
 def update_running_days():
     key, value = f'job_lock', os.getpid()
     if not cache.add(key, value, 30):

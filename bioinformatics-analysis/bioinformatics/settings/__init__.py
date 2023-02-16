@@ -205,26 +205,14 @@ TASK_RESULT_DIR = os.getenv("TASK_RESULT_DIR", "/tmp")
 MOVE_OTHERS_DIR = os.getenv("MOVE_OTHERS_DIR", "/nano/result/other")
 MOVE_QC_DIR = os.getenv("MOVE_QC_DIR", "/nano/result/qc")
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://redis:6379/1",  # 这里直接使用redis别名作为host ip地址
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#             # "PASSWORD": "yourpassword", # 换成你自己密码
-#         },
-#     }
-# }
-
-# Django缓存，使用文件缓存
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/var/tmp/django_cache',
-        'TIMEOUT': 60,
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
-        }
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",  # 这里直接使用redis别名作为host ip地址
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PASSWORD": "yourpassword", # 换成你自己密码
+        },
     }
 }
 

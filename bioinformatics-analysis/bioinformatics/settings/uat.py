@@ -14,6 +14,17 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://10.10.0.208:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PASSWORD": "yourpassword", # 换成你自己密码
+        },
+    }
+}
+
 LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
 LOGGING = {
     'version': 1,
