@@ -102,9 +102,10 @@ class UsersAPIView(
                 Q(is_delete=False) & (
                             Q(parent=request.account) | Q(pk=request.account.id))).all()
         elif account_constant.SUPER in request.role_list:
-            accounts = Account.objects.filter(
-                is_delete=False, user2role__role__code__in=[
-                    account_constant.SUPER, account_constant.ADMIN]).all()
+            # accounts = Account.objects.filter(
+            #     is_delete=False, user2role__role__code__in=[
+            #         account_constant.SUPER, account_constant.ADMIN]).all()
+            accounts = Account.objects.filter(is_delete=False)
         else:
             accounts = Account.objects.filter(is_delete=False)
 
