@@ -16,7 +16,11 @@ class ValueType:
     number = 'number'
 
 
-SAMPLE_TEMPLATE_PATH = ""
+SAMPLE_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "data-meta.xlsx"
+)
 SAMPLE_META_TEMPLATE_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "resources",
