@@ -35,7 +35,7 @@ class ExcelHandler:
         def _compare_name(value):
             return value.replace('\n', '').replace(' ', '').replace('\t', '')
 
-        mappings = {attr['name']: index for attr, index in enumerate(self._attrs)}
+        mappings = {attr['name']: index for index, attr in enumerate(self._attrs)}
 
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
@@ -69,13 +69,18 @@ class ValueProcess:
         except Exception:
             return self._default_user_id
 
+    def _process_boolean(self, b):
+        return True if b.lower() in {"true", "y", "是"} else False
+
     def _handle_functions(self):
         return {
+            'sample_date': self._process_date,
             'test_date': self._process_date,
+            'risk': self._process_boolean,
         }
 
     def _get_function(self, key):
-        return self._handle_functions().get(key, lambda x: x or '')
+        return self._handle_functions().get(key, lambda x: x)
 
     def process(self, data):
         return {k: self._get_function(k)(v) for k, v in data.items()}

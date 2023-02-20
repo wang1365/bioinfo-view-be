@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import json
 from common.filters import CommonFilters
+from django.db.models import Q
 
+from account import constants as account_constant
 from project.utils import get_sampleids_by_projectids, get_user_by_project_ids
 
 
@@ -9,19 +11,21 @@ class SampleUserFilter:
 
     def filter_queryset(self, request, queryset, view):
         projects = {}
-        if "admin" in request.role_list:
-            return queryset
 
         if request.method == 'POST':
             body = json.loads(request.parser_context['request'].body)
             projects = body.get('project_id', {})
-
         include = projects.get('in', [])
-
         if include:
             return queryset
 
-        return queryset.filter(user_id__in=[0, request.account.id])
+        if account_constant.NORMAL in request.role_list:
+            queryset = queryset.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            queryset = queryset.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+
+        return queryset
 
 
 class SampleProjectFilters:

@@ -32,15 +32,22 @@ class SampleView(CustomeViewSets):
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter, SampleKeywordFilters]
 
-    def create_data(self, request, *args, **kwargs):
-        data = request.data
-        if isinstance(request.data, QueryDict):
-            data = request.data.dict()
+    def create(self, request, *args, **kwargs):
+        data = self.create_data(request, *args, **kwargs)
+        data['identifier'] = str(uuid.uuid4())
 
-        if 'identifier' not in data or not data['identifier']:
-            data['identifier'] = str(uuid.uuid4())
+        serializer = self.get_serializer(data=data)
+        is_valid = serializer.is_valid(raise_exception=False)
 
-        return data
+        if not is_valid:
+            return self.deal_with_create_error(serializer)
+
+        self.perform_create(serializer)
+        obj = serializer.instance
+        obj.identifier = f'D{obj.id:08}'
+        obj.save()
+
+        return response_body(data=serializer.data, msg="success")
 
     def post_retrieve(self, data, request, *args, **kwargs):
         pk = int(kwargs['pk'])
@@ -125,16 +132,22 @@ class SampleMetaView(CustomeViewSets):
 
     filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter]
 
-    def create_data(self, request, *args, **kwargs):
-        data = request.data
-        if isinstance(request.data, QueryDict):
-            data = request.data.dict()
+    def create(self, request, *args, **kwargs):
+        data = self.create_data(request, *args, **kwargs)
+        data['identifier'] = str(uuid.uuid4())
 
-        if 'identifier' not in data or not data['identifier']:
-            data['identifier'] = str(uuid.uuid4())
+        serializer = self.get_serializer(data=data)
+        is_valid = serializer.is_valid(raise_exception=False)
 
-        return data
+        if not is_valid:
+            return self.deal_with_create_error(serializer)
 
+        self.perform_create(serializer)
+        obj = serializer.instance
+        obj.identifier = f'S{obj.id:08}'
+        obj.save()
+
+        return response_body(data=serializer.data, msg="success")
     def query(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -174,25 +187,43 @@ class SampleMetaView(CustomeViewSets):
 class SampleUploadView(CustomeViewSets):
     parser_classes = (MultiPartParser,)
 
-    def upload(self, request, suffix=".xlxs"):
+    def upload(self, request, suffix=".xlsx"):
         info = {
             "attrs": SAMPLE_MODEL_ATTRS,
             "serializer": SampleSerializer,
             "identifiers": SampleMeta.objects.values_list("identifier", flat=True),
             "key": "sample_identifier",
+            "update_id": self._update_sample_meta_id,
+            "prefix": "D",
         }
         return self._upload(request, info, suffix)
 
-    def upload_meta(self, request, suffix=".xlxs"):
+    def upload_meta(self, request, suffix=".xlsx"):
         info = {
             "attrs": SAMPLE_META_MODEL_ATTRS,
             "serializer": SampleMetaSerializer,
             "identifiers": Patient.objects.values_list("identifier", flat=True),
             "key": "patient_identifier",
+            "update_id": self._update_patient_id,
+            "prefix": "S",
         }
         return self._upload(request, info, suffix)
 
-    def _upload(self, request, info, suffix='.xlxs'):
+    def _update_sample_meta_id(self, obj, identifier):
+        if identifier[1:].isdigit():
+            obj.sample_meta_id = int(identifier[1:])
+        else:
+            sample_meta = SampleMeta.objects.first(identifier=identifier)
+            obj.sample_meta_id = sample_meta.id
+
+    def _update_patient_id(self, obj, identifier):
+        if identifier[1:].isdigit():
+            obj.patient_id = int(identifier[1:])
+        else:
+            patient = Patient.objects.first(identifier=identifier)
+            obj.patient_id = patient.id
+
+    def _upload(self, request, info, suffix='.xlsx'):
         up_file = request.FILES['file']
 
         _, filename = tempfile.mkstemp(suffix=suffix)
@@ -212,15 +243,25 @@ class SampleUploadView(CustomeViewSets):
             if data[info['key']] not in info['identifiers']:
                 unsuccessful_records.append(record)
                 continue
+            data['identifier'] = str(uuid.uuid4())
 
             sample_serializer = info['serializer'](data=data)
             if sample_serializer.is_valid():
                 sample_serializer.save()
+                obj = sample_serializer.instance
+                obj.identifier = info['prefix'] + f'{obj.id:08}'
+                info['update_id'](obj, data[info['key']])
+                obj.save()
             else:
                 print(sample_serializer.errors)
                 unsuccessful_records.append(record)
 
-        return response_body(data=unsuccessful_records, msg="success")
+        is_all_success = len(unsuccessful_records) == 0
+
+        return response_body(
+            data=unsuccessful_records,
+            msg="success" if is_all_success else "part success",
+        )
 
 
 def download(request, pk):

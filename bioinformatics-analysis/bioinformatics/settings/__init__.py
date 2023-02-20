@@ -228,6 +228,8 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
+DISABLE_JOB_RUN = False
+
 # REST_FRAMEWORK = {
 #    # 过滤器默认后端
 #     'DEFAULT_FILTER_BACKENDS': (

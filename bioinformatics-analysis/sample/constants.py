@@ -39,13 +39,13 @@ FIELDS_OPERATORS = {
 SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'sample_date',
-        'name': '采样日期',
+        'name': '采样日期（YYYY-MM-DD）',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
     {
         'key': 'test_date',
-        'name': '送检日期',
+        'name': '送测日期（YYYY-MM-DD）',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
@@ -77,12 +77,6 @@ SAMPLE_META_MODEL_ATTRS = [
         'key': 'is_panel',
         'name': '肿瘤样本',
         'value_type': 'bool',
-        'search_type': SearchType.exact
-    },
-    {
-        'key': 'identifier',
-        'name': '样本识别号',
-        'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
@@ -120,7 +114,7 @@ SAMPLE_MODEL_ATTRS = [
     },
     {
         'key': 'library_input',
-        'name': '建库input',
+        'name': '建库input（ng）',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -155,12 +149,6 @@ SAMPLE_MODEL_ATTRS = [
         'search_type': SearchType.choices
     },
     {
-        'key': 'sample_meta_id',
-        'name': '样本ID',
-        'value_type': 'string',
-        'search_type': SearchType.not_support
-    },
-    {
         'key': 'company',
         'name': '送检机构',
         'value_type': 'string',
@@ -174,21 +162,15 @@ SAMPLE_MODEL_ATTRS = [
     },
     {
         'key': 'fastq1_path',
-        'name': 'fastq1文件地址',
+        'name': 'R1文件',
         'value_type': 'string',
         'search_type': SearchType.not_support
     },
     {
         'key': 'fastq2_path',
-        'name': 'fastq2文件地址',
+        'name': 'R2文件',
         'value_type': 'string',
         'search_type': SearchType.not_support
-    },
-    {
-        'key': 'identifier',
-        'name': '数据识别号',
-        'value_type': 'string',
-        'search_type': SearchType.exact
     },
     {
         'key': 'sample_identifier',

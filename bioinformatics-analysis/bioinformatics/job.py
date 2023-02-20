@@ -11,6 +11,8 @@ from config.models import Config
 from task.models import Task
 
 from django.db import close_old_connections
+from django.conf import settings
+
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 
@@ -38,6 +40,9 @@ scheduler = BackgroundScheduler()
 
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
 def run_task():
+    if settings.DISABLE_JOB_RUN:
+        return
+
     close_old_connections()
     # from django import db
     # for conn in db.connections.all():

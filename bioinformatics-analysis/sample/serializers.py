@@ -20,7 +20,7 @@ class SampleMetaSerializer(serializers.ModelSerializer):
 
 
 class SampleSerializer(serializers.ModelSerializer):
-    sample_meta_id = serializers.IntegerField()
+    sample_meta_id = serializers.IntegerField(allow_null=True, default=None)
     sample_meta = SampleMetaSerializer(read_only=True)
     patient = PatientSerializer(source='sample_meta.patient', read_only=True)
 
