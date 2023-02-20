@@ -20,7 +20,7 @@ class ExcelHandler:
 
     def read(self):
         workbook = load_workbook(self._filename)
-        sheet = workbook.get_sheet_by_name("患者")
+        sheet = workbook.get_sheet_by_name("Sheet1")
 
         result = []
 
@@ -39,7 +39,6 @@ class ExcelHandler:
             attr['name']: index for index,
             attr in enumerate(
                 self._attrs)}
-
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
             for _, cell in enumerate(cells)

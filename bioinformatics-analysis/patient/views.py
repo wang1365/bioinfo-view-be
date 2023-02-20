@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 import tempfile
 import openpyxl
+import os
 import time
 import uuid
 from django.db.models import Q
@@ -17,7 +18,7 @@ from patient.services import file_import as file_import_service
 from utils.response import response_body
 from utils.paginator import PageNumberPaginationWithWrapper
 from common.filters import CommonFilters
-from patient.constant import PATIENT_MODEL_ATTRS
+from patient.constant import PATIENT_MODEL_ATTRS, PATIENT_META_TEMPLATE_PATH
 from patient.core import export_to_csv, ExcelHandler, ValueProcess, calculate_age
 
 
@@ -46,7 +47,8 @@ class PatientViewSet(ModelViewSet):
         if account_constant.NORMAL in request.role_list:
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
-            queryset = queryset.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+            queryset = queryset.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -148,37 +150,51 @@ class PatientViewSet(ModelViewSet):
     @action(methods=['get'], detail=False)
     def template(self, request, *args, **kwargs):
         # response = HttpResponse(content_type='application/ms-excel')
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        # response = HttpResponse(content_type='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; filename="patient.xlsx"'
-        wb = openpyxl.Workbook()
-        # 创建一张新表
-        ws = wb.create_sheet(title='患者')
-        exclude_keys = ["id", "identifier", "age"]
-        columns = [f.get("name") for f in PATIENT_MODEL_ATTRS if f.get(
-            "key") not in exclude_keys]
-        ws.append(columns)
-        wb.save(response)
+        # response = HttpResponse(
+        #     content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        # # response = HttpResponse(content_type='application/octet-stream')
+        # response['Content-Disposition'] = 'attachment; filename="patient.xlsx"'
+        # wb = openpyxl.Workbook()
+        # # 创建一张新表
+        # ws = wb.create_sheet(title='患者')
+        # exclude_keys = ["id", "identifier", "age"]
+        # columns = [f.get("name") for f in PATIENT_MODEL_ATTRS if f.get(
+        #     "key") not in exclude_keys]
+        # ws.append(columns)
+        # wb.save(response)
+        # return response
+        with open(PATIENT_META_TEMPLATE_PATH, "rb") as f:
+            data = f.read()
+
+        response = HttpResponse(data)
+        response['Content-Disposition'] = 'attachment; filename={}'.format(
+            os.path.basename(PATIENT_META_TEMPLATE_PATH))
+        response['Content-Type'] = 'application/octet-stream'
         return response
 
-    @action(methods=('POST', ), parser_classes=[MultiPartParser], detail=False)
-    def import_patients(self, request, *args, **kwargs):
-        s = FileSerializer(data=request.data)
-        try:
-            s.is_valid(raise_exception=True)
-            added, existed = file_import_service.import_patients_by_csv(
-                request.account, s.validated_data['file'])
-        except Exception as err:
-            # middleware attempt to transfer this to utf-8. the middleware
-            # should process this case
-            request.data["file"] = {}
-            return response_body(code=1, msg=str(err))
-        return response_body(data={"added": added, "existed": existed})
+    # @action(methods=('POST', ), parser_classes=[MultiPartParser], detail=False)
+    # def import_patients(self, request, *args, **kwargs):
+    #     s = FileSerializer(data=request.data)
+    #     try:
+    #         s.is_valid(raise_exception=True)
+    #         added, existed = file_import_service.import_patients_by_csv(
+    #             request.account, s.validated_data['file'])
+    #     except Exception as err:
+    #         # middleware attempt to transfer this to utf-8. the middleware
+    #         # should process this case
+    #         request.data["file"] = {}
+    #         return response_body(code=1, msg=str(err))
+    #     return response_body(data={"added": added, "existed": existed})
 
     @action(methods=('GET',), parser_classes=[MultiPartParser], detail=False)
     def export(self, request):
-        path = export_to_csv(self.queryset.all())
+        query_set = self.queryset.all()
+        if account_constant.NORMAL in request.role_list:
+            query_set = query_set.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            query_set = query_set.filter(
+                Q(creator__parent=request.account) | Q(creator=request.account))
+        path = export_to_csv(querset=query_set)
 
         with open(path, "rb") as f:
             data = f.read()

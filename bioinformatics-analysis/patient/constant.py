@@ -1,3 +1,5 @@
+import os
+
 PATIENT_ZH_TO_EN = {
     "患者识别号": "identifier",
     "送检机构": "inspection_agency",
@@ -41,14 +43,20 @@ PATIENT_MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
+        'key': 'medication_history',
+        'name': '用药史',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
         'key': 'gender',
         'name': '性别',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
-        'key': 'blood_type',
-        'name': '血型',
+        'key': 'prognosis_time',
+        'name': '预后时间（天）',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -72,7 +80,7 @@ PATIENT_MODEL_ATTRS = [
     },
     {
         'key': 'location',
-        'name': '家庭住址',
+        'name': '家庭地址',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -153,20 +161,26 @@ PATIENT_MODEL_ATTRS = [
     },
     {
         'key': 'diagnosis_time',
-        'name': '诊断时间',
+        'name': '诊断时间（天）',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
         'key': 'recurrence_time',
-        'name': '复发时间',
+        'name': '复发时间（天）',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
         'key': 'survival_time',
-        'name': '存活时间',
+        'name': '存活时间（天）',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
 ]
+
+PATIENT_META_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "patient-meta.xlsx"
+)
