@@ -20,10 +20,10 @@ class SampleUserFilter:
             return queryset
 
         if account_constant.NORMAL in request.role_list:
-            queryset = queryset.filter(creator=request.account)
+            queryset = queryset.filter(user=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+                Q(user__user2role__role__code=account_constant.NORMAL) | Q(user=request.account))
 
         return queryset
 

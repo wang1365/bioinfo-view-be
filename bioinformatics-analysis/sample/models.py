@@ -28,7 +28,7 @@ class SampleMeta(models.Model):
     is_panel = models.BooleanField(default=False)
 
     # 样本所有者
-    user_id = models.BigIntegerField(default=1)
+    user = models.ForeignKey(to=Account, on_delete=models.CASCADE, blank=True, null=True)
 
     # 患者 ID
     patient = models.ForeignKey(to=Patient,
@@ -134,7 +134,7 @@ class Sample(models.Model):
     fastq2_path = models.CharField(max_length=1024)
 
     # 样本所有者
-    user_id = models.BigIntegerField(default=0)
+    user = models.ForeignKey(to=Account, on_delete=models.CASCADE, blank=True, null=True)
 
     create_time = models.DateTimeField(null=True,
                                        blank=True,

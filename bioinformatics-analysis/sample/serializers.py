@@ -15,8 +15,8 @@ class SampleMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = SampleMeta
 
-        fields = ['id', 'patient', 'patient_id', 'identifier'
-                  ] + [f['key'] for f in SAMPLE_META_MODEL_ATTRS]
+        fields = ['id', 'patient', 'patient_id', 'identifier', 'user',
+                  'user_id'] + [f['key'] for f in SAMPLE_META_MODEL_ATTRS]
 
 
 class SampleSerializer(serializers.ModelSerializer):
@@ -27,4 +27,4 @@ class SampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = ['id', 'sample_meta', 'patient', 'sample_meta_id',
-                  'identifier'] + [f['key'] for f in SAMPLE_MODEL_ATTRS]
+                  'user', 'user_id', 'identifier'] + [f['key'] for f in SAMPLE_MODEL_ATTRS]

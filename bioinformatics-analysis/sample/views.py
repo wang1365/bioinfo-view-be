@@ -8,6 +8,10 @@ from task.serializers import TaskSerializer
 from utils.response import response_body
 from collections import defaultdict
 
+from django.db.models import Q
+
+from account import constants as account_constant
+
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from django.http import HttpResponse, QueryDict
@@ -35,6 +39,7 @@ class SampleView(CustomeViewSets):
     def create(self, request, *args, **kwargs):
         data = self.create_data(request, *args, **kwargs)
         data['identifier'] = str(uuid.uuid4())
+        data['user'] = request.account.id
 
         serializer = self.get_serializer(data=data)
         is_valid = serializer.is_valid(raise_exception=False)
@@ -135,6 +140,7 @@ class SampleMetaView(CustomeViewSets):
     def create(self, request, *args, **kwargs):
         data = self.create_data(request, *args, **kwargs)
         data['identifier'] = str(uuid.uuid4())
+        data['user'] = request.account.id
 
         serializer = self.get_serializer(data=data)
         is_valid = serializer.is_valid(raise_exception=False)
@@ -148,6 +154,7 @@ class SampleMetaView(CustomeViewSets):
         obj.save()
 
         return response_body(data=serializer.data, msg="success")
+
     def query(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -191,7 +198,7 @@ class SampleUploadView(CustomeViewSets):
         info = {
             "attrs": SAMPLE_MODEL_ATTRS,
             "serializer": SampleSerializer,
-            "identifiers": SampleMeta.objects.values_list("identifier", flat=True),
+            "identifiers": self._get_sample_meta_identifiers(request),
             "key": "sample_identifier",
             "update_id": self._update_sample_meta_id,
             "prefix": "D",
@@ -202,12 +209,30 @@ class SampleUploadView(CustomeViewSets):
         info = {
             "attrs": SAMPLE_META_MODEL_ATTRS,
             "serializer": SampleMetaSerializer,
-            "identifiers": Patient.objects.values_list("identifier", flat=True),
+            "identifiers": self._get_patient_identifiers(request),
             "key": "patient_identifier",
             "update_id": self._update_patient_id,
             "prefix": "S",
         }
         return self._upload(request, info, suffix)
+
+    def _get_sample_meta_identifiers(self, request):
+        queryset = SampleMeta.objects.all()
+        if account_constant.NORMAL in request.role_list:
+            queryset = queryset.filter(user=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            queryset = queryset.filter(
+                Q(user__user2role__role__code=account_constant.NORMAL) | Q(user=request.account))
+        return queryset.values_list("identifier", flat=True)
+
+    def _get_patient_identifiers(self, request):
+        queryset = Patient.objects.all()
+        if account_constant.NORMAL in request.role_list:
+            queryset = queryset.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            queryset = queryset.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+        return queryset.values_list("identifier", flat=True)
 
     def _update_sample_meta_id(self, obj, identifier):
         if identifier[1:].isdigit():
@@ -244,6 +269,7 @@ class SampleUploadView(CustomeViewSets):
                 unsuccessful_records.append(record)
                 continue
             data['identifier'] = str(uuid.uuid4())
+            data['user'] = request.account.id
 
             sample_serializer = info['serializer'](data=data)
             if sample_serializer.is_valid():
