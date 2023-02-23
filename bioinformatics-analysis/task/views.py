@@ -604,7 +604,7 @@ class TaskView(ModelViewSet):
                                           f"{instance.creator.id}"),
                     user_id=instance.creator.id,
                 )
-            if key == "priority" and "admin" not in request.role_list:
+            if key == "priority" and ("admin" not in request.role_list or "super" not in request.role_list):
                 return response_body(code=1, msg="非管理员用户不能调整优先级")
             setattr(instance, key, value)
             if key == "result_path":
@@ -799,3 +799,18 @@ class RunQcView(APIView):
         # add 自带去重
         project.samples.add(sample_id)
         return response_body(data="success", msg="", code=200)
+
+
+def remove_temp(request, pk):
+    instance = Task.objects.get(pk=pk)
+    out_dir = instance.env.get("OUT_DIR")
+    if out_dir:
+        temp_dir = os.path.join(out_dir, "temp")
+        subprocess.Popen(f"rm -rf {temp_dir}", shell=True)
+        async_func(
+            cal_dir_size,
+            dirctory=os.path.join(settings.TASK_RESULT_DIR,
+                                  f"{instance.creator.id}"),
+            user_id=instance.creator.id,
+        )
+    return response_body(data="success", msg="", code=200)
