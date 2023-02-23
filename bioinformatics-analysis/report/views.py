@@ -3,6 +3,8 @@ import json
 import threading
 import subprocess
 
+from account.models import Account
+
 from task.models import Task
 from report.models import Report
 from report.core import generate_df, extract_meta_data, extract_data, read_raw_data
@@ -116,6 +118,12 @@ class ReportView(CustomeViewSets):
         return data
 
     def list(self, request, *args, **kwargs):
+        user = Account.objects.filter(pk=request.user_id).first()
+        role_codes = [item.role.code for item in user.user2role.all()]
+        
+        
+
+
         search = request.GET.get('search', None)
         patient_identifier = request.GET.get('patient_identifier', None)
         sample_meta_identifier = request.GET.get('sample_meta_identifier',
@@ -145,13 +153,16 @@ class ReportView(CustomeViewSets):
                 task_ids.append(item.id)
 
             queryset = Report.objects.filter(
-                task__id__in=task_ids).order_by('-id').all()
+                task__id__in=task_ids)
         else:
             if search:
                 queryset = Report.objects.filter(
-                    task__name__icontains=search).order_by('-id').all()
+                    task__name__icontains=search)
             else:
-                queryset = Report.objects.order_by('-id').all()
+                queryset = Report.objects
+        if 'super' not in role_codes:
+            queryset.filter(creator=user)
+        queryset=queryset.order_by('-id').all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
