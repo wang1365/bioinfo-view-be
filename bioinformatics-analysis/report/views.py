@@ -3,7 +3,13 @@ import json
 import threading
 import subprocess
 
+<<<<<<< HEAD
 from account.models import Account
+=======
+from django.db.models import Q
+
+from account import constants as account_constant
+>>>>>>> 45f9fb949729c64734c2585c48e4a1e24902ce55
 
 from task.models import Task
 from report.models import Report
@@ -84,7 +90,7 @@ class ReportView(CustomeViewSets):
         report.status = '报告创建中'
         report.save()
         def async_create_report(report):
-            
+
             # save query to a txt file
             json_filepath = os.path.join(report.task.result_dir, "report",
                                      str(report.id))
@@ -118,12 +124,6 @@ class ReportView(CustomeViewSets):
         return data
 
     def list(self, request, *args, **kwargs):
-        user = Account.objects.filter(pk=request.user_id).first()
-        role_codes = [item.role.code for item in user.user2role.all()]
-        
-        
-
-
         search = request.GET.get('search', None)
         patient_identifier = request.GET.get('patient_identifier', None)
         sample_meta_identifier = request.GET.get('sample_meta_identifier',
@@ -159,10 +159,14 @@ class ReportView(CustomeViewSets):
                 queryset = Report.objects.filter(
                     task__name__icontains=search)
             else:
-                queryset = Report.objects
-        if 'super' not in role_codes:
-            queryset.filter(creator=user)
-        queryset=queryset.order_by('-id').all()
+                queryset = Report.objects.order_by('-id').all()
+
+        if account_constant.NORMAL in request.role_list:
+            queryset = queryset.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            queryset = queryset.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)

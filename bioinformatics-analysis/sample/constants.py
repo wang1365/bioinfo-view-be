@@ -90,7 +90,7 @@ SAMPLE_META_MODEL_ATTRS = [
 SAMPLE_MODEL_ATTRS = [
     {
         'key': 'project_index',
-        'name': '项目编码',
+        'name': '数据详情',
         'value_type': 'string',
         'search_type': SearchType.exact
     },

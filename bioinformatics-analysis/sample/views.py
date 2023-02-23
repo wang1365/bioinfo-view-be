@@ -238,14 +238,14 @@ class SampleUploadView(CustomeViewSets):
         if identifier[1:].isdigit():
             obj.sample_meta_id = int(identifier[1:])
         else:
-            sample_meta = SampleMeta.objects.first(identifier=identifier)
+            sample_meta = SampleMeta.objects.filter(identifier=identifier).first()
             obj.sample_meta_id = sample_meta.id
 
     def _update_patient_id(self, obj, identifier):
         if identifier[1:].isdigit():
             obj.patient_id = int(identifier[1:])
         else:
-            patient = Patient.objects.first(identifier=identifier)
+            patient = Patient.objects.filter(identifier=identifier).first()
             obj.patient_id = patient.id
 
     def _upload(self, request, info, suffix='.xlsx'):
@@ -265,7 +265,7 @@ class SampleUploadView(CustomeViewSets):
 
         for record in records:
             data = value_process.process(record)
-            if data[info['key']] not in info['identifiers']:
+            if data[info['key']].strip() not in info['identifiers']:
                 unsuccessful_records.append(record)
                 continue
             data['identifier'] = str(uuid.uuid4())
@@ -276,7 +276,7 @@ class SampleUploadView(CustomeViewSets):
                 sample_serializer.save()
                 obj = sample_serializer.instance
                 obj.identifier = info['prefix'] + f'{obj.id:08}'
-                info['update_id'](obj, data[info['key']])
+                info['update_id'](obj, data[info['key']].strip())
                 obj.save()
             else:
                 print(sample_serializer.errors)
