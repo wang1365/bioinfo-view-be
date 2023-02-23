@@ -3,13 +3,9 @@ import json
 import threading
 import subprocess
 
-<<<<<<< HEAD
-from account.models import Account
-=======
 from django.db.models import Q
 
 from account import constants as account_constant
->>>>>>> 45f9fb949729c64734c2585c48e4a1e24902ce55
 
 from task.models import Task
 from report.models import Report
