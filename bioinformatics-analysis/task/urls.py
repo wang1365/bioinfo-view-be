@@ -22,4 +22,5 @@ urlpatterns = [
     url("^/(?P<pk>\d+)/mufile/$",
         views.read_mut_standard_file,
         name="read_mut_standard_file"),
+    url("^/(?P<pk>\d+)/remove_temp/$", views.remove_temp, name="remove_temp"),
 ]

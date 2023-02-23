@@ -98,19 +98,19 @@ def run_task():
                 used_memory += beto_run_task.memory
 
 
-@scheduler.scheduled_job(trigger='interval',
-                         seconds=3600 * 24 * 30,
-                         id='clear_task')
-def clear_task():
-    print("Hello Scheduler!Start clean task disk")
-    beto_clean_tasks = Task.objects.filter(
-        status=3, has_cleaned=False).order_by("create_time").all()
-    for beto_clean_task in beto_clean_tasks:
-        out_dir = beto_clean_task.env.get("OUT_DIR")
-        if out_dir:
-            subprocess.Popen(f"rm -rf {out_dir}", shell=True)
-            beto_clean_task.has_cleaned = True
-            beto_clean_task.save()
+# @scheduler.scheduled_job(trigger='interval',
+#                          seconds=3600 * 24 * 30,
+#                          id='clear_task')
+# def clear_task():
+#     print("Hello Scheduler!Start clean task disk")
+#     beto_clean_tasks = Task.objects.filter(
+#         status=3, has_cleaned=False).order_by("create_time").all()
+#     for beto_clean_task in beto_clean_tasks:
+#         out_dir = beto_clean_task.env.get("OUT_DIR")
+#         if out_dir:
+#             subprocess.Popen(f"rm -rf {out_dir}", shell=True)
+#             beto_clean_task.has_cleaned = True
+#             beto_clean_task.save()
 
 
 @scheduler.scheduled_job(trigger='interval',
