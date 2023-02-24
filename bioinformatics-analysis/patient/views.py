@@ -90,8 +90,7 @@ class PatientViewSet(ModelViewSet):
             patient_serializer = info['serializer'](
                 data=value_process.process(record))
             if patient_serializer.is_valid():
-                patient_serializer.save()
-                obj = patient_serializer.instance
+                obj = Patient.objects.create(**record)
                 obj.age = calculate_age(obj.birthday)
                 obj.identifier = f'P{obj.id:08}'
                 obj.save()

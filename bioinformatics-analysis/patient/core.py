@@ -106,6 +106,8 @@ def export_to_csv(querset):
 
 
 def calculate_age(born):
+    if isinstance(born, str):
+        born = datetime.datetime.strptime(born, "%Y-%m-%d")
     today = date.today()
     try:
         birthday = born.replace(year=today.year)
@@ -113,7 +115,7 @@ def calculate_age(born):
         # raised when birth date is February 29
         # and the current year is not a leap year
         birthday = born.replace(year=today.year, day=born.day - 1)
-    if birthday > today:
+    if str(birthday) > str(today):
         return today.year - born.year - 1
     else:
         return today.year - born.year

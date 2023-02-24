@@ -13,6 +13,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
+        depth = 1
         fields = [
             "id",
             "name",
