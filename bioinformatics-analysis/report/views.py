@@ -3,6 +3,10 @@ import json
 import threading
 import subprocess
 
+from django.db.models import Q
+
+from account import constants as account_constant
+
 from task.models import Task
 from report.models import Report
 from report.core import generate_df, extract_meta_data, extract_data, read_raw_data
@@ -82,7 +86,7 @@ class ReportView(CustomeViewSets):
         report.status = '报告创建中'
         report.save()
         def async_create_report(report):
-            
+
             # save query to a txt file
             json_filepath = os.path.join(report.task.result_dir, "report",
                                      str(report.id))
@@ -145,13 +149,20 @@ class ReportView(CustomeViewSets):
                 task_ids.append(item.id)
 
             queryset = Report.objects.filter(
-                task__id__in=task_ids).order_by('-id').all()
+                task__id__in=task_ids)
         else:
             if search:
                 queryset = Report.objects.filter(
-                    task__name__icontains=search).order_by('-id').all()
+                    task__name__icontains=search)
             else:
                 queryset = Report.objects.order_by('-id').all()
+
+        if account_constant.NORMAL in request.role_list:
+            queryset = queryset.filter(creator=request.account)
+        elif account_constant.ADMIN in request.role_list:
+            queryset = queryset.filter(
+                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
