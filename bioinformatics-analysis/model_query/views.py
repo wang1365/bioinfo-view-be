@@ -100,6 +100,8 @@ def post_query(request: HttpRequest, model_name: str):
             # query_set = query_set.filter(Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
             query_set = query_set.filter(
                 Q(creator__parent=request.account) | Q(creator=request.account)).order_by("-id")
+        else:
+            query_set = query_set.order_by("-id")
     if model_name in {"sample", "sample_meta"}:
         if account_constant.NORMAL in request.role_list:
             query_set = query_set.filter(user=request.account)
