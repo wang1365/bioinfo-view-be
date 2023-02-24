@@ -604,8 +604,8 @@ class TaskView(ModelViewSet):
                                           f"{instance.creator.id}"),
                     user_id=instance.creator.id,
                 )
-            if key == "priority" and ("admin" not in request.role_list or "super" not in request.role_list):
-                return response_body(code=1, msg="非管理员用户不能调整优先级")
+            # if key == "priority" and ("admin" not in request.role_list or "super" not in request.role_list):
+            #     return response_body(code=1, msg="非管理员用户不能调整优先级")
             setattr(instance, key, value)
             if key == "result_path":
                 # if not instance.is_merge:
@@ -813,4 +813,6 @@ def remove_temp(request, pk):
                                   f"{instance.creator.id}"),
             user_id=instance.creator.id,
         )
+    instance.deleted_tempdir = True
+    instance.save()
     return response_body(data="success", msg="", code=200)

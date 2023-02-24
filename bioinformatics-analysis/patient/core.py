@@ -20,7 +20,8 @@ class ExcelHandler:
 
     def read(self):
         workbook = load_workbook(self._filename)
-        sheet = workbook.get_sheet_by_name("Sheet1")
+        sheet = workbook.active
+        # sheet = workbook.get_sheet_by_name("Sheet1")
 
         result = []
 
@@ -77,7 +78,7 @@ class ValueProcess:
         }
 
     def _get_function(self, key):
-        return self._handle_functions().get(key, lambda x: x or '')
+        return self._handle_functions().get(key, lambda x: x)
 
     def process(self, data):
         return {k: self._get_function(k)(v) for k, v in data.items()}
