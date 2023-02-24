@@ -93,7 +93,7 @@ class PatientViewSet(ModelViewSet):
                 obj = Patient.objects.create(**record)
                 obj.age = calculate_age(obj.birthday)
                 obj.identifier = f'P{obj.id:08}'
-                obj.creator = request.accountx
+                obj.creator = request.account
                 obj.save()
             else:
                 print(patient_serializer.errors)
