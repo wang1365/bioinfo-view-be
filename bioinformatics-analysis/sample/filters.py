@@ -54,15 +54,25 @@ class SampleProjectFilters:
 
 class SampleKeywordFilters:
     def filter_queryset(self, request, queryset, view):
+        qs = queryset
         if request.method != 'POST':
-            return queryset
+            return qs
 
         body = json.loads(request.parser_context['request'].body)
         keyword = body.get('keyword', '')
-        if not keyword:
-            return queryset
+        identifier = body.get('sampleIdentifier', '')
+        data_identifier = body.get('dataIdentifier', '')
+        reagent_box = body.get('reagentBox', '')
+        if keyword:
+            qs = qs.filter(sample_meta__patient__name__icontains=keyword)
+        if identifier:
+            qs = qs.filter(sample_meta__identifier__icontains=identifier)
+        if data_identifier:
+            qs = qs.filter(identifier__icontains=data_identifier)
+        if reagent_box:
+            qs = qs.filter(reagent_box__icontains=reagent_box)
 
-        return queryset.filter(sample_meta__patient__name__icontains=keyword)
+        return qs
 
 
 class SampleFilters(CommonFilters):
