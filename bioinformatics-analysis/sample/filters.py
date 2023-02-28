@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 from common.filters import CommonFilters
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from account import constants as account_constant
 from project.utils import get_sampleids_by_projectids, get_user_by_project_ids
@@ -53,8 +53,8 @@ class SampleProjectFilters:
 
 
 class SampleKeywordFilters:
-    def filter_queryset(self, request, queryset, view):
-        qs = queryset
+    def filter_queryset(self, request, queryset: QuerySet, view):
+        qs = queryset.order_by('-id')
         if request.method != 'POST':
             return qs
 
