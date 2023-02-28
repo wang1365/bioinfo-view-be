@@ -141,12 +141,17 @@ class ReportView(CustomeViewSets):
                 sample_meta__patient__identifier=patient_identifier)
         if filtered:
             sample_ids = [str(item.id) for item in samples.all()]
-            query = f'select id from task where samples ?| ARRAY{sample_ids}'
-            if search:
-                query = f'{query} and name ilike \'%%{search}%%\''
+            query=''
+            if sample_ids:
+                query = f'select id from task where samples ?| ARRAY{sample_ids}'
+                if search:
+                    query = f'{query} and name ilike \'%%{search}%%\''
+            elif search:
+                query = f'select id from task where name ilike \'%%{search}%%\''
             task_ids = []
-            for item in Task.objects.raw(query):
-                task_ids.append(item.id)
+            if query:
+                for item in Task.objects.raw(query):
+                    task_ids.append(item.id)
 
             queryset = Report.objects.filter(
                 task__id__in=task_ids)
@@ -155,14 +160,15 @@ class ReportView(CustomeViewSets):
                 queryset = Report.objects.filter(
                     task__name__icontains=search)
             else:
-                queryset = Report.objects.order_by('-id').all()
+                queryset = Report.objects.all()
 
         if account_constant.NORMAL in request.role_list:
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
                 Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
-
+        queryset= queryset.order_by('-id')
+        
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
