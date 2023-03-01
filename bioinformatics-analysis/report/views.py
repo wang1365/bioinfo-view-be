@@ -142,14 +142,11 @@ class ReportView(CustomeViewSets):
         if filtered:
             sample_ids = [str(item.id) for item in samples.all()]
             query=''
+            task_ids = []
             if sample_ids:
                 query = f'select id from task where samples ?| ARRAY{sample_ids}'
                 if search:
                     query = f'{query} and name ilike \'%%{search}%%\''
-            elif search:
-                query = f'select id from task where name ilike \'%%{search}%%\''
-            task_ids = []
-            if query:
                 for item in Task.objects.raw(query):
                     task_ids.append(item.id)
 
