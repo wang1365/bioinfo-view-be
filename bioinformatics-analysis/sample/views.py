@@ -116,7 +116,7 @@ class SampleView(CustomeViewSets):
         return response_body(data=data)
 
     def export(self, request):
-        path = export_to_csv(self.queryset.all())
+        path = export_to_csv(SampleUserFilter().filter_queryset(request, self.queryset, None))
 
         with open(path, "rb") as f:
             data = f.read()
@@ -177,7 +177,7 @@ class SampleMetaView(CustomeViewSets):
         return response_body(data=data)
 
     def export(self, request):
-        path = export_to_csv(self.queryset.all())
+        path = export_to_csv(SampleUserFilter().filter_queryset(request, self.queryset, None))
 
         with open(path, "rb") as f:
             data = f.read()
