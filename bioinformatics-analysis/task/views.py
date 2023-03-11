@@ -349,23 +349,37 @@ class TaskView(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if (request.account.id
-                == instance.creator.id) or ("admin" in request.role_list):
-            self._clean_out_dir(instance)
-            self._unset_sample_task_id(instance)
-            async_func(
-                cal_dir_size,
-                dirctory=os.path.join(settings.TASK_RESULT_DIR,
-                                      f"{instance.creator.id}"),
-                user_id=instance.creator.id,
-            )
-            try:
-                stop_docker(instance.pid)
-            except Exception as e:
-                print("删除任务时删除容器失败: ", e)
-            instance.delete()
-            return response_body(data=True)
-        return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
+        self._clean_out_dir(instance)
+        self._unset_sample_task_id(instance)
+        async_func(
+            cal_dir_size,
+            dirctory=os.path.join(settings.TASK_RESULT_DIR,
+                                  f"{instance.creator.id}"),
+            user_id=instance.creator.id,
+        )
+        try:
+            stop_docker(instance.pid)
+        except Exception as e:
+            print("删除任务时删除容器失败: ", e)
+        instance.delete()
+        return response_body(data=True)
+        # if (request.account.id
+        #         == instance.creator.id) or ("admin" in request.role_list):
+        #     self._clean_out_dir(instance)
+        #     self._unset_sample_task_id(instance)
+        #     async_func(
+        #         cal_dir_size,
+        #         dirctory=os.path.join(settings.TASK_RESULT_DIR,
+        #                               f"{instance.creator.id}"),
+        #         user_id=instance.creator.id,
+        #     )
+        #     try:
+        #         stop_docker(instance.pid)
+        #     except Exception as e:
+        #         print("删除任务时删除容器失败: ", e)
+        #     instance.delete()
+        #     return response_body(data=True)
+        # return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
 
     def _enrich_task_list(self, ret_data):
         flow_list = Flow.objects.filter(
