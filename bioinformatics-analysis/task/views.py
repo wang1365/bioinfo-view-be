@@ -25,7 +25,7 @@ from flow.models import Flow
 from flow.serializers import FlowSerializer
 from project.serializer import ProjectSerializer
 from account.serializer import AccountSerializer
-from task.models import Task
+from task.models import Task, TaskSample
 from task.serializers import TaskSerializer, ListTaskSerializer
 from utils.asy import async_func
 from utils.hostip import get_host_ip
@@ -309,6 +309,8 @@ class TaskView(ModelViewSet):
         task.result_dir = os.path.join(out_dir, "result")
         task.save()
         serializer = self.get_serializer(task)
+        for sample_id in task.samples:
+            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id)
         return response_body(data=serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -372,15 +374,31 @@ class TaskView(ModelViewSet):
             id__in=[item['project'] for item in ret_data])
         account_list = Account.objects.filter(
             id__in=[item['creator'] for item in ret_data])
+        sample_list = Sample.objects.filter(
+            id__in=[sample_id for item in ret_data for sample_id in item['samples']])
+
         flow_dict = {flow.id: flow for flow in flow_list}
         project_dict = {project.id: project for project in project_list}
         account_dict = {account.id: account for account in account_list}
+        sample_dict = {sample.id: sample for sample in sample_list}
+
         for item in ret_data:
             item["flow"] = FlowSerializer(flow_dict.get(item['flow'])).data
             item["project"] = ProjectSerializer(
                 project_dict.get(item['project'])).data
             item["creator"] = AccountSerializer(
                 account_dict.get(item['creator'])).data
+            sample_data = []
+            for sample_id in item["samples"]:
+                sample = sample_dict.get(int(sample_id))
+                if sample:
+                    sample_data.append({
+                        "sample_id": int(sample_id),
+                        "sample_data_id": sample.sample_meta_id,
+                        "library_number": sample.library_number,
+                        "patient_name": sample.sample_meta.patient.name,
+                    })
+            item["sample_data"] = sample_data
         return ret_data
 
     def list(self, request, *args, **kwargs):
@@ -388,6 +406,8 @@ class TaskView(ModelViewSet):
 
         project_id = request.query_params.get("project_id")
         status = request.query_params.get("status")
+        patient = request.query_params.get("patient")
+        library_number = request.query_params.get("libraryNumber")
         if account_constant.SUPER in request.role_list:
             tasks = Task.objects.all()
         elif account_constant.ADMIN in request.role_list:
@@ -406,6 +426,12 @@ class TaskView(ModelViewSet):
             status_code = {value: key
                            for key, value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
+        if patient:
+            samples = Sample.objects.filter(sample_meta__patient__name=patient).values_list("id", flat=True)
+            tasks = tasks.filter(task_samples__sample_id__in=samples)
+        if library_number:
+            samples = Sample.objects.filter(library_number=library_number).values_list("id", flat=True)
+            tasks = tasks.filter(task_samples__sample_id__in=samples)
 
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)

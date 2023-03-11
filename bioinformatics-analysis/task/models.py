@@ -4,6 +4,7 @@ import os
 from django.db import models
 from django.utils.timezone import now
 # from django_mysql.models import JSONField
+from sample.models import Sample
 
 from django.db.models import JSONField
 
@@ -49,3 +50,14 @@ class Task(models.Model):
         verbose_name = "任务"
         verbose_name_plural = verbose_name
         get_latest_by = "id"
+
+
+class TaskSample(models.Model):
+    task = models.ForeignKey(Task, related_name="task_samples", on_delete=models.CASCADE)
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
+    create_time = models.DateTimeField("创建时间", default=now)
+    update_time = models.DateTimeField("修改时间", auto_now=True)
+
+    class Meta:
+        db_table = "task_sample"
+        ordering = ["-id"]

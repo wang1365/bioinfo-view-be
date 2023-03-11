@@ -31,6 +31,7 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "creator",
             "id",
             "progress",
+            "samples",
             "name",
             "status",
             "is_merge",
