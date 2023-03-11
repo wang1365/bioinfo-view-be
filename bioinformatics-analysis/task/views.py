@@ -440,12 +440,17 @@ class TaskView(ModelViewSet):
             status_code = {value: key
                            for key, value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
+        samples = None
         if patient:
-            samples = Sample.objects.filter(sample_meta__patient__name=patient).values_list("id", flat=True)
-            tasks = tasks.filter(task_samples__sample_id__in=samples)
+            samples = Sample.objects.filter(sample_meta__patient__name=patient)
         if library_number:
-            samples = Sample.objects.filter(library_number=library_number).values_list("id", flat=True)
-            tasks = tasks.filter(task_samples__sample_id__in=samples)
+            if samples:
+                samples = samples.filter(library_number=library_number)
+            else:
+                samples = Sample.objects.filter(library_number=library_number)
+        if samples:
+            samples_ids = samples.values_list("id", flat=True)
+            tasks = tasks.filter(task_samples__sample_id__in=samples_ids)
 
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)
