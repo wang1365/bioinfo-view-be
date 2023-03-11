@@ -1,5 +1,6 @@
 import subprocess
 import os
+import time
 
 from account.models import Account
 
@@ -7,6 +8,7 @@ from account.models import Account
 def cal_dir_size(dirctory, user_id):
     if not os.path.exists(dirctory):
         return
+    time.sleep(3)
     size = dir_size(dirctory)
     Account.objects.filter(pk=user_id).update(used_disk=size)
 
