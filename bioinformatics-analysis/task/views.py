@@ -441,13 +441,12 @@ class TaskView(ModelViewSet):
                            for key, value in Task.status_choices}.get(status)
             tasks = tasks.filter(status=status_code)
         samples = None
-        if patient:
+        if patient and library_number:
+            samples = Sample.objects.filter(sample_meta__patient__name=patient, library_number=library_number)
+        if patient and not library_number:
             samples = Sample.objects.filter(sample_meta__patient__name=patient)
-        if library_number:
-            if samples:
-                samples = samples.filter(library_number=library_number)
-            else:
-                samples = Sample.objects.filter(library_number=library_number)
+        if not patient and library_number:
+            samples = Sample.objects.filter(library_number=library_number)
         if samples:
             samples_ids = samples.values_list("id", flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples_ids)
