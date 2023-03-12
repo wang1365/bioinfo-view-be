@@ -37,7 +37,7 @@ services:
       - ./storage/redis/data:/data:rw
 
   web:
-    build: ./bioinformatics-analysis
+    image: bioinformatics-web:1.0
     restart: always
     container_name: web
     privileged: true
@@ -57,7 +57,7 @@ services:
       - DATA_DIR=${DATA_DIR}
       - DATABASE_DIR=${DATABASE_DIR}
       - DISK_RATIO=${DISK_RATIO}
-      - PROXY=true
+      - proxy=true
     env_file: .env
     ports:
       - ${PORT}:8080
