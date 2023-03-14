@@ -3,7 +3,7 @@ from docker.errors import DockerException
 
 G_CLIENT = None
 try:
-    G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock')
+    G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock', timeout=60 * 10)
 except DockerException as e:
     print(e)
 
