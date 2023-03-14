@@ -77,6 +77,8 @@ class UsersAPIView(
         if disk_limit:
             disk_config = Config.objects.filter(name="disk").first()
             sum_disk = sum_dict.get("sum_disk", 0)
+            if not sum_disk:
+                sum_disk = 0
             if sum_disk + int(disk_limit) > disk_config.value:
                 return response_body(status_code=200, code=1, msg=f"您最多只剩下{disk_config.value-sum_disk}MB的空间可配置")
         resp = super().update(request, *args, **kwargs)
