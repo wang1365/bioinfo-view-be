@@ -26,8 +26,6 @@ class FlowSerializer(serializers.ModelSerializer):
         if not tar_path.startswith("/"):
             real_tar_path = os.path.join("/data/bioinfo/image_dir", tar_path)
 
-        if not os.getenv('FLOW_DOCKER_VALIDATE'):
-            return real_tar_path
         try:
             load_image(real_tar_path, self.initial_data['image_name'])
         except Exception:
