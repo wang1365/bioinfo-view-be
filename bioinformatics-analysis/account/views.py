@@ -66,7 +66,7 @@ class UsersAPIView(
 
     @action(detail=True, methods=['put'])
     def reset_password(self, request, *args, **kwargs):
-        user = Account.objects.filter(pk=request.user_id).first()
+        user = Account.objects.filter(pk=int(kwargs.get("pk"))).first()
         user.password = get_md5(request.data.get("password"))
         user.save()
         return response_body(data="重置密码成功")
@@ -88,11 +88,9 @@ class UsersAPIView(
 
     @action(detail=True, methods=['patch'])
     def change_password(self, request, *args, **kwargs):
-        # user = Account.objects.filter(pk=request.user_id).first()
-        # if user.password != get_md5(request.data.get("old_password")):
-        #     return response_body(code=1, msg="原密码不正确")
-        # user.password = get_md5(request.data.get("new_password"))
         user = Account.objects.filter(pk=request.user_id).first()
+        if user.password != get_md5(request.data.get("old_password")):
+            return response_body(code=1, msg="原密码不正确")
         user.password = get_md5(request.data.get("password"))
         user.save()
         return response_body(data="密码修改成功")
