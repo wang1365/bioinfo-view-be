@@ -36,6 +36,8 @@ class Task(models.Model):
     log = models.TextField(null=True)
     parameter = JSONField(null=True)
     error_message = models.TextField(null=True, default="")
+    error_message_EN = models.TextField(null=True, default="")
+    error_message_CN = models.TextField(null=True, default="")
     create_time = models.DateTimeField("创建时间", default=now)
     # TODO on_update
     update_time = models.DateTimeField("修改时间", auto_now=True)

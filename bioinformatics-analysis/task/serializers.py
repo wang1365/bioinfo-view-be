@@ -41,6 +41,8 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "env",
             "priority",
             "error_message",
+            "error_message_EN",
+            "error_message_CN",
             "create_time",
             "log",
             "deleted_tempdir"
