@@ -330,7 +330,7 @@ class TaskView(ModelViewSet):
         log_EN_data = "[]"
         if not log_data:
             log_CN_data = self._load_CN_log_data(instance)
-            log_EN_data = self._load_CN_log_data(instance)
+            log_EN_data = self._load_EN_log_data(instance)
         data["log_CN"] = json.loads(log_CN_data)
         data["log_EN"] = json.loads(log_EN_data)
         return response_body(data=data)
