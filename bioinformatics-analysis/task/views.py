@@ -326,9 +326,13 @@ class TaskView(ModelViewSet):
             with open(igv_file) as f:
                 data['igv'] = [line.strip().split('\t') for line in f]
         log_data = instance.log
+        log_CN_data = "[]"
+        log_EN_data = "[]"
         if not log_data:
-            log_data = self._load_log_data(instance)
-        data["log"] = json.loads(log_data)
+            log_CN_data = self._load_CN_log_data(instance)
+            log_EN_data = self._load_CN_log_data(instance)
+        data["log_CN"] = json.loads(log_CN_data)
+        data["log_EN"] = json.loads(log_EN_data)
         return response_body(data=data)
 
     def _clean_out_dir(self, task):
@@ -607,11 +611,22 @@ class TaskView(ModelViewSet):
             attach={
                 "file": task.result_path.split(",")})
 
-    def _load_log_data(self, instance):
-        log_file = os.path.join(instance.env.get("OUT_DIR"), "log.txt")
+    def _load_CN_log_data(self, instance):
+        log_file_CN = os.path.join(instance.env.get("OUT_DIR"), "log_CN.txt")
         data = []
         try:
-            with open(log_file, "r") as f:
+            with open(log_file_CN, "r") as f:
+                for line in f:
+                    data.append(json.loads(line.strip()))
+        except Exception as e:
+            print(f"{instance.id} parse log.txt error: {e}")
+        return json.dumps(data, ensure_ascii=False)
+
+    def _load_EN_log_data(self, instance):
+        log_file_EN = os.path.join(instance.env.get("OUT_DIR"), "log_EN.txt")
+        data = []
+        try:
+            with open(log_file_EN, "r") as f:
                 for line in f:
                     data.append(json.loads(line.strip()))
         except Exception as e:
