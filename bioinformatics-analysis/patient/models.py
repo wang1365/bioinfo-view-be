@@ -22,8 +22,8 @@ class Patient(models.Model):
     )
     age = models.IntegerField(default=0, null=True, blank=True)
     birthday = models.DateField()
-    name = models.CharField(max_length=256, null=True, blank=True)
-    id_card = models.CharField(max_length=32, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=256)
+    id_card = models.CharField(max_length=32, unique=True)
     medical_doctor = models.CharField(max_length=128, null=True, blank=True)  # 诊疗医生
     gender = models.CharField(max_length=12, choices=GENDER, default=MALE)
     location = models.CharField(max_length=256, null=True, blank=True)
