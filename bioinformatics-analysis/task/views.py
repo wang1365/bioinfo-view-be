@@ -666,14 +666,14 @@ class TaskView(ModelViewSet):
             # if key == "priority" and ("admin" not in request.role_list or "super" not in request.role_list):
             #     return response_body(code=1, msg="非管理员用户不能调整优先级")
             setattr(instance, key, value)
-            if key == "result_path":
-                # if not instance.is_merge:
-                #     # 处理result_path
-                #     self._update_task_result_path(task=instance)
-                #     # 更新bam, 发送邮件等
-                #     self.resolve_task_result_path(task=instance)
-                instance.progress = 100
-                instance.data = self._load_log_data(instance)
+            # if key == "result_path" or key == "result_path_CN" or key == "result_path_EN":
+            #     # if not instance.is_merge:
+            #     #     # 处理result_path
+            #     #     self._update_task_result_path(task=instance)
+            #     #     # 更新bam, 发送邮件等
+            #     #     self.resolve_task_result_path(task=instance)
+            #     instance.progress = 100
+            #     instance.data = self._load_log_data(instance)
                 # TODO 定期删除task_data数据
                 # self._delete_test_update_task_by_shell(instance)
 
@@ -683,7 +683,10 @@ class TaskView(ModelViewSet):
 
 
 def download(request, pk):
-    file_list = Task.objects.get(id=pk).result_path.split(",")
+    if request.is_english:
+        file_list = Task.objects.get(id=pk).result_path_EN.split(",")
+    else:
+        file_list = Task.objects.get(id=pk).result_path_CN.split(",")
     if not file_list:
         return response_body(code=1, msg="要下载的文件不存在,请检查有没有上报结果文件或重新创建任务")
 

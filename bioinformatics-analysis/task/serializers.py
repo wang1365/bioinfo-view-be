@@ -37,6 +37,8 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "is_merge",
             "flow",
             "result_path",
+            "result_path_CN",
+            "result_path_EN",
             "is_qc",
             "env",
             "priority",

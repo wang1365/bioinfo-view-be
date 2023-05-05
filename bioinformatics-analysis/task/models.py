@@ -25,6 +25,8 @@ class Task(models.Model):
     is_merge = models.BooleanField(default=False)  # 是否归并任务结果
     flow = models.ForeignKey(to=Flow, on_delete=models.CASCADE)
     result_path = models.TextField(null=True)
+    result_path_CN = models.TextField(null=True)
+    result_path_EN = models.TextField(null=True)
     result_dir = models.CharField(max_length=120, null=True)
     keep_bam = models.BooleanField(default=False)
     has_cleaned = models.BooleanField(default=False)
