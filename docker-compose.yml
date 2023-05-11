@@ -68,4 +68,5 @@ services:
       - ${DATA_DIR}:${DATA_DIR}
       - ${DATABASE_DIR}:${DATABASE_DIR}
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime
     command: ["./wait-for-postgres.sh", "db", "./start.sh"]
