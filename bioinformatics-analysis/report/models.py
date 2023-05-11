@@ -21,5 +21,7 @@ class Report(models.Model):
     query = models.TextField()
     comment = models.TextField(null=True)
     report_path = models.TextField(null=True)
+    report_path_cn=models.TextField(null=True)
+    report_path_en=models.TextField(null=True)
     create_time = models.DateTimeField(default=now,null=True)
     status = models.CharField(max_length=32,null=True)
