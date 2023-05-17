@@ -87,6 +87,10 @@ def run_task():
                             'bind': os.getenv("DATABASE_DIR"),
                             'mode': 'rw'
                         },
+                        "/etc/localtime": {
+                            'bind': "/etc/localtime",
+                            'mode': "ro"
+                        }
                     },
                     detach=True,
                     remove=True,
