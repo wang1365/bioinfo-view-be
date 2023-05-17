@@ -95,7 +95,7 @@ class ReportView(CustomeViewSets):
                 fp.write(data['query'])
 
             report_file_path_prefix = os.path.join(report.task.result_dir, 'report',
-                                        f'{report.id}.docx')
+                                        f'{report.id}')
 
             # /path/xx.docx不是平台提供给脚本的，如果不增加输入参数，
             # 那这里-o改成报告前缀？ -o /path/xx ，
