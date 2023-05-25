@@ -15,6 +15,8 @@ class Account(models.Model):
     disk_limit = models.PositiveBigIntegerField(null=True, blank=True, default=0)  # MB
     parent = models.ForeignKey(to="self", null=True, blank=True, on_delete=models.DO_NOTHING)
     used_disk = models.PositiveBigIntegerField(default=0)   # MB
+    task_limit = models.BigIntegerField(null=True, blank=True)
+    task_count = models.BigIntegerField(default=0)
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
 

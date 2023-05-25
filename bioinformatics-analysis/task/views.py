@@ -6,7 +6,7 @@ import uuid
 import os
 import json
 import csv
-from django.db.models import Q
+from django.db.models import Q, F
 import shutil
 import subprocess
 from datetime import datetime
@@ -248,7 +248,16 @@ class TaskView(ModelViewSet):
             return True
         return False
 
+    def _check_count(self, request, *args, **kwargs):
+        if request.account.task_limit and request.account.task_count >= request.account.task_limit:
+            return True
+        return False
+
     def create(self, request, *args, **kwargs):
+        if self._check_count(request, *args, **kwargs):
+            return response_body(code=1,
+                                 status_code=400,
+                                 msg="您可以使用的次数已用完")
         if self._check_disk(request, *args, **kwargs):
             return response_body(code=1,
                                  status_code=400,
@@ -308,6 +317,7 @@ class TaskView(ModelViewSet):
         task.env = env
         task.result_dir = os.path.join(out_dir, "result")
         task.save()
+        Account.objects.filter(pk=request.account.pk).update(task_count=F("task_count") + 1)
         serializer = self.get_serializer(task)
         for sample_id in task.samples:
             TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id)
