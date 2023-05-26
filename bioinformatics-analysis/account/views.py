@@ -132,12 +132,12 @@ class UsersAPIView(
                     "role__code",
                     flat=True))
             if len(item["role"]) == 0:
-                print("account user: ", item.username, " role is empty")
+                print("account user: ", item['username'], " role is empty")
                 if "super" in request.role_list:
                     role = Role.objects.filter(code="admin").first()
                 elif "admin" in request.role_list:
                     role = Role.objects.filter(code="normal").first()
-                User2Role.objects.create(user=item, role=role)
+                User2Role.objects.create(user_id=item['id'], role=role)
             item["role"] = list(
                 User2Role.objects.filter(
                     user=item["id"]).values_list(
