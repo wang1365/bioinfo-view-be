@@ -131,6 +131,18 @@ class UsersAPIView(
                     user=item["id"]).values_list(
                     "role__code",
                     flat=True))
+            if len(item["role"]) == 0:
+                print("account user: ", item.username, " role is empty")
+                if "super" in request.role_list:
+                    role = Role.objects.filter(code="admin").first()
+                elif "admin" in request.role_list:
+                    role = Role.objects.filter(code="normal").first()
+                User2Role.objects.create(user=item, role=role)
+            item["role"] = list(
+                User2Role.objects.filter(
+                    user=item["id"]).values_list(
+                    "role__code",
+                    flat=True))
             item['running_task'] = Task.objects.filter(creator_id=item["id"], status=2).count()
         return response_body(
             data={"item_list": item_list, "total_count": accounts.count()}
