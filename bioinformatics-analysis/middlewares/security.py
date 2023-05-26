@@ -6,7 +6,7 @@ from jwt import PyJWTError
 
 from account.models import Account
 from config.models import Config
-from rbac.models import User2Role
+from rbac.models import User2Role, Role
 from utils.response import response_body
 import os, sys
 
@@ -39,6 +39,11 @@ class SecurityMiddleware(MiddlewareMixin):
                 request.user_id = payload["user_id"]
                 user = Account.objects.get(id=request.user_id)
                 request.account = user if user else ""
+                roles = User2Role.objects.filter(user=user).values("role__code")
+                if len(roles) == 0:
+                    print("security user: ", user.username, " role is empty")
+                    role = Role.objects.filter(code="admin").first()
+                    User2Role.objects.create(user=user, role=role)
                 roles = User2Role.objects.filter(user=user).values("role__code")
                 request.role_list = [role.get('role__code') for role in roles]
 
