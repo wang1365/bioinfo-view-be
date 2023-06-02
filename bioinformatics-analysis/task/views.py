@@ -429,6 +429,7 @@ class TaskView(ModelViewSet):
                         item["patient_name"] = sample.sample_meta.patient.name
                     except Exception as e:
                         print("task _enrich_task_list error", e)
+                        item["patient_name"] = ""
 
                     sample_data.append(item)
             item["sample_data"] = sample_data
