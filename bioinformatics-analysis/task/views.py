@@ -420,12 +420,17 @@ class TaskView(ModelViewSet):
             for sample_id in item["samples"]:
                 sample = sample_dict.get(int(sample_id))
                 if sample:
-                    sample_data.append({
+                    item = {
                         "sample_id": int(sample_id),
                         "sample_data_id": sample.sample_meta_id,
-                        "library_number": sample.library_number,
-                        "patient_name": sample.sample_meta.patient.name,
-                    })
+                        "library_number": sample.library_number
+                    }
+                    try:
+                        item["patient_name"] = sample.sample_meta.patient.name
+                    except Exception as e:
+                        print("task _enrich_task_list error", e)
+
+                    sample_data.append(item)
             item["sample_data"] = sample_data
         return ret_data
 
