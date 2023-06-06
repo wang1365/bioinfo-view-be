@@ -7,6 +7,7 @@ RUN set -ex; \
     fi; \
     apt update; \
     apt install -y postgresql-client; \
+    apt install -y gawk; \
     rm -rf /var/lib/apt/lists/*
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements.txt
