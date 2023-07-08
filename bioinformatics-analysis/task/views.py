@@ -699,7 +699,6 @@ class TaskView(ModelViewSet):
 
 
 def download(request, pk):
-    print("HTTP_LANGUAGE", request.META.get("HTTP_LANGUAGE", "DEFAULT"))
     if request.is_english:
         file_list = Task.objects.get(id=pk).result_path_EN.split(",")
     else:

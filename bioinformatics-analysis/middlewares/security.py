@@ -48,6 +48,8 @@ class SecurityMiddleware(MiddlewareMixin):
                 request.role_list = [role.get('role__code') for role in roles]
 
                 if not self.check_license_expired(user):
+                    if request.is_english:
+                        return response_body(code=1, msg="The system usage time has expired！", status_code=401)
                     return response_body(code=1, msg="系统使用期限已到！", status_code=401)
             except PyJWTError:
                 return response_body(code=1, msg="token已失效", status_code=401)

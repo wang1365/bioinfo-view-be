@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from config.filters import ConfigFilterSet, ResourceFilterSet
 from rest_framework.decorators import action
+from django.db.models import Q
 
 from common.viewsets.viewsets import CustomeViewSets
 
@@ -38,6 +39,11 @@ class ResourceView(CustomeViewSets):
         now = datetime.now()
         week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0)
         tasks = Task.objects.filter(create_time__gte=week_start, create_time__lte=now)
+        if "super" in request.role_list:
+            tasks = tasks.all()
+        elif "admin" in request.role_list:
+            tasks = tasks.filter(
+                Q(creator__parent=request.account) | Q(creator=request.account))
         day_used_disk = 0
         for task in tasks:
             day_used_disk += dir_size(task.env.get("OUT_DIR"))
