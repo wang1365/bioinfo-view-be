@@ -36,7 +36,7 @@ def dir_size(dirctory):
     # elif size[-1] == "B":
     #     size = float(size[:-1]) / (1024 * 1024)
     res = subprocess.Popen(
-        f'du -h {dirctory}',
+        f'du -s {dirctory}',
         shell=True,
         stdout=subprocess.PIPE,
         encoding='utf8')
