@@ -255,10 +255,18 @@ class TaskView(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if self._check_count(request, *args, **kwargs):
+            if request.is_english:
+                return response_body(code=1,
+                                     status_code=400,
+                                     msg="Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit")
             return response_body(code=1,
                                  status_code=400,
-                                 msg="您可以使用的次数已用完")
+                                 msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
         if self._check_disk(request, *args, **kwargs):
+            if request.is_english:
+                return response_body(code=1,
+                                     status_code=400,
+                                     msg="Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit")
             return response_body(code=1,
                                  status_code=400,
                                  msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
