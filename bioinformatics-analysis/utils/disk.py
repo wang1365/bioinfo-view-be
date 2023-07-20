@@ -3,14 +3,17 @@ import os
 import time
 
 from account.models import Account
+from config.models import Config
 
 
 def cal_dir_size(dirctory, user_id):
     if not os.path.exists(dirctory):
         return
-    time.sleep(3)
+    time.sleep(8)
     size = dir_size(dirctory)
     Account.objects.filter(pk=user_id).update(used_disk=size)
+    result_dir = os.getenv("TASK_RESULT_DIR")
+    Config.objects.filter(name="disk").update(used=dir_size(result_dir))
 
 
 def dir_size(dirctory):
