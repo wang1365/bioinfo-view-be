@@ -5,18 +5,19 @@ from datetime import date
 import tempfile
 import pendulum
 from openpyxl import load_workbook
-from patient.constant import PATIENT_MODEL_ATTRS
+from patient.constant import PATIENT_MODEL_ATTRS, PATIENT_MODEL_ATTRS_MAP
 
 from account.models import Account
 from django.core.exceptions import ObjectDoesNotExist
 
 
 class ExcelHandler:
-    def __init__(self, filename, attrs):
+    def __init__(self, filename, attrs, is_english=False):
         self._filename = filename
         self._index2index = {}
         self._field_names = []
         self._attrs = attrs
+        self._is_english = is_english
 
     def read(self):
         workbook = load_workbook(self._filename)
@@ -35,15 +36,30 @@ class ExcelHandler:
 
     def _deal_with_headers(self, cells):
         def _compare_name(value):
-            return value.replace('\n', '').replace(' ', '').replace('\t', '')
+            val = value.strip()
+            if self._is_english:
+                val = PATIENT_MODEL_ATTRS_MAP[val]
+            return val
         mappings = {
             attr['name']: index for index,
             attr in enumerate(
                 self._attrs)}
+
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
             for _, cell in enumerate(cells)
         ]
+        # ret = []
+        # for _, cell in enumerate(cells):
+        #     try:
+        #         _c = _compare_name(cell.value)
+        #         key = self._attrs[mappings[_c]]
+        #         ret.append(key['key'])
+        #     except Exception as e:
+        #         import pdb
+        #         pdb.set_trace()
+        # return ret
+
 
     def _deal_with_values(self, cells):
         values = [cell.value for cell in cells]

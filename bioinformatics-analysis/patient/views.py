@@ -18,7 +18,7 @@ from patient.services import file_import as file_import_service
 from utils.response import response_body
 from utils.paginator import PageNumberPaginationWithWrapper
 from common.filters import CommonFilters
-from patient.constant import PATIENT_MODEL_ATTRS, PATIENT_META_TEMPLATE_PATH
+from patient.constant import PATIENT_MODEL_ATTRS, PATIENT_META_TEMPLATE_PATH, PATIENT_META_TEMPLATE_EN_PATH
 from patient.core import export_to_csv, ExcelHandler, ValueProcess, calculate_age
 
 
@@ -81,7 +81,7 @@ class PatientViewSet(ModelViewSet):
             for chunk in up_file.chunks():
                 fp.write(chunk)
 
-        excel_handler = ExcelHandler(filename, info['attrs'])
+        excel_handler = ExcelHandler(filename, info['attrs'], request.is_english)
         records = excel_handler.read()
 
         for record in records:
@@ -203,7 +203,10 @@ class PatientViewSet(ModelViewSet):
         # ws.append(columns)
         # wb.save(response)
         # return response
-        with open(PATIENT_META_TEMPLATE_PATH, "rb") as f:
+        path = PATIENT_META_TEMPLATE_PATH
+        if request.is_english:
+            path = PATIENT_META_TEMPLATE_EN_PATH
+        with open(path, "rb") as f:
             data = f.read()
 
         response = HttpResponse(data)

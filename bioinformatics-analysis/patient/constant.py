@@ -28,6 +28,28 @@ class SearchType:
     exact = 'exact'
     not_support = 'not_support'
 
+PATIENT_MODEL_ATTRS_MAP = {
+    "Name": "姓名",
+    "Gender": "性别",
+    "Date of Birth": "出生日期",
+    "ID card": "身份证",
+    "Home Address": "家庭地址",
+    "Submission Unit": "送检机构",
+    "Treating Physician": "诊疗医生",
+    "Clinical Diagnosis": "临床诊断",
+    "Tumor Staging": "肿瘤分期",
+    "Genetic Disease": "遗传病",
+    "Family History": "家族史",
+    "Grug Using History": "用药史",
+    "Smoking": "吸烟",
+    "Alcohol Drinking": "饮酒",
+    "Viral Infection": "病毒感染",
+    "Treatment History": "治疗史",
+    "Prognosis Information": "预后信息",
+    "Prognosis Time(day)": "预后时间（天）",
+    "Time of Recurrence(day)": "复发时间（天）",
+    "Survival Time(day)": "存活时间（天）",
+}
 
 PATIENT_MODEL_ATTRS = [
     {
@@ -102,8 +124,6 @@ PATIENT_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.exact
     },
-
-
     {
         'key': 'diagnosis',
         'name': '临床诊断',
@@ -134,7 +154,6 @@ PATIENT_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.exact
     },
-
     {
         'key': 'smoking',
         'name': '吸烟',
@@ -183,4 +202,10 @@ PATIENT_META_TEMPLATE_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "resources",
     "patient-meta.xlsx"
+)
+
+PATIENT_META_TEMPLATE_EN_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "patient-meta-en.xlsx"
 )
