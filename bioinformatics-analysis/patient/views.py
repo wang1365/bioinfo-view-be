@@ -83,8 +83,10 @@ class PatientViewSet(ModelViewSet):
 
         excel_handler = ExcelHandler(filename, info['attrs'], request.is_english)
         records = excel_handler.read()
-
+        new_records = []
         for record in records:
+            if not record["id_card"]:
+                continue
             record["creator_id"] = request.account.id
             record["identifier"] = str(uuid.uuid4())
             record["birthday"] = record["birthday"].strftime("%Y-%m-%d")
@@ -92,6 +94,11 @@ class PatientViewSet(ModelViewSet):
             record["disease"] = record.get("disease", "")
             record["family_history"] = record.get("family_history", "")
             prognosis_time = record.get("prognosis_time")
+            if request.is_english:
+                if record["gender"] == "Female":
+                    record["gender"] = "女"
+                elif record["gender"] == "Male":
+                    record["gender"] = "男"
             if not prognosis_time:
                 record["prognosis_time"] = 0
             recurrence_time = record.get("recurrence_time")
@@ -122,11 +129,12 @@ class PatientViewSet(ModelViewSet):
                 record["viral_infection"] = "否"
             elif is_all_english(viral_infection) and viral_infection.lower() == "yes":
                 record["viral_infection"] = "是"
+            new_records.append(record)
 
         unsuccessful_records = []
         value_process = ValueProcess(user_id=request.account.id)
 
-        for record in records:
+        for record in new_records:
             patient_serializer = info['serializer'](
                 data=value_process.process(record))
             if patient_serializer.is_valid():
