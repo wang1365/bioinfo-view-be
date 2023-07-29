@@ -82,6 +82,21 @@ SERIALIZER_MAP = {
     'report': ReportSerializer
 }
 
+def _translate(data):
+    for item in data:
+        if item["smoking"] == "是":
+            item["smoking"] = "Yes"
+        else:
+            item["smoking"] = "No"
+        if item["drinking"] == "是":
+            item["drinking"] = "Yes"
+        else:
+            item["drinking"] = "No"
+        if item["viral_infection"] == "是":
+            item["viral_infection"] = "Yes"
+        else:
+            item["viral_infection"] = "No"
+    return data
 
 def post_query(request: HttpRequest, model_name: str):
     if request.body:
@@ -127,11 +142,14 @@ def post_query(request: HttpRequest, model_name: str):
     sobj = serializer(objs, many=True)
     # import ipdb
     # ipdb.set_trace()
+    dat = sobj.data
+    if model_name == "patient" and request.META.get("HTTP_LANGUAGE", "") == "en-US":
+        dat = _translate(dat)
     return JsonResponse({
         'code': 0,
         'data': {
             'count': paginator.count,
-            'results': sobj.data
+            'results': dat
         },
         'msg': 'OK'
     })

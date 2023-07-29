@@ -36,6 +36,13 @@ class PatientFilter(CommonFilters):
         return qs
 
 
+def is_all_english(strs):
+    import string
+    for i in strs:
+        if i not in string.ascii_lowercase + string.ascii_uppercase:
+            return False
+    return True
+
 class PatientViewSet(ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
@@ -54,7 +61,6 @@ class PatientViewSet(ModelViewSet):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -82,6 +88,40 @@ class PatientViewSet(ModelViewSet):
             record["creator_id"] = request.account.id
             record["identifier"] = str(uuid.uuid4())
             record["birthday"] = record["birthday"].strftime("%Y-%m-%d")
+            record["tumor_stage"] = record.get("tumor_stage", "")
+            record["disease"] = record.get("disease", "")
+            record["family_history"] = record.get("family_history", "")
+            prognosis_time = record.get("prognosis_time")
+            if not prognosis_time:
+                record["prognosis_time"] = 0
+            recurrence_time = record.get("recurrence_time")
+            if not recurrence_time:
+                record["recurrence_time"] = 0
+            survival_time = record.get("survival_time")
+            if not survival_time:
+                record["survival_time"] = 0
+            record["medication_history"] = record.get("medication_history", "")
+            smoking = record.get("smoking")
+            if not smoking:
+                record["smoking"] = "否"
+            elif is_all_english(smoking) and smoking.lower() == "no":
+                record["smoking"] = "否"
+            elif is_all_english(smoking) and smoking.lower() == "yes":
+                record["smoking"] = "是"
+            drinking = record.get("drinking")
+            if not drinking:
+                record["drinking"] = "否"
+            elif is_all_english(drinking) and drinking.lower() == "no":
+                record["drinking"] = "否"
+            elif is_all_english(drinking) and drinking.lower() == "yes":
+                record["drinking"] = "是"
+            viral_infection = record.get("viral_infection")
+            if not viral_infection:
+                record["viral_infection"] = "否"
+            elif is_all_english(viral_infection) and viral_infection.lower() == "no":
+                record["viral_infection"] = "否"
+            elif is_all_english(viral_infection) and viral_infection.lower() == "yes":
+                record["viral_infection"] = "是"
 
         unsuccessful_records = []
         value_process = ValueProcess(user_id=request.account.id)
