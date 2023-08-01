@@ -21,12 +21,24 @@ SAMPLE_TEMPLATE_PATH = os.path.join(
     "resources",
     "data-meta.xlsx"
 )
+
+SAMPLE_TEMPLATE_EN_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "data-meta-en.xlsx"
+)
+
 SAMPLE_META_TEMPLATE_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "resources",
     "sample-meta.xlsx"
 )
 
+SAMPLE_META_TEMPLATE_EN_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "resources",
+    "sample-meta-en.xlsx"
+)
 
 FIELDS_OPERATORS = {
     (ValueType.date, SearchType.ranges): ['between'],

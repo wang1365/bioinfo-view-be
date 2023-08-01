@@ -1,7 +1,7 @@
 from django.urls import re_path as url
 
 from sample import views
-from sample.constants import SAMPLE_META_TEMPLATE_PATH, SAMPLE_TEMPLATE_PATH
+from sample.constants import SAMPLE_META_TEMPLATE_PATH, SAMPLE_TEMPLATE_PATH, SAMPLE_META_TEMPLATE_EN_PATH, SAMPLE_TEMPLATE_EN_PATH
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -15,7 +15,7 @@ other_urls = [
 
     url(
         r"^/samples/template/download",
-        lambda req: views.download_by_filename(req, SAMPLE_TEMPLATE_PATH),
+        lambda req: views.download_by_choices(req, [SAMPLE_TEMPLATE_PATH, SAMPLE_TEMPLATE_EN_PATH]),
     ),
 
     url(
@@ -39,7 +39,7 @@ other_urls = [
 
     url(
         r"^/samplemeta/template/download",
-        lambda req: views.download_by_filename(req, SAMPLE_META_TEMPLATE_PATH),
+        lambda req: views.download_by_choices(req, [SAMPLE_META_TEMPLATE_PATH, SAMPLE_META_TEMPLATE_EN_PATH]),
     ),
     url(r"^/samplemeta/list_fields",
         views.SampleMetaView.as_view({"get": "list_fields"})),

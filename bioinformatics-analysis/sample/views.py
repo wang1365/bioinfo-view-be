@@ -297,6 +297,11 @@ def download(request, pk):
     return download_by_filename(file)
 
 
+def download_by_choices(request, filenames):
+    filename = filenames[request.is_english]
+    return download_by_filename(request, filename)
+
+
 def download_by_filename(request, filename):
     if not filename:
         return response_body(code=1, msg="要下载的文件不存在")
