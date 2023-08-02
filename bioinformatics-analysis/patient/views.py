@@ -212,6 +212,7 @@ class PatientViewSet(ModelViewSet):
         # wb.save(response)
         # return response
         path = PATIENT_META_TEMPLATE_PATH
+        print(request.META)
         if request.is_english:
             path = PATIENT_META_TEMPLATE_EN_PATH
         with open(path, "rb") as f:
