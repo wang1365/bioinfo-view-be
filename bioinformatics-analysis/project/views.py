@@ -1,16 +1,20 @@
 # Create your views here.
 import re
 import subprocess
-from rest_framework.viewsets import ModelViewSet
 
 from account.models import Account
-from project.models import Project, ProjectMembers
-from project.serializer import ProjectSerializer
+from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from sample.models import Sample
 from task.models import Task
+
+from project.models import Project, ProjectMembers
+from project.serializer import ProjectSerializer
 from utils.paginator import PageNumberPagination
 from utils.response import response_body
-from django.db.models import Q
 
 
 class ProjectsAPIView(ModelViewSet):
@@ -46,12 +50,12 @@ class ProjectsAPIView(ModelViewSet):
         # if Project.objects.filter(owner=request.account, name=project_name).exists():
         #     return response_body(code=1, msg=f"您已创建了名为{project_name}的项目")
         samples = [
-            Sample.objects.get(
-                pk=i) for i in request.data.get(
-                "samples", [])]
+            Sample.objects.get(pk=i) for i in request.data.get("samples", [])
+        ]
         members = [request.account]
-        members.extend([Account.objects.get(pk=i)
-                        for i in request.data.get("members", [])])
+        members.extend([
+            Account.objects.get(pk=i) for i in request.data.get("members", [])
+        ])
         # code = request.data.get("code", "")
         # if self._code_exists(code):
         #     return response_body(code=1, msg=f"已存在项目编码{code}的项目")
@@ -64,17 +68,16 @@ class ProjectsAPIView(ModelViewSet):
                     "desc": request.data.get("desc", ""),
                     "parent_id": parent
                     # "code": request.data.get("code", ""),
-                }
-            )
+                })
         except Exception as e:
             return response_body(code=1, msg=e.args[0])
         if samples:
             project.samples.set(samples)
         if members:
             members_list = [
-                ProjectMembers(
-                    account=member,
-                    project=project) for member in set(members)]
+                ProjectMembers(account=member, project=project)
+                for member in set(members)
+            ]
             ProjectMembers.objects.bulk_create(objs=members_list)
         bs = self.serializer_class(project, many=False)
         return response_body(data=bs.data)
@@ -85,14 +88,12 @@ class ProjectsAPIView(ModelViewSet):
         if "super" in request.role_list:
             projects = Project.objects.filter(is_visible=True)
         elif "admin" in request.role_list:
-            projects = Project.objects.filter(Q(is_visible=True) &
-                                              (Q(members__id__in=[request.account.id])
-                                               | Q(members__parent=request.account.id)))
+            projects = Project.objects.filter(
+                Q(is_visible=True) & (Q(members__id__in=[request.account.id])
+                                      | Q(members__parent=request.account.id)))
         elif "normal" in request.role_list:
             projects = Project.objects.filter(
-                members__id__in=[
-                    request.account.id],
-                is_visible=True)
+                members__id__in=[request.account.id], is_visible=True)
         if query_name:
             projects = projects.filter(name__contains=query_name)
         if query_parent:
@@ -105,16 +106,17 @@ class ProjectsAPIView(ModelViewSet):
         page = self.paginate_queryset(projects)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return response_body(
-                data={"results": serializer.data, "count": len(projects)}
-            )
+            return response_body(data={
+                "results": serializer.data,
+                "count": len(projects)
+            })
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.is_builtin:
             return response_body(code=1, msg="内置项目不能删除")
-        if request.account.id == instance.owner.id or (
-                "admin" in request.role_list):
+        if request.account.id == instance.owner.id or ("admin"
+                                                       in request.role_list):
             tasks = Task.objects.filter(project=instance).all()
             for task in tasks:
                 out_dir = task.env.get("OUT_DIR")
@@ -127,25 +129,26 @@ class ProjectsAPIView(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if request.account.id == instance.owner.id or (
-                "admin" in request.role_list):
-            samples = [
-                Sample.objects.get(
-                    pk=i) for i in set(
-                    request.data.get(
-                        "samples",
-                        []))]
+        if request.account.id == instance.owner.id or ("admin"
+                                                       in request.role_list):
+            request_samples = request.data.get("samples", None)
+            if request_samples is not None:
+                samples = [
+                    Sample.objects.get(pk=i) for i in set(request_samples)
+                ]
+                instance.samples.set(samples)
+
             members = [
-                Account.objects.get(
-                    pk=i) for i in request.data.get(
-                    "members", [])]
-            instance.samples.set(samples)
+                Account.objects.get(pk=i)
+                for i in request.data.get("members", [])
+            ]
+
             if members:
                 instance.members.clear()
                 members_list = [
-                    ProjectMembers(
-                        account=member,
-                        project=instance) for member in members]
+                    ProjectMembers(account=member, project=instance)
+                    for member in members
+                ]
                 ProjectMembers.objects.bulk_create(objs=members_list)
             if request.data.get("name"):
                 instance.name = request.data.get("name")
