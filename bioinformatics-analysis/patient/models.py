@@ -38,6 +38,8 @@ class Patient(models.Model):
     smoking = models.CharField(max_length=16, default=False, choices=BOOL)  # 吸烟
     drinking = models.CharField(max_length=16, default=False, choices=BOOL) # 饮酒
     viral_infection = models.CharField(max_length=16, default=False, choices=BOOL)  # 病毒感染
+    viral_result = models.CharField(max_length=256, default='')  # 病原培养鉴定结果
+    viral_focus = models.CharField(max_length=256, default='')  # 重点关注病原
     treatment_history = models.CharField(max_length=256, null=True, blank=True)  # 治疗史
     prognosis = models.CharField(max_length=512, blank=True, null=True)  # 预后信息
     prognosis_time = models.IntegerField(default=0)  # 预后时间
