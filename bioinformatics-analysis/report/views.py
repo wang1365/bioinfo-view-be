@@ -4,6 +4,7 @@ import threading
 import subprocess
 
 from django.db.models import Q
+from django.http.request import HttpRequest
 
 from account import constants as account_constant
 
@@ -85,33 +86,35 @@ class ReportView(CustomeViewSets):
         report = Report.objects.create(**data)
         report.status = '报告创建中'
         report.save()
+
         def async_create_report(report):
 
             # save query to a txt file
             json_filepath = os.path.join(report.task.result_dir, "report",
-                                     str(report.id))
+                                         str(report.id))
             os.makedirs(os.path.dirname(json_filepath), exist_ok=True)
             with open(json_filepath, "w") as fp:
                 fp.write(data['query'])
 
-            report_file_path_prefix = os.path.join(report.task.result_dir, 'report',
-                                        f'{report.id}')
+            report_file_path_prefix = os.path.join(report.task.result_dir,
+                                                   'report', f'{report.id}')
 
             # /path/xx.docx不是平台提供给脚本的，如果不增加输入参数，
             # 那这里-o改成报告前缀？ -o /path/xx ，
             # 我脚本生成 /path/xx_CN.docx 和 /path/xx_EN.docx ？
 
             return_code = subprocess.call([
-            'python3', script_path, '-i', json_filepath, '-d',
-            os.path.dirname(json_filepath), '-o', report_file_path_prefix
-        ])
+                'python3', script_path, '-i', json_filepath, '-d',
+                os.path.dirname(json_filepath), '-o', report_file_path_prefix
+            ])
             print([
-            'python3', script_path, '-i', json_filepath, '-d',
-            os.path.dirname(json_filepath), '-o', report_file_path_prefix
-        ])
+                'python3', script_path, '-i', json_filepath, '-d',
+                os.path.dirname(json_filepath), '-o', report_file_path_prefix
+            ])
             cn_file_path = f'{os.path.abspath(report_file_path_prefix)}_CN.docx'
             en_file_path = f'{os.path.abspath(report_file_path_prefix)}_EN.docx'
-            if not os.path.isfile(cn_file_path) or not os.path.isfile(en_file_path):
+            if not os.path.isfile(cn_file_path) or not os.path.isfile(
+                    en_file_path):
                 report.status = '创建失败'
                 report.save()
                 return response_body(msg="脚本执行异常")
@@ -121,7 +124,10 @@ class ReportView(CustomeViewSets):
             report.report_path_en = en_file_path
             report.status = '创建成功'
             report.save()
-        threading.Thread(target=async_create_report, args=(report,),daemon=True).start()
+
+        threading.Thread(target=async_create_report,
+                         args=(report, ),
+                         daemon=True).start()
         return response_body(data=serializer.data, msg="success")
 
     def post_list(self, data, request, *args, **kwargs):
@@ -149,7 +155,7 @@ class ReportView(CustomeViewSets):
                 sample_meta__patient__identifier=patient_identifier)
         if filtered:
             sample_ids = [str(item.id) for item in samples.all()]
-            query=''
+            query = ''
             task_ids = []
             if sample_ids:
                 query = f'select id from task where samples ?| ARRAY{sample_ids}'
@@ -158,12 +164,10 @@ class ReportView(CustomeViewSets):
                 for item in Task.objects.raw(query):
                     task_ids.append(item.id)
 
-            queryset = Report.objects.filter(
-                task__id__in=task_ids)
+            queryset = Report.objects.filter(task__id__in=task_ids)
         else:
             if search:
-                queryset = Report.objects.filter(
-                    task__name__icontains=search)
+                queryset = Report.objects.filter(task__name__icontains=search)
             else:
                 queryset = Report.objects.all()
 
@@ -171,9 +175,10 @@ class ReportView(CustomeViewSets):
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
-        queryset= queryset.order_by('-id')
-        
+                Q(creator__user2role__role__code=account_constant.NORMAL)
+                | Q(creator=request.account))
+        queryset = queryset.order_by('-id')
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = MReportSerializer(page, many=True)
@@ -183,3 +188,76 @@ class ReportView(CustomeViewSets):
         serializer = MReportSerializer(queryset, many=True)
         data = self.post_list(serializer.data, request, *args, **kwargs)
         return response_body(data=data, msg="success")
+
+
+def pathogen_read(request):
+    task_id=request.GET.get('task_id') # 任务 id
+    task = Task.objects.get(id=task_id)
+    project = task.project
+
+    # # 项目下的样本 id 列表
+    # project_sample_ids = [sample.id for sample in project_samples]
+
+    project_tasks = Task.objects.filter(project=project).all()
+    # 项目下所有任务的结果目录
+    project_tasks_result = []
+
+    for item in project_tasks:
+        task_samples = [
+            {
+                'project_index': sample.project_index,
+                'library_number': sample.library_number,
+                'reagent_box': sample.reagent_box,
+                'nucleic_break_type': sample.nucleic_break_type,
+                'library_input': sample.library_input,
+                'index_type': sample.index_type,
+                'index_number': sample.index_number,
+                'hybrid_input': sample.hybrid_input,
+                'risk': sample.risk,
+                'nucleic_level': sample.nucleic_level,
+                # 'sample_meta':sample.sample_meta,
+                'sample_identifier': sample.sample_identifier,
+                'identifier': sample.identifier,
+                'company': sample.company,
+                'nucleic_type': sample.nucleic_type,
+                'fastq1_path': sample.fastq1_path,
+                'fastq2_path': sample.fastq2_path,
+                # 'user':sample.user,
+                #'create_time':sample.create_time,
+                #'modify_time':sample.modify_time,
+            } for sample in Sample.objects.filter(id__in=item.samples).all()
+        ]
+        task = {
+            'id': item.id,
+            'name': item.name,
+            # 'project':item.project,
+            'status': item.status,
+            'progress': item.progress,
+            # 'creator':item.creator,
+            'pid': item.pid,
+            'is_merge': item.is_merge,
+            # 'flow':item.flow,
+            'result_path': item.result_path,
+            'result_path_CN': item.result_path_CN,
+            'result_path_EN': item.result_path_EN,
+            'result_dir': item.result_dir,
+            'keep_bam': item.keep_bam,
+            'has_cleaned': item.has_cleaned,
+            'is_qc': item.is_qc,
+            'priority': item.priority,
+            'memory': item.memory,
+            'log': item.log,
+            'error_message': item.error_message,
+            'error_message_EN': item.error_message_EN,
+            'error_message_CN': item.error_message_CN,
+            # 'create_time':item.create_time,
+            # 'update_time':item.update_time,
+            # 'deleted_tempdir':item.deleted_tempdir,
+            'env': item.env,
+            'samples': task_samples,
+            'parameter': item.parameter,
+        }
+        project_tasks_result.append(task)
+    project_tasks_result.sort(key=lambda item: item['id'])
+
+    return response_body(data=project_tasks_result)

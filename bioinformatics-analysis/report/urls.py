@@ -18,6 +18,7 @@ other_urls = [
     url(
         r"^/file/", views.read_file
     ),
+    url(r'^/pathogen/read',views.pathogen_read)
 ]
 
 urlpatterns = other_urls + router.urls
