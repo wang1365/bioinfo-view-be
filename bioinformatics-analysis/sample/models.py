@@ -131,7 +131,7 @@ class Sample(models.Model):
 
     # R1 / R2 数据名称
     fastq1_path = models.CharField(max_length=1024)
-    fastq2_path = models.CharField(max_length=1024)
+    fastq2_path = models.CharField(max_length=1024,default="",null=True)
 
     # 样本所有者
     user = models.ForeignKey(to=Account, on_delete=models.CASCADE, blank=True, null=True)
