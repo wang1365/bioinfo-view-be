@@ -803,11 +803,12 @@ def task_summary(request, *args, **kwargs):
 def read_file(request, pk):
     task = Task.objects.get(pk=pk)
     file_path = os.path.join(task.result_dir, request.GET['path'])
+    ignore_not_existed = request.GET['ignore_not_existed'] or False
     if not os.path.isfile(file_path) or not os.path.exists(file_path):
         return response_body(
             data=None,
             status_code=200,
-            code=-1,
+            code=-1 if not ignore_not_existed else 0,
             msg=f'文件不存在:{file_path}, result_dir:f{task.result_dir}')
 
     with open(file_path) as f:
