@@ -6,7 +6,7 @@ RUN set -ex; \
         echo "deb http://mirrors.aliyun.com/debian/ buster main non-free contrib\ndeb-src http://mirrors.aliyun.com/debian/ buster main non-free contrib\ndeb http://mirrors.aliyun.com/debian-security buster/updates main\ndeb-src http://mirrors.aliyun.com/debian-security buster/updates main\ndeb http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib\ndeb-src http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib\ndeb http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib\ndeb-src http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib\n" > /etc/apt/sources.list; \
     fi; \
     apt update; \
-    apt upgrade; \
+    apt -y upgrade; \
     apt install -y postgresql-client; \
     rm -rf /var/lib/apt/lists/*
 COPY ./requirements.txt /requirements.txt
