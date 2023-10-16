@@ -1,3 +1,5 @@
+import logging
+
 import docker
 from docker.errors import DockerException
 
@@ -5,7 +7,8 @@ G_CLIENT = None
 try:
     G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock', timeout=60 * 10)
 except DockerException as e:
-    print(e)
+    print('!!!create docker client failed', e)
+    logging.getLogger().warning('create docker client failed', e)
 
 
 def has_image(image_name):
