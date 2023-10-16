@@ -5,7 +5,7 @@ from docker.errors import DockerException
 
 G_CLIENT = None
 try:
-    G_CLIENT = docker.DockerClient(base_url='unix://var/run/docker.sock', timeout=60 * 10)
+    G_CLIENT = docker.from_env()
     print('create docker client success', G_CLIENT)
     logging.getLogger().warning('create docker client success', G_CLIENT)
 except DockerException as e:
