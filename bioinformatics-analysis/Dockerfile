@@ -1,6 +1,6 @@
 FROM python:3.10
 # install system dependencies
-RUN apt-get install ca-certificates
+RUN apt install apt-transport-https ca-certificates
 RUN set -ex; \
     if [ "${PROXY}"="true" ] ; then \
         mv /etc/apt/sources.list /etc/apt/sources.list.bak; \
@@ -8,6 +8,7 @@ RUN set -ex; \
     fi; \
     apt update; \
     apt -y upgrade; \
+    apt install -y gawk; \
     apt install -y postgresql-client; \
     rm -rf /var/lib/apt/lists/*
 COPY ./requirements.txt /requirements.txt
