@@ -1,5 +1,6 @@
 FROM python:3.10
 # install system dependencies
+RUN apt-get install ca-certificates
 RUN set -ex; \
     if [ "${PROXY}"="true" ] ; then \
         mv /etc/apt/sources.list /etc/apt/sources.list.bak; \
