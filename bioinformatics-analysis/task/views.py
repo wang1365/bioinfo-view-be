@@ -431,7 +431,10 @@ class TaskView(ModelViewSet):
                     obj = {
                         "sample_id": int(sample_id),
                         "sample_data_id": sample.sample_meta_id,
-                        "library_number": sample.library_number
+                        "library_number": sample.library_number,
+                        "sample_identifier":sample.sample_identifier,
+                        "sample_data_identifier":sample.sample_meta.identifier
+
                     }
                     try:
                         obj["patient_name"] = sample.sample_meta.patient.name
