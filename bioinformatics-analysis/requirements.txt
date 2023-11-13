@@ -38,3 +38,4 @@ docker==6.1.3
 concurrent-log-handler==0.9.20
 pandas==1.5.1
 python-docx
+ipython
