@@ -57,6 +57,7 @@ def run_task():
     used_memory = sum(task.memory for task in running_tasks)
     totol_memory = SystemMemory().totol_memory
     running_tasks_count = len(running_tasks)
+    running_tasks_count = Task.objects.filter(status=2).count()
     if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
         # run task
         beto_run_tasks = Task.objects.filter(status=1).order_by(
