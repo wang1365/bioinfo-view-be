@@ -58,12 +58,19 @@ def run_task():
     totol_memory = SystemMemory().totol_memory
     running_tasks_count = len(running_tasks)
     running_tasks_count = Task.objects.filter(status=2).count()
+    log = logging.getLogger('RunTask')
+    log.info(f'max_task:{max_task}, running_task:{running_tasks_count}, used_memory:{used_memory}, total_memory:{totol_memory}, memory_rate:{memory_rate}')
     if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
         # run task
         beto_run_tasks = Task.objects.filter(status=1).order_by(
             "-priority", "create_time")[0:max_task - running_tasks_count]
+        to_run_count = max_task - running_tasks_count
+        log.info(f'start to run {to_run_count} tasks')
         for beto_run_task in beto_run_tasks:
-            if used_memory + beto_run_task.memory < totol_memory * memory_rate:
+            log.info(f'Check task memory, task: {beto_run_task.id}, require mem:{beto_run_task.memory} ')
+            # 内存检查的不对，临时除以2
+            if used_memory + beto_run_task.memory / 2 < totol_memory * memory_rate:
+                log.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
                 container = G_CLIENT.containers.run(
                     image=beto_run_task.flow.image_name,
                     environment=beto_run_task.env,
