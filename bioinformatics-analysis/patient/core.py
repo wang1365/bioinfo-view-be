@@ -105,9 +105,9 @@ class ValueProcess:
 
 def export_to_csv(querset, is_en=False):
     if is_en:
-        headers = [a['name'] for a in PATIENT_MODEL_ATTRS]
-    else:
         headers = [a['en_name'] for a in PATIENT_MODEL_ATTRS]
+    else:
+        headers = [a['name'] for a in PATIENT_MODEL_ATTRS]
 
     data = [headers]
 
