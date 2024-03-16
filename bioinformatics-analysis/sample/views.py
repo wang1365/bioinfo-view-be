@@ -18,7 +18,7 @@ from django.http import HttpResponse, QueryDict
 
 from patient.models import Patient
 from sample.models import Sample, SampleMeta
-from sample.core import ExcelHandler, ValueProcess, export_to_csv
+from sample.core import ExcelHandler, ValueProcess, export_to_csv, export_to_csv_sample_meta
 from sample.serializers import SampleMetaSerializer, SampleSerializer, SampleMeta
 from sample.filters import (SampleFilters, SampleProjectFilters,
                             SampleUserFilter, SampleKeywordFilters)
@@ -183,7 +183,7 @@ class SampleMetaView(CustomeViewSets):
         return response_body(data=data)
 
     def export(self, request):
-        path = export_to_csv(
+        path = export_to_csv_sample_meta(
             SampleUserFilter().filter_queryset(request, self.queryset, None),
             request.is_english)
 

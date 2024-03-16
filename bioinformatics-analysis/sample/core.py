@@ -4,7 +4,7 @@ import datetime
 import tempfile
 import pendulum
 from openpyxl import load_workbook
-from sample.constants import SAMPLE_MODEL_ATTRS
+from sample.constants import SAMPLE_MODEL_ATTRS, SAMPLE_META_MODEL_ATTRS
 
 from account.models import Account
 from django.core.exceptions import ObjectDoesNotExist
@@ -103,6 +103,32 @@ def export_to_csv(querset, is_en=False):
     for o in querset:
         data.append(
             [getattr(o, a.get('alias', a['key'])) for a in SAMPLE_MODEL_ATTRS])
+
+    _, filename = tempfile.mkstemp(suffix='.csv')
+    with open(filename, 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile,
+                                delimiter=',',
+                                quotechar='\\',
+                                quoting=csv.QUOTE_MINIMAL)
+        for row in data:
+            spamwriter.writerow(row)
+
+    return filename
+
+
+def export_to_csv_sample_meta(querset, is_en=False):
+    if is_en:
+        headers = [a['en_name'] for a in SAMPLE_META_MODEL_ATTRS]
+    else:
+        headers = [a['name'] for a in SAMPLE_META_MODEL_ATTRS]
+
+    data = [headers]
+
+    for o in querset:
+        data.append([
+            getattr(o, a.get('alias', a['key']))
+            for a in SAMPLE_META_MODEL_ATTRS
+        ])
 
     _, filename = tempfile.mkstemp(suffix='.csv')
     with open(filename, 'w', newline='') as csvfile:
