@@ -7,6 +7,7 @@ class Config(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
     value = models.FloatField(default=0, null=True)
     used = models.FloatField(default=0, null=True, blank=True)
+    data = models.CharField(max_length=1000, null=True, blank=True)
 
     create_time = models.DateTimeField("创建时间", auto_now_add=True)
     update_time = models.DateTimeField("修改时间", auto_now=True)
