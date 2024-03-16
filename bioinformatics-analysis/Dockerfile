@@ -10,9 +10,13 @@ RUN set -ex; \
     apt -y upgrade; \
     apt install -y gawk; \
     apt install -y postgresql-client; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* \
+
 COPY ./requirements.txt /requirements.txt
+COPY requirements-deploy.txt /requirements-linux.txt
 RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements.txt
+RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements-deploy.txt
+
 COPY . /bioinformatics-analysis/
 WORKDIR /bioinformatics-analysis
 RUN rm -rf /requirements.txt; \
