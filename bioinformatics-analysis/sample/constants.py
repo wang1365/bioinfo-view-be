@@ -194,7 +194,7 @@ SAMPLE_MODEL_ATTRS = [
     {
         'key': 'fastq2_path',
         'name': 'R2文件',
-        'en_name': 'Data Name Of R1',
+        'en_name': 'Data Name Of R2',
         'value_type': 'string',
         'search_type': SearchType.not_support
     },

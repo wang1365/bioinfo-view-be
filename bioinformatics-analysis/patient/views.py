@@ -241,8 +241,10 @@ class PatientViewSet(ModelViewSet):
     #         return response_body(code=1, msg=str(err))
     #     return response_body(data={"added": added, "existed": existed})
 
-    @action(methods=('GET', ), parser_classes=[MultiPartParser], detail=False)
+    @action(methods=('GET', ), detail=False)
     def export(self, request):
+        print(request.is_english)
+        print(dir(request))
         query_set = self.queryset.all()
         if account_constant.NORMAL in request.role_list:
             query_set = query_set.filter(creator=request.account)
