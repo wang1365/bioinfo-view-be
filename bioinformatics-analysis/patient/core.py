@@ -106,15 +106,27 @@ class ValueProcess:
 def export_to_csv(querset, is_en=False):
     if is_en:
         headers = [a['en_name'] for a in PATIENT_MODEL_ATTRS]
+        data = [headers]
+
+        for o in querset:
+            row = []
+            for item in PATIENT_MODEL_ATTRS:
+                value = getattr(o, item.get('alias', item['key']))
+                if 'en_value_map' in item:
+                    row.append(item['en_value_map'].get(value, value))
+                else:
+                    row.append(value)
+            data.append(row)
     else:
         headers = [a['name'] for a in PATIENT_MODEL_ATTRS]
+        data = [headers]
 
-    data = [headers]
+        for o in querset:
 
-    for o in querset:
-        data.append([
-            getattr(o, a.get('alias', a['key'])) for a in PATIENT_MODEL_ATTRS
-        ])
+            data.append([
+                getattr(o, a.get('alias', a['key']))
+                for a in PATIENT_MODEL_ATTRS
+            ])
 
     _, filename = tempfile.mkstemp(suffix='.csv')
     with open(filename, 'w', newline='') as csvfile:

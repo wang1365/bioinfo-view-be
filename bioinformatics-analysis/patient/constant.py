@@ -78,6 +78,10 @@ PATIENT_MODEL_ATTRS = [
         'key': 'gender',
         'name': '性别',
         'en_name': 'Gender',
+        'en_value_map': {
+            '男': 'Male',
+            '女': 'Female'
+        },
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -176,6 +180,10 @@ PATIENT_MODEL_ATTRS = [
         'key': 'smoking',
         'name': '吸烟',
         'en_name': 'Smoking',
+        'en_value_map': {
+            '是': 'Yes',
+            '否': 'No'
+        },
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -183,6 +191,10 @@ PATIENT_MODEL_ATTRS = [
         'key': 'drinking',
         'name': '饮酒',
         'en_name': 'Alcohol Drinking',
+        'en_value_map': {
+            '是': 'Yes',
+            '否': 'No'
+        },
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -190,6 +202,10 @@ PATIENT_MODEL_ATTRS = [
         'key': 'viral_infection',
         'name': '病原感染',
         'en_name': 'Viral Infection',
+        'en_value_map': {
+            '是': 'Yes',
+            '否': 'No'
+        },
         'value_type': 'string',
         'search_type': SearchType.exact
     },
