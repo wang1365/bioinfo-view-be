@@ -1,27 +1,6 @@
 #!/usr/bin/env python3
 import csv
 import datetime
-import tempfile
-import pendulum
-from openpyxl import load_workbook
-from sample.constants import SAMPLE_MODEL_ATTRS, SAMPLE_META_MODEL_ATTRS
-
-from account.models import Account
-from django.core.exceptions import ObjectDoesNotExist
-
-
-class ExcelHandler:
-
-    def __init__(self, filename, attrs):
-        self._filename = filename
-        self._index2index = {}
-        self._field_names = []
-        self._attrs = attrs
-
-    def read(self):
-        workbook = load_workbook(self._filename)
-        sheet = workbook.active
-
         result = []
 
         for index, row_cells in enumerate(sheet.rows):
@@ -119,16 +98,28 @@ def export_to_csv(querset, is_en=False):
 def export_to_csv_sample_meta(querset, is_en=False):
     if is_en:
         headers = [a['en_name'] for a in SAMPLE_META_MODEL_ATTRS]
+        data = [headers]
+
+        for o in querset:
+            row = []
+            for item in SAMPLE_META_MODEL_ATTRS:
+                value = getattr(o, item.get('alias', item['key']))
+                if 'en_value_map' in item:
+                    row.append(item['en_value_map'].get(value, value))
+                else:
+                    row.append(value)
+            data.append(row)
     else:
         headers = [a['name'] for a in SAMPLE_META_MODEL_ATTRS]
+        data = [headers]
 
-    data = [headers]
+        for o in querset:
 
-    for o in querset:
-        data.append([
-            getattr(o, a.get('alias', a['key']))
-            for a in SAMPLE_META_MODEL_ATTRS
-        ])
+            data.append([
+                getattr(o, a.get('alias', a['key']))
+                for a in SAMPLE_META_MODEL_ATTRS
+            ])
+
 
     _, filename = tempfile.mkstemp(suffix='.csv')
     with open(filename, 'w', newline='') as csvfile:

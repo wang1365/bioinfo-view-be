@@ -73,6 +73,15 @@ SAMPLE_META_MODEL_ATTRS = [
         'key': 'sample_type',
         'name': '样本类型',
         'en_name': 'Sample Type',
+        'en_value_map': {
+            'FFPE蜡块': 'FFPE',
+            '新鲜组织': 'Fresh Tissue',
+            '血液': 'Blood',
+            '脑脊液': 'Cerebrospinal Fluid',
+            '胸水': 'Pleural Effusion',
+            '其他体液': 'Other Body Fluids',
+            '骨髓': 'Bone Marrow',
+        },
         'value_type': 'string',
         'search_type': SearchType.choices
     },
