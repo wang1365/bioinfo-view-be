@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class ExcelHandler:
+
     def __init__(self, filename, attrs, is_english=False):
         self._filename = filename
         self._index2index = {}
@@ -35,15 +36,17 @@ class ExcelHandler:
         return result
 
     def _deal_with_headers(self, cells):
+
         def _compare_name(value):
             val = value.strip()
             if self._is_english:
                 val = PATIENT_MODEL_ATTRS_MAP[val]
             return val
+
         mappings = {
-            attr['name']: index for index,
-            attr in enumerate(
-                self._attrs)}
+            attr['name']: index
+            for index, attr in enumerate(self._attrs)
+        }
 
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
@@ -60,7 +63,6 @@ class ExcelHandler:
         #         pdb.set_trace()
         # return ret
 
-
     def _deal_with_values(self, cells):
         values = [cell.value for cell in cells]
         record = dict(zip(self._field_names, values))
@@ -68,6 +70,7 @@ class ExcelHandler:
 
 
 class ValueProcess:
+
     def __init__(self, user_id=1):
         self._default_user_id = user_id
 
@@ -100,14 +103,18 @@ class ValueProcess:
         return {k: self._get_function(k)(v) for k, v in data.items()}
 
 
-def export_to_csv(querset):
-    headers = [a['name'] for a in PATIENT_MODEL_ATTRS]
+def export_to_csv(querset, is_en=False):
+    if is_en:
+        headers = [a['name'] for a in PATIENT_MODEL_ATTRS]
+    else:
+        headers = [a['en_name'] for a in PATIENT_MODEL_ATTRS]
 
     data = [headers]
 
     for o in querset:
-        data.append([getattr(o, a.get('alias', a['key']))
-                     for a in PATIENT_MODEL_ATTRS])
+        data.append([
+            getattr(o, a.get('alias', a['key'])) for a in PATIENT_MODEL_ATTRS
+        ])
 
     _, filename = tempfile.mkstemp(suffix='.csv')
     with open(filename, 'w', newline='') as csvfile:

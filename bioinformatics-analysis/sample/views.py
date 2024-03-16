@@ -34,7 +34,10 @@ class SampleView(CustomeViewSets):
     serializer_class = SampleSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
-    filter_backends = [SampleFilters, SampleProjectFilters, SampleUserFilter, SampleKeywordFilters]
+    filter_backends = [
+        SampleFilters, SampleProjectFilters, SampleUserFilter,
+        SampleKeywordFilters
+    ]
 
     def create(self, request, *args, **kwargs):
         data = self.create_data(request, *args, **kwargs)
@@ -71,7 +74,8 @@ class SampleView(CustomeViewSets):
             for id in task.samples:
                 if int(id) in sample_ids:
                     out_dir = task.env.get('OUT_DIR') or ''
-                    exist_igv = os.path.exists(os.path.join(out_dir, 'result', 'IGV_file.txt'))
+                    exist_igv = os.path.exists(
+                        os.path.join(out_dir, 'result', 'IGV_file.txt'))
                     result[id].append({
                         'id': task.id,
                         'name': task.name,
@@ -116,7 +120,9 @@ class SampleView(CustomeViewSets):
         return response_body(data=data)
 
     def export(self, request):
-        path = export_to_csv(SampleUserFilter().filter_queryset(request, self.queryset, None))
+        path = export_to_csv(
+            SampleUserFilter().filter_queryset(request, self.queryset, None),
+            request.is_english)
 
         with open(path, "rb") as f:
             data = f.read()
@@ -177,7 +183,9 @@ class SampleMetaView(CustomeViewSets):
         return response_body(data=data)
 
     def export(self, request):
-        path = export_to_csv(SampleUserFilter().filter_queryset(request, self.queryset, None))
+        path = export_to_csv(
+            SampleUserFilter().filter_queryset(request, self.queryset, None),
+            request.is_english)
 
         with open(path, "rb") as f:
             data = f.read()
@@ -192,7 +200,7 @@ class SampleMetaView(CustomeViewSets):
 
 
 class SampleUploadView(CustomeViewSets):
-    parser_classes = (MultiPartParser,)
+    parser_classes = (MultiPartParser, )
 
     def upload(self, request, suffix=".xlsx"):
         info = {
@@ -222,7 +230,8 @@ class SampleUploadView(CustomeViewSets):
             queryset = queryset.filter(user=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
-                Q(user__user2role__role__code=account_constant.NORMAL) | Q(user=request.account))
+                Q(user__user2role__role__code=account_constant.NORMAL)
+                | Q(user=request.account))
         return queryset.values_list("identifier", flat=True)
 
     def _get_patient_identifiers(self, request):
@@ -231,14 +240,16 @@ class SampleUploadView(CustomeViewSets):
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+                Q(creator__user2role__role__code=account_constant.NORMAL)
+                | Q(creator=request.account))
         return queryset.values_list("identifier", flat=True)
 
     def _update_sample_meta_id(self, obj, identifier):
         if identifier[1:].isdigit():
             obj.sample_meta_id = int(identifier[1:])
         else:
-            sample_meta = SampleMeta.objects.filter(identifier=identifier).first()
+            sample_meta = SampleMeta.objects.filter(
+                identifier=identifier).first()
             obj.sample_meta_id = sample_meta.id
 
     def _update_patient_id(self, obj, identifier):

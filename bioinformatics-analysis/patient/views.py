@@ -23,6 +23,7 @@ from patient.core import export_to_csv, ExcelHandler, ValueProcess, calculate_ag
 
 
 class PatientFilter(CommonFilters):
+
     def filter_queryset(self, request, qs, view):
         identifiers = request.GET.get('identifiers')
         if identifiers:
@@ -43,6 +44,7 @@ def is_all_english(strs):
             return False
     return True
 
+
 class PatientViewSet(ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
@@ -55,7 +57,8 @@ class PatientViewSet(ModelViewSet):
             queryset = queryset.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
             queryset = queryset.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
+                Q(creator__user2role__role__code=account_constant.NORMAL)
+                | Q(creator=request.account))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -64,12 +67,9 @@ class PatientViewSet(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(methods=('POST',), parser_classes=[MultiPartParser], detail=False)
+    @action(methods=('POST', ), parser_classes=[MultiPartParser], detail=False)
     def upload(self, request, suffix=".xlsx"):
-        info = {
-            "attrs": PATIENT_MODEL_ATTRS,
-            "serializer": PatientSerializer
-        }
+        info = {"attrs": PATIENT_MODEL_ATTRS, "serializer": PatientSerializer}
         return self._upload(request, info, suffix)
 
     def _upload(self, request, info, suffix='.xlsx'):
@@ -81,7 +81,8 @@ class PatientViewSet(ModelViewSet):
             for chunk in up_file.chunks():
                 fp.write(chunk)
 
-        excel_handler = ExcelHandler(filename, info['attrs'], request.is_english)
+        excel_handler = ExcelHandler(filename, info['attrs'],
+                                     request.is_english)
         records = excel_handler.read()
         new_records = []
         for record in records:
@@ -125,9 +126,11 @@ class PatientViewSet(ModelViewSet):
             viral_infection = record.get("viral_infection")
             if not viral_infection:
                 record["viral_infection"] = "否"
-            elif is_all_english(viral_infection) and viral_infection.lower() == "no":
+            elif is_all_english(
+                    viral_infection) and viral_infection.lower() == "no":
                 record["viral_infection"] = "否"
-            elif is_all_english(viral_infection) and viral_infection.lower() == "yes":
+            elif is_all_english(
+                    viral_infection) and viral_infection.lower() == "yes":
                 record["viral_infection"] = "是"
             new_records.append(record)
 
@@ -238,15 +241,16 @@ class PatientViewSet(ModelViewSet):
     #         return response_body(code=1, msg=str(err))
     #     return response_body(data={"added": added, "existed": existed})
 
-    @action(methods=('GET',), parser_classes=[MultiPartParser], detail=False)
+    @action(methods=('GET', ), parser_classes=[MultiPartParser], detail=False)
     def export(self, request):
         query_set = self.queryset.all()
         if account_constant.NORMAL in request.role_list:
             query_set = query_set.filter(creator=request.account)
         elif account_constant.ADMIN in request.role_list:
             query_set = query_set.filter(
-                Q(creator__parent=request.account) | Q(creator=request.account))
-        path = export_to_csv(querset=query_set)
+                Q(creator__parent=request.account)
+                | Q(creator=request.account))
+        path = export_to_csv(querset=query_set, request.is_english)
 
         with open(path, "rb") as f:
             data = f.read()

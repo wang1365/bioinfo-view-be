@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class ExcelHandler:
+
     def __init__(self, filename, attrs):
         self._filename = filename
         self._index2index = {}
@@ -32,10 +33,14 @@ class ExcelHandler:
         return result
 
     def _deal_with_headers(self, cells):
+
         def _compare_name(value):
             return value.replace('\n', '').replace(' ', '').replace('\t', '')
 
-        mappings = {attr['name']: index for index, attr in enumerate(self._attrs)}
+        mappings = {
+            attr['name']: index
+            for index, attr in enumerate(self._attrs)
+        }
 
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
@@ -49,6 +54,7 @@ class ExcelHandler:
 
 
 class ValueProcess:
+
     def __init__(self, user_id=1):
         self._default_user_id = user_id
 
@@ -86,8 +92,11 @@ class ValueProcess:
         return {k: self._get_function(k)(v) for k, v in data.items()}
 
 
-def export_to_csv(querset):
-    headers = [a['name'] for a in SAMPLE_MODEL_ATTRS]
+def export_to_csv(querset, is_en=False):
+    if is_en:
+        headers = [a['en_name'] for a in SAMPLE_MODEL_ATTRS]
+    else:
+        headers = [a['name'] for a in SAMPLE_MODEL_ATTRS]
 
     data = [headers]
 
