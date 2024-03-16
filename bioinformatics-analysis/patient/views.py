@@ -250,7 +250,7 @@ class PatientViewSet(ModelViewSet):
             query_set = query_set.filter(
                 Q(creator__parent=request.account)
                 | Q(creator=request.account))
-        path = export_to_csv(querset=query_set, request.is_english)
+        path = export_to_csv(query_set, request.is_english)
 
         with open(path, "rb") as f:
             data = f.read()
