@@ -13,8 +13,10 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/* \
 
 COPY ./requirements.txt /requirements.txt
-COPY requirements-deploy.txt /requirements-deploy.txt
+RUN ls /
 RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements.txt
+
+COPY requirements-deploy.txt /requirements-deploy.txt
 RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements-deploy.txt
 
 COPY . /bioinformatics-analysis/
