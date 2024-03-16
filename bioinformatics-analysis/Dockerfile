@@ -12,14 +12,12 @@ RUN set -ex; \
     apt install -y postgresql-client; \
     rm -rf /var/lib/apt/lists/* \
 
-COPY ./requirements.txt /requirements.txt
-RUN ls /
-RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements.txt
-
-COPY requirements-deploy.txt /requirements-deploy.txt
-RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /requirements-deploy.txt
-
 COPY . /bioinformatics-analysis/
+RUN ls /bioinformatics-analysis/
+
+RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /bioinformatics-analysis//requirements.txt
+RUN pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -r /bioinformatics-analysis/requirements-deploy.txt
+
 WORKDIR /bioinformatics-analysis
 RUN rm -rf /requirements.txt; \
     sed -i 's/\r//' ./start.sh; \
