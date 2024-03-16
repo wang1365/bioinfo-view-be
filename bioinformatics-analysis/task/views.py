@@ -783,16 +783,15 @@ def task_summary(request, *args, **kwargs):
                 "canceled_task_count": queryset.filter(status=5).count(),
             })
     else:
-        project = Project.objects.filter(
-            projectmembers__account__in=[request.account]).all()
+        # 普通用户只能查询自己创建的任务
+        queryset = queryset.filter(owner_id=request.account)
+        # project = Project.objects.filter(
+        #     projectmembers__account__in=[request.account]).all()
+
         if request.GET.get("start_time__gte"):
-            queryset = queryset.filter(
-                create_time__gte=request.GET.get("start_time__gte"),
-                project__in=project)
+            queryset = queryset.filter(create_time__gte=request.GET.get("start_time__gte"))
         if request.GET.get("start_time__lte"):
-            queryset = queryset.filter(
-                create_time__lte=request.GET.get("start_time__lte"),
-                project__in=project)
+            queryset = queryset.filter(create_time__lte=request.GET.get("start_time__lte"))
         return response_body(
             data={
                 "pending_task_count": queryset.filter(status=1).count(),
