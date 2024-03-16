@@ -10,7 +10,7 @@ RUN set -ex; \
     apt -y upgrade; \
     apt install -y gawk; \
     apt install -y postgresql-client; \
-    rm -rf /var/lib/apt/lists/* \
+    rm -rf /var/lib/apt/lists/*
 
 COPY . /bioinformatics-analysis/
 RUN ls /bioinformatics-analysis/
