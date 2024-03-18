@@ -16,7 +16,7 @@ access_token_jwt_subject = "access"
 
 class SecurityMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        request.is_english = request.META.get("HTTP_LANGUAGE", "") == "en-US"
+        request.is_english = request.META.get("HTTP_LANGUAGE", "") in ("en-US", "en")
 
         if 'AUTH_DISABLED' in os.environ:
             return
