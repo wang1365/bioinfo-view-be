@@ -784,7 +784,7 @@ def task_summary(request, *args, **kwargs):
             })
     else:
         # 普通用户只能查询自己创建的任务
-        queryset = queryset.filter(owner_id=request.account)
+        queryset = queryset.filter(creator_id=request.account)
         # project = Project.objects.filter(
         #     projectmembers__account__in=[request.account]).all()
 
