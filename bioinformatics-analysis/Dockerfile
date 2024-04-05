@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.10-slim
 # install system dependencies
 RUN apt install apt-transport-https ca-certificates
 RUN set -ex; \
