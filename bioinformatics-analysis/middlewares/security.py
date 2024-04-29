@@ -1,3 +1,5 @@
+import os
+
 import jwt
 from django.conf import settings
 from django.urls import reverse
@@ -8,7 +10,6 @@ from account.models import Account
 from config.models import Config
 from rbac.models import User2Role, Role
 from utils.response import response_body
-import os, sys
 
 ALGORITHM = "HS256"
 access_token_jwt_subject = "access"
@@ -22,14 +23,7 @@ class SecurityMiddleware(MiddlewareMixin):
             return
         token = request.META.get("HTTP_AUTHORIZATION") or request.COOKIES.get("token")
         if not token:
-            if (
-                    request.path.startswith("/account")
-                    and request.method == "POST"
-                    or request.path == reverse("account:result")
-            ) or (request.path.startswith("/task") and request.method.lower() == "put") \
-                    or (request.path.startswith("/site_config") and request.method.lower() == 'get'):
-                pass
-            else:
+            if self.require_auth(request):
                 return response_body(code=1, msg="未登录", status_code=401)
         else:
             try:
@@ -53,6 +47,23 @@ class SecurityMiddleware(MiddlewareMixin):
                     return response_body(code=1, msg="系统使用期限已到！", status_code=401)
             except PyJWTError:
                 return response_body(code=1, msg="token已失效", status_code=401)
+
+    def require_auth(self, request):
+        if (
+                request.path.startswith("/account")
+                and request.method == "POST"
+                or request.path == reverse("account:result")
+        ):
+            return False
+
+        if request.path.startswith("/task") and request.method.lower() == "put":
+            return False
+        if request.path.startswith("/site_config") and request.method.lower() == 'get':
+            return False
+        if request.path.startswith("/config") and request.method.lower() == 'get':
+            return False
+
+        return True
 
     def check_license_expired(self, user):
         if user.username == 'super':
