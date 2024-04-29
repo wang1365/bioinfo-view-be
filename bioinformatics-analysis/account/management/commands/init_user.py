@@ -17,12 +17,15 @@ class Command(BaseCommand):
         ])
         super_role = Role.objects.get(code="super")
         admin_role = Role.objects.get(code="admin")
-        super_account, _ = Account.objects.update_or_create(
-            defaults={'username': "super", 'nickname': '超级管理员', 'password': get_md5("1234qwer"), 'is_active': True},
-            email="super@super.com")
-        admin_account, _ = Account.objects.update_or_create(
-            defaults={'username': "admin", 'nickname': '管理员', 'password': get_md5("1234qwer"), 'is_active': True,
-                      "parent": super_account},
-            email="admin@admin.com")
-        User2Role.objects.update_or_create(user=super_account, role=super_role)
-        User2Role.objects.update_or_create(user=admin_account, role=admin_role)
+
+        if not Account.objects.filter(email="super@super.com").exists():
+            super_account, _ = Account.objects.update_or_create(
+                defaults={'username': "super", 'nickname': '超级管理员', 'password': get_md5("1234qwer"), 'is_active': True},
+                email="super@super.com")
+            User2Role.objects.update_or_create(user=super_account, role=super_role)
+
+        if not Account.objects.filter(email="admin@admin.com").exists():
+            admin_account, _ = Account.objects.update_or_create(
+                defaults={'username': "admin", 'nickname': '管理员', 'password': get_md5("1234qwer"), 'is_active': True},
+                email="admin@admin.com")
+            User2Role.objects.update_or_create(user=admin_account, role=admin_role)
