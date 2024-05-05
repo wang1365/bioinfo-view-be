@@ -29,6 +29,9 @@ class ExcelHandler:
             if index == 0:
                 self._field_names = self._deal_with_headers(row_cells)
             else:
+                values = [cell.value for cell in row_cells]
+                if values.count(None) == len(values):
+                    continue
                 result.append(self._deal_with_values(row_cells))
 
         return result
