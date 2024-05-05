@@ -45,14 +45,14 @@ SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'sample_date',
         'name': '采样日期（YYYY-MM-DD）',
-        'en_name': 'Sampling Date',
+        'en_name': 'Sampling Date(YYYY-MM-DD)',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
     {
         'key': 'test_date',
         'name': '送测日期（YYYY-MM-DD）',
-        'en_name': 'Submission Date',
+        'en_name': 'Submission Date(YYYY-MM-DD)',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
@@ -102,7 +102,7 @@ SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'patient_identifier',
         'name': '患者识别号',
-        'en_name': 'Patient ID',
+        'en_name': 'Sample Identification Number',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
