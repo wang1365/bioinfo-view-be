@@ -12,11 +12,12 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class ExcelHandler:
 
-    def __init__(self, filename, attrs):
+    def __init__(self, filename, attrs, is_english=False):
         self._filename = filename
         self._index2index = {}
         self._field_names = []
         self._attrs = attrs
+        self.is_english = is_english
 
     def read(self):
         workbook = load_workbook(self._filename)
@@ -37,10 +38,24 @@ class ExcelHandler:
         def _compare_name(value):
             return value.replace('\n', '').replace(' ', '').replace('\t', '')
 
-        mappings = {
-            attr['name']: index
-            for index, attr in enumerate(self._attrs)
-        }
+        if not self.is_english:
+            mappings = {
+                attr['name']: index
+                for index, attr in enumerate(self._attrs)
+            }
+            return [
+                self._attrs[mappings[_compare_name(cell.value)]]['key']
+                for _, cell in enumerate(cells)
+            ]
+        else:
+            mappings = {
+                attr['en_name']: index
+                for index, attr in enumerate(self._attrs)
+            }
+            return [
+                self._attrs[mappings[cell.value]]['key']
+                for _, cell in enumerate(cells)
+            ]
 
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']

@@ -119,14 +119,14 @@ SAMPLE_MODEL_ATTRS = [
     {
         'key': 'library_number',
         'name': '文库编号',
-        'en_name': '',
+        'en_name': 'Library Number',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
         'key': 'reagent_box',
         'name': '捕获试剂盒',
-        'en_name': 'Library Number',
+        'en_name': 'Reagent Box',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
