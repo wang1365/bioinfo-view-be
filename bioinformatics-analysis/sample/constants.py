@@ -125,8 +125,8 @@ SAMPLE_MODEL_ATTRS = [
     },
     {
         'key': 'reagent_box',
-        'name': '捕获试剂盒',
-        'en_name': 'Reagent Box',
+        'name': '捕获试剂盒',  # 注意这里由于历史翻译原因,导致这里名称不一致
+        'en_name': 'Capture Kit',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
