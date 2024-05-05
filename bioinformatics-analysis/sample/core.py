@@ -36,26 +36,20 @@ class ExcelHandler:
     def _deal_with_headers(self, cells):
 
         def _compare_name(value):
-            return value.replace('\n', '').replace(' ', '').replace('\t', '')
+            return value.replace('\n', '').replace(' ',
+                                                   '').replace('\t',
+                                                               '').lower()
 
         if not self.is_english:
             mappings = {
-                attr['name']: index
+                _compare_name(attr['name']): index
                 for index, attr in enumerate(self._attrs)
             }
-            return [
-                self._attrs[mappings[_compare_name(cell.value)]]['key']
-                for _, cell in enumerate(cells)
-            ]
         else:
             mappings = {
-                attr['en_name']: index
+                _compare_name(attr['en_name']): index
                 for index, attr in enumerate(self._attrs)
             }
-            return [
-                self._attrs[mappings[cell.value]]['key']
-                for _, cell in enumerate(cells)
-            ]
 
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
