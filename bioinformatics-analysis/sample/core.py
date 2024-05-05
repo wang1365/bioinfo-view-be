@@ -53,7 +53,8 @@ class ExcelHandler:
                 _compare_name(attr['en_name']): index
                 for index, attr in enumerate(self._attrs)
             }
-
+        print(mappings)
+        print([_compare_name(cell.value) for cell in cells])
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
             for _, cell in enumerate(cells)
