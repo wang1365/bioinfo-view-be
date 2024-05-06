@@ -234,7 +234,7 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'recurrence_time',
         'name': '复发时间（天）',
-        'en_name': 'Time to Relapse(day)',
+        'en_name': 'Time of Recurrence(day)',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
