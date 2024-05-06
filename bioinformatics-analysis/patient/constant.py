@@ -144,7 +144,7 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'diagnosis',
         'name': '临床诊断',
-        'en_name': 'Clinical Informatiaon',
+        'en_name': 'Clinical Diagnosis',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
