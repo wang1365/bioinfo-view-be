@@ -212,10 +212,18 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'prognosis',
         'name': '预后信息',
+        'en_name': 'Prognosis Information',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'prognosis_time',
+        'name': '预后时间',
         'en_name': 'Prognosis Time(day)',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
+
     # {
     #     'key': 'diagnosis_time',
     #     'name': '诊断时间（天）',
