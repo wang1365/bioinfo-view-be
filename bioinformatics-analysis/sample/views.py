@@ -268,7 +268,8 @@ class SampleUploadView(CustomeViewSets):
             for chunk in up_file.chunks():
                 fp.write(chunk)
 
-        excel_handler = ExcelHandler(filename, info['attrs'])
+        excel_handler = ExcelHandler(filename, info['attrs'],
+                                     request.is_english)
         records = excel_handler.read()
 
         unsuccessful_records = []

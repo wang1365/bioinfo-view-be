@@ -144,7 +144,7 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'diagnosis',
         'name': '临床诊断',
-        'en_name': 'Clinical Informatiaon',
+        'en_name': 'Clinical Diagnosis',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -212,10 +212,18 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'prognosis',
         'name': '预后信息',
+        'en_name': 'Prognosis Information',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'prognosis_time',
+        'name': '预后时间',
         'en_name': 'Prognosis Time(day)',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
+
     # {
     #     'key': 'diagnosis_time',
     #     'name': '诊断时间（天）',
@@ -226,7 +234,7 @@ PATIENT_MODEL_ATTRS = [
     {
         'key': 'recurrence_time',
         'name': '复发时间（天）',
-        'en_name': 'Time to Relapse(day)',
+        'en_name': 'Time of Recurrence(day)',
         'value_type': 'string',
         'search_type': SearchType.exact
     },

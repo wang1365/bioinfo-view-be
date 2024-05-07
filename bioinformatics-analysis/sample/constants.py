@@ -45,14 +45,14 @@ SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'sample_date',
         'name': '采样日期（YYYY-MM-DD）',
-        'en_name': 'Sampling Date',
+        'en_name': 'Sampling Date(YYYY-MM-DD)',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
     {
         'key': 'test_date',
         'name': '送测日期（YYYY-MM-DD）',
-        'en_name': 'Submission Date',
+        'en_name': 'Submission Date(YYYY-MM-DD)',
         'value_type': 'date',
         'search_type': SearchType.ranges
     },
@@ -102,7 +102,7 @@ SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'patient_identifier',
         'name': '患者识别号',
-        'en_name': 'Patient ID',
+        'en_name': 'Patient Identification',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
@@ -119,14 +119,14 @@ SAMPLE_MODEL_ATTRS = [
     {
         'key': 'library_number',
         'name': '文库编号',
-        'en_name': '',
+        'en_name': 'Library Number',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
     {
         'key': 'reagent_box',
-        'name': '捕获试剂盒',
-        'en_name': 'Library Number',
+        'name': '捕获试剂盒',  # 注意这里由于历史翻译原因,导致这里名称不一致
+        'en_name': 'Capture Kit',
         'value_type': 'string',
         'search_type': SearchType.exact
     },

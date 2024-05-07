@@ -12,11 +12,12 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class ExcelHandler:
 
-    def __init__(self, filename, attrs):
+    def __init__(self, filename, attrs, is_english=False):
         self._filename = filename
         self._index2index = {}
         self._field_names = []
         self._attrs = attrs
+        self.is_english = is_english
 
     def read(self):
         workbook = load_workbook(self._filename)
@@ -28,6 +29,9 @@ class ExcelHandler:
             if index == 0:
                 self._field_names = self._deal_with_headers(row_cells)
             else:
+                values = [cell.value for cell in row_cells]
+                if values.count(None) == len(values):
+                    continue
                 result.append(self._deal_with_values(row_cells))
 
         return result
@@ -35,13 +39,22 @@ class ExcelHandler:
     def _deal_with_headers(self, cells):
 
         def _compare_name(value):
-            return value.replace('\n', '').replace(' ', '').replace('\t', '')
+            return value.replace('\n', '').replace(' ',
+                                                   '').replace('\t',
+                                                               '').lower()
 
-        mappings = {
-            attr['name']: index
-            for index, attr in enumerate(self._attrs)
-        }
-
+        if not self.is_english:
+            mappings = {
+                _compare_name(attr['name']): index
+                for index, attr in enumerate(self._attrs)
+            }
+        else:
+            mappings = {
+                _compare_name(attr['en_name']): index
+                for index, attr in enumerate(self._attrs)
+            }
+        print(mappings)
+        print([_compare_name(cell.value) for cell in cells])
         return [
             self._attrs[mappings[_compare_name(cell.value)]]['key']
             for _, cell in enumerate(cells)
