@@ -240,16 +240,19 @@ class TaskView(ModelViewSet):
         return True
 
     def _check_disk(self, request, *args, **kwargs):
+        if request.account.disk_limit is None or  request.account.disk_limit == -1:
+            return False
         disk_ratio = float(os.getenv("DISK_RATIO", 1))
         disk_config = Config.objects.filter(name="disk").first()
-        if (request.account.disk_limit and request.account.disk_limit <=
-                request.account.used_disk * disk_ratio) or (
+        if (request.account.disk_limit <= request.account.used_disk * disk_ratio) or (
                     disk_config.used >= disk_config.value * disk_ratio):
             return True
         return False
 
     def _check_count(self, request, *args, **kwargs):
-        if request.account.task_limit and request.account.task_count >= request.account.task_limit:
+        if request.account.task_limit is None or request.account.task_limit == -1:
+            return False
+        if request.account.task_count >= request.account.task_limit:
             return True
         return False
 
