@@ -49,7 +49,7 @@ def run_task():
     #     conn.close_if_unusable_or_obsolete()
 
     max_task = Config.objects.filter(name="max_task").first().value
-    max_task = int(max_task) if max_task else 10
+    max_task = int(max_task) if max_task else 9999
     print(f"Hello Scheduler!Start run task, max_task: {max_task}")
     memory_rate = Config.objects.filter(name="memory_rate").first().value
     memory_rate = memory_rate if memory_rate < 1.0 else 1
