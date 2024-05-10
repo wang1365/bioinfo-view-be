@@ -49,18 +49,18 @@ def run_task():
     #     conn.close_if_unusable_or_obsolete()
 
     max_task = Config.objects.filter(name="max_task").first().value
-    max_task = int(max_task) if max_task else -1
+    max_task = int(max_task) if max_task else 10
     print(f"Hello Scheduler!Start run task, max_task: {max_task}")
     memory_rate = Config.objects.filter(name="memory_rate").first().value
     memory_rate = memory_rate if memory_rate < 1.0 else 1
     running_tasks = Task.objects.filter(status=2).all()
     used_memory = sum(task.memory for task in running_tasks)
-    total_memory = SystemMemory().totol_memory
+    totol_memory = SystemMemory().totol_memory
     running_tasks_count = len(running_tasks)
     running_tasks_count = Task.objects.filter(status=2).count()
     log = logging.getLogger('RunTask')
-    log.info(f'max_task:{max_task}, running_task:{running_tasks_count}, used_memory:{used_memory}, total_memory:{total_memory}, memory_rate:{memory_rate}')
-    if (max_task == -1 or running_tasks_count < max_task) and used_memory < total_memory * memory_rate:
+    log.info(f'max_task:{max_task}, running_task:{running_tasks_count}, used_memory:{used_memory}, total_memory:{totol_memory}, memory_rate:{memory_rate}')
+    if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
         # run task
         beto_run_tasks = Task.objects.filter(status=1).order_by(
             "-priority", "create_time")[0:max_task - running_tasks_count]
@@ -69,7 +69,7 @@ def run_task():
         for beto_run_task in beto_run_tasks:
             log.info(f'Check task memory, task: {beto_run_task.id}, require mem:{beto_run_task.memory} ')
             # 内存检查的不对，临时除以2
-            if used_memory + beto_run_task.memory / 2 < total_memory * memory_rate:
+            if used_memory + beto_run_task.memory / 2 < totol_memory * memory_rate:
                 log.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
                 container = G_CLIENT.containers.run(
                     image=beto_run_task.flow.image_name,
