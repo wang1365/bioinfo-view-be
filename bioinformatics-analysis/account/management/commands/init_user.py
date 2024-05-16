@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
     def create_role(self, code):
         if not Role.objects.filter(code=code).exists():
-            Role.objects.create(Role(code=code))
+            Role.objects.create(code=code)
 
     def handle(self, *args, **options):
         self.create_role("super")

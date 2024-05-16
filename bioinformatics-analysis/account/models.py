@@ -12,7 +12,7 @@ class Account(models.Model):
     department = models.CharField(max_length=128, null=True)
     is_active = models.BooleanField(default=False)
     is_delete = models.BooleanField(default=False)
-    disk_limit = models.PositiveBigIntegerField(null=True, blank=True, default=0)  # MB
+    disk_limit = models.BigIntegerField(null=True, blank=True)  # MB
     parent = models.ForeignKey(to="self", null=True, blank=True, on_delete=models.DO_NOTHING)
     used_disk = models.PositiveBigIntegerField(default=0)   # MB
     task_limit = models.BigIntegerField(null=True, blank=True)
