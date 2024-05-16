@@ -21,6 +21,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def get_creator(self, obj):
         return AccountSerializer(obj.creator).data
 
+
 class ListTaskSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
 
@@ -46,6 +47,7 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "error_message_EN",
             "error_message_CN",
             "create_time",
+            "create_time_timestamp",
             "log",
-            "deleted_tempdir"
+            "deleted_tempdir",
         ]
