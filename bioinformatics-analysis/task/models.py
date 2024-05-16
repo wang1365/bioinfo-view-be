@@ -3,6 +3,7 @@ import os
 
 from django.db import models
 from django.utils.timezone import now
+
 # from django_mysql.models import JSONField
 from sample.models import Sample
 
@@ -16,8 +17,13 @@ from project.models import Project
 class Task(models.Model):
     name = models.CharField(max_length=100, blank=True)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
-    status_choices = ((1, "PENDING"), (2, "RUNNING"), (3, "FINISHED"),
-                      (4, "FAILURED"), (5, "CANCELED"))
+    status_choices = (
+        (1, "PENDING"),
+        (2, "RUNNING"),
+        (3, "FINISHED"),
+        (4, "FAILURED"),
+        (5, "CANCELED"),
+    )
     status = models.SmallIntegerField(choices=status_choices, default=1)
     progress = models.SmallIntegerField(default=0)
     creator = models.ForeignKey(to=Account, on_delete=models.CASCADE)
@@ -44,6 +50,8 @@ class Task(models.Model):
     # TODO on_update
     update_time = models.DateTimeField("修改时间", auto_now=True)
     deleted_tempdir = models.BooleanField(default=False)
+    create_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    update_time_timestamp = models.IntegerField(default=0)  # 时间戳
 
     def __str__(self):
         return self.name
@@ -57,10 +65,15 @@ class Task(models.Model):
 
 
 class TaskSample(models.Model):
-    task = models.ForeignKey(Task, related_name="task_samples", on_delete=models.CASCADE)
+    task = models.ForeignKey(
+        Task, related_name="task_samples", on_delete=models.CASCADE
+    )
     sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
+
+    create_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    update_time_timestamp = models.IntegerField(default=0)  # 时间戳
 
     class Meta:
         db_table = "task_sample"
