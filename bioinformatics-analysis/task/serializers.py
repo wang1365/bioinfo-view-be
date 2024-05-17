@@ -47,7 +47,7 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "error_message_EN",
             "error_message_CN",
             "create_time",
-            "create_time_timestamp",
+            # "create_time_timestamp",
             "log",
             "deleted_tempdir",
         ]
