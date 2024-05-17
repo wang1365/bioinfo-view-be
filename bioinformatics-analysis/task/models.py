@@ -50,8 +50,8 @@ class Task(models.Model):
     # TODO on_update
     update_time = models.DateTimeField("修改时间", auto_now=True)
     deleted_tempdir = models.BooleanField(default=False)
-    create_time_timestamp = models.IntegerField(default=0)  # 时间戳
-    update_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # create_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # update_time_timestamp = models.IntegerField(default=0)  # 时间戳
 
     def __str__(self):
         return self.name
@@ -72,8 +72,8 @@ class TaskSample(models.Model):
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
 
-    create_time_timestamp = models.IntegerField(default=0)  # 时间戳
-    update_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # create_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # update_time_timestamp = models.IntegerField(default=0)  # 时间戳
 
     class Meta:
         db_table = "task_sample"

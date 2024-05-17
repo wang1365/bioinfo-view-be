@@ -60,5 +60,5 @@ class Patient(models.Model):
     )
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
-    create_time_timestamp = models.IntegerField(default=0)  # 时间戳
-    update_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # create_time_timestamp = models.IntegerField(default=0)  # 时间戳
+    # update_time_timestamp = models.IntegerField(default=0)  # 时间戳
