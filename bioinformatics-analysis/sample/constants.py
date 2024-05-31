@@ -110,6 +110,13 @@ SAMPLE_META_MODEL_ATTRS = [
 
 SAMPLE_MODEL_ATTRS = [
     {
+        'key': 'id',
+        'name': 'ID',
+        'en_name': 'ID',
+        'value_type': 'string',
+        'search_type': SearchType.not_support
+    },
+    {
         'key': 'project_index',
         'name': '数据详情',
         'en_name': 'Data Details',
