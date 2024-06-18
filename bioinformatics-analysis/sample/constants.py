@@ -102,14 +102,14 @@ SAMPLE_META_MODEL_ATTRS = [
     {
         'key': 'patient_identifier',
         'name': '患者识别号',
-        'en_name': 'Patient Id',
+        'en_name': 'Patient Identification',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
 {
         'key': 'identifier',
         'name': '样本识别号',
-        'en_name': 'Sample Id',
+        'en_name': 'Sample Identification',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
