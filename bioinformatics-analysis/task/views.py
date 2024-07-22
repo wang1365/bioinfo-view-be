@@ -933,7 +933,7 @@ def remove_temp(request, pk):
 
 def check_multi_create_task(request, *args, **kwargs):
     """验证同时批量创建任务是否可行."""
-    task_count = int(request.query_params.get('task_count', '0'))
+    task_count = int(request.GET.get('task_count', '0'))
     task_limit_fail = request.account.task_limit and request.account.task_count + task_count >= request.account.task_limit
     if task_limit_fail:
         if request.is_english:
