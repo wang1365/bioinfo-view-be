@@ -23,4 +23,5 @@ urlpatterns = [
         views.read_mut_standard_file,
         name="read_mut_standard_file"),
     url("^/(?P<pk>\d+)/remove_temp/$", views.remove_temp, name="remove_temp"),
+        url("^/check_multi_create_task$", views.check_multi_create_task, name="check_multi_create_task"),
 ]

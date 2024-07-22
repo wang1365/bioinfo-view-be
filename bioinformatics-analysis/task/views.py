@@ -929,3 +929,39 @@ def remove_temp(request, pk):
     instance.deleted_tempdir = True
     instance.save()
     return response_body(data="success", msg="", code=200)
+
+
+def check_multi_create_task(request, *args, **kwargs):
+    """验证同时批量创建任务是否可行."""
+    task_count = int(request.query_params.get('task_count', '0'))
+    task_limit_fail = request.account.task_limit and request.account.task_count + task_count >= request.account.task_limit
+    if task_limit_fail:
+        if request.is_english:
+            return response_body(
+                code=1,
+                status_code=400,
+                msg=
+                "Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit"
+            )
+        return response_body(code=1,
+                             status_code=400,
+                             msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
+    disk_ratio = float(os.getenv("DISK_RATIO", 1))
+    disk_config = Config.objects.filter(name="disk").first()
+    disk_limit_fail = (request.account.disk_limit
+                       and request.account.disk_limit
+                       <= request.account.used_disk * disk_ratio) or (
+                           disk_config.used >= disk_config.value * disk_ratio)
+
+    if disk_limit_fail:
+        if request.is_english:
+            return response_body(
+                code=1,
+                status_code=400,
+                msg=
+                "Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit"
+            )
+        return response_body(code=1,
+                             status_code=400,
+                             msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
+    return response_body(code=0, status_code=200, msg="Ok")
