@@ -242,9 +242,10 @@ class TaskView(ModelViewSet):
     def _check_disk(self, request, *args, **kwargs):
         disk_ratio = float(os.getenv("DISK_RATIO", 1))
         disk_config = Config.objects.filter(name="disk").first()
-        if (request.account.disk_limit and request.account.disk_limit <=
-                request.account.used_disk * disk_ratio) or (
-                    disk_config.used >= disk_config.value * disk_ratio):
+        if (request.account.disk_limit
+                and request.account.disk_limit <= request.account.used_disk *
+                disk_ratio) or (disk_config.used
+                                >= disk_config.value * disk_ratio):
             return True
         return False
 
@@ -256,17 +257,23 @@ class TaskView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         if self._check_count(request, *args, **kwargs):
             if request.is_english:
-                return response_body(code=1,
-                                     status_code=400,
-                                     msg="Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit")
+                return response_body(
+                    code=1,
+                    status_code=400,
+                    msg=
+                    "Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit"
+                )
             return response_body(code=1,
                                  status_code=400,
                                  msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
         if self._check_disk(request, *args, **kwargs):
             if request.is_english:
-                return response_body(code=1,
-                                     status_code=400,
-                                     msg="Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit")
+                return response_body(
+                    code=1,
+                    status_code=400,
+                    msg=
+                    "Your disk usage has reached the limit. Please delete the space or contact your administrator to increase the disk capacity limit"
+                )
             return response_body(code=1,
                                  status_code=400,
                                  msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制")
@@ -277,7 +284,8 @@ class TaskView(ModelViewSet):
             if flag:
                 return response_body(
                     code=1,
-                    msg=f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建"
+                    msg=
+                    f"{old_task.creator.username}已在项目id为{old_task.project.id}创建了任务名称为{old_task.name}的同样的分析任务, 请确认是否继续创建"
                 )
             else:
                 return response_body(code=200, msg="", data="")
@@ -325,10 +333,12 @@ class TaskView(ModelViewSet):
         task.env = env
         task.result_dir = os.path.join(out_dir, "result")
         task.save()
-        Account.objects.filter(pk=request.account.pk).update(task_count=F("task_count") + 1)
+        Account.objects.filter(pk=request.account.pk).update(
+            task_count=F("task_count") + 1)
         serializer = self.get_serializer(task)
         for sample_id in task.samples:
-            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id)
+            TaskSample.objects.create(sample_id=int(sample_id),
+                                      task_id=task.id)
         return response_body(data=serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -410,8 +420,9 @@ class TaskView(ModelViewSet):
             id__in=[item['project'] for item in ret_data])
         account_list = Account.objects.filter(
             id__in=[item['creator'] for item in ret_data])
-        sample_list = Sample.objects.filter(
-            id__in=[sample_id for item in ret_data for sample_id in item['samples']])
+        sample_list = Sample.objects.filter(id__in=[
+            sample_id for item in ret_data for sample_id in item['samples']
+        ])
 
         flow_dict = {flow.id: flow for flow in flow_list}
         project_dict = {project.id: project for project in project_list}
@@ -432,9 +443,8 @@ class TaskView(ModelViewSet):
                         "sample_id": int(sample_id),
                         "sample_data_id": sample.sample_meta_id,
                         "library_number": sample.library_number,
-                        "sample_identifier":sample.identifier,
-                        "sample_data_identifier":sample.sample_meta.identifier
-
+                        "sample_identifier": sample.identifier,
+                        "sample_data_identifier": sample.sample_meta.identifier
                     }
                     try:
                         obj["patient_name"] = sample.sample_meta.patient.name
@@ -453,6 +463,7 @@ class TaskView(ModelViewSet):
         status = request.query_params.get("status")
         patient = request.query_params.get("patient")
         library_number = request.query_params.get("libraryNumber")
+        task_name = request.query_params.get("task_name")
         if account_constant.SUPER in request.role_list:
             tasks = Task.objects.all()
         elif account_constant.ADMIN in request.role_list:
@@ -462,26 +473,35 @@ class TaskView(ModelViewSet):
             # tasks = Task.objects.filter(
             #     Q(creator__user2role__role__code=account_constant.NORMAL) | Q(creator=request.account))
             tasks = Task.objects.filter(
-                Q(creator__parent=request.account) | Q(creator=request.account))
+                Q(creator__parent=request.account)
+                | Q(creator=request.account))
         else:
             tasks = Task.objects.filter(creator=request.account)
         if project_id:
             tasks = tasks.filter(project_id=project_id)
         if status:
-            status_code = {value: key
-                           for key, value in Task.status_choices}.get(status)
+            status_code = {
+                value: key
+                for key, value in Task.status_choices
+            }.get(status)
             tasks = tasks.filter(status=status_code)
 
         if patient and library_number:
-            samples = Sample.objects.filter(sample_meta__patient__name=patient, library_number=library_number).values_list("id", flat=True)
+            samples = Sample.objects.filter(
+                sample_meta__patient__name=patient,
+                library_number=library_number).values_list("id", flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples)
         if patient and not library_number:
-            samples = Sample.objects.filter(sample_meta__patient__name=patient).values_list("id", flat=True)
+            samples = Sample.objects.filter(
+                sample_meta__patient__name=patient).values_list("id",
+                                                                flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples)
         if not patient and library_number:
-            samples = Sample.objects.filter(library_number=library_number).values_list("id", flat=True)
+            samples = Sample.objects.filter(
+                library_number=library_number).values_list("id", flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples)
-
+        if task_name:
+            tasks = tasks.filter(name__contains=task_name)
         tasks = tasks.order_by("-create_time")
         page = self.paginate_queryset(tasks)
         if page is not None:
@@ -634,9 +654,9 @@ class TaskView(ModelViewSet):
             send_email,
             subject="任务完成通知",
             to_addr=task.creator.email,
-            content=f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
-            attach={
-                "file": task.result_path.split(",")})
+            content=
+            f"尊敬的用户，您好！<br/>谢谢使用纳昂达生信分析平台，您在项目{task.project.name}中创建的{task.name}分析已结束，详情见附件，请查收",
+            attach={"file": task.result_path.split(",")})
 
     def _load_CN_log_data(self, instance):
         log_file_CN = os.path.join(instance.env.get("OUT_DIR"), "log_CN.txt")
@@ -681,8 +701,10 @@ class TaskView(ModelViewSet):
                                             key=key,
                                             value=value)
             if key == "status":
-                value = {value: key
-                         for key, value in Task.status_choices}.get(value)
+                value = {
+                    value: key
+                    for key, value in Task.status_choices
+                }.get(value)
 
                 async_func(
                     cal_dir_size,
@@ -701,8 +723,8 @@ class TaskView(ModelViewSet):
             #     #     self.resolve_task_result_path(task=instance)
             #     instance.progress = 100
             #     instance.data = self._load_log_data(instance)
-                # TODO 定期删除task_data数据
-                # self._delete_test_update_task_by_shell(instance)
+            # TODO 定期删除task_data数据
+            # self._delete_test_update_task_by_shell(instance)
 
         instance.save()
         bs = self.serializer_class(instance, many=False)
@@ -789,9 +811,11 @@ def task_summary(request, *args, **kwargs):
         #     projectmembers__account__in=[request.account]).all()
 
         if request.GET.get("start_time__gte"):
-            queryset = queryset.filter(create_time__gte=request.GET.get("start_time__gte"))
+            queryset = queryset.filter(
+                create_time__gte=request.GET.get("start_time__gte"))
         if request.GET.get("start_time__lte"):
-            queryset = queryset.filter(create_time__lte=request.GET.get("start_time__lte"))
+            queryset = queryset.filter(
+                create_time__lte=request.GET.get("start_time__lte"))
         return response_body(
             data={
                 "pending_task_count": queryset.filter(status=1).count(),
