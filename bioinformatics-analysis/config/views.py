@@ -46,7 +46,8 @@ class ResourceView(CustomeViewSets):
         #         Q(creator__parent=request.account) | Q(creator=request.account))
         day_used_disk = 0
         for task in tasks:
-            day_used_disk += dir_size(task.env.get("OUT_DIR"))
+            if task.env.get("OUT_DIR"):
+                day_used_disk += dir_size(task.env.get("OUT_DIR"))
         return response_body(data=day_used_disk)
 
 
