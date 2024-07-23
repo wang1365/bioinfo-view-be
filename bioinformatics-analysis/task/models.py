@@ -41,6 +41,8 @@ class Task(models.Model):
     priority = models.SmallIntegerField(default=1)
     memory = models.BigIntegerField()  # 单位MB
     samples = JSONField()
+    samples_first = JSONField(default=[])
+    samples_second = JSONField(default=[])
     log = models.TextField(null=True)
     parameter = JSONField(null=True)
     error_message = models.TextField(null=True, default="")
@@ -63,9 +65,9 @@ class Task(models.Model):
 
 
 class TaskSample(models.Model):
-    task = models.ForeignKey(
-        Task, related_name="task_samples", on_delete=models.CASCADE
-    )
+    task = models.ForeignKey(Task,
+                             related_name="task_samples",
+                             on_delete=models.CASCADE)
     sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)

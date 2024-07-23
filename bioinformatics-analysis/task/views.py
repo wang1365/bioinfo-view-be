@@ -179,6 +179,7 @@ class TaskView(ModelViewSet):
             req_data["parameter"] = json.loads(req_data.get("parameter"))
         if req_data.get("samples"):
             req_data["samples"] = req_data.get("samples").split(",")
+
         req_data["samples"] = sorted(req_data.get("samples", []))
         has_filepath_samples = Flow2Sample.objects.filter(
             flow_id=flow_id).values_list("sample_id", flat=True)
@@ -194,6 +195,14 @@ class TaskView(ModelViewSet):
             flow_id=flow_id,
             sample_id__in=req_data["samples"]).values_list("filepath",
                                                            flat=True)
+        # 配对多样本特殊处理
+        samples_first = req_data.get('task_samples_first', [])
+        if samples_first:
+            samples_first = samples_first.split(",")
+        samples_second = req_data.get('task_samples_second', [])
+        if samples_second:
+            samples_second = samples_second.split(",")
+
         task = Task.objects.create(
             **{
                 "name": req_data.get('name'),
@@ -204,7 +213,10 @@ class TaskView(ModelViewSet):
                 "parameter": req_data.get('parameter', []),
                 "creator_id": request.account.id,
                 "is_merge": True,
+                "samples_first": samples_first,
+                "samples_second": samples_second
             })
+
         out_dir = self._normal_task_dir(task)
         env = {
             "OUT_DIR":
@@ -414,9 +426,7 @@ class TaskView(ModelViewSet):
         # return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
 
     def _enrich_task_list(self, ret_data):
-        print(ret_data)
-        print(
-            [sample_id for item in ret_data for sample_id in item['samples']])
+
         flow_list = Flow.objects.filter(
             id__in=[item['flow'] for item in ret_data])
         project_list = Project.objects.filter(
