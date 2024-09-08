@@ -91,8 +91,8 @@ class SampleView(CustomeViewSets):
         out_fp2 = out_fp_pattern % 'R2'
 
         try:
-            merge(fp1, out_fp1)
-            merge(fp2, out_fp2)
+            merge(fp1, os.path.join(base_dir, out_fp1))
+            merge(fp2, os.path.join(base_dir, out_fp2))
         except ServiceException as e:
             return False, response_body(status_code=e.status_code, msg=e.message)
         except Exception as e:
