@@ -2,7 +2,11 @@ import uuid
 import tempfile
 import time
 import os
+import gzip
+import shutil
+from typing import Tuple
 
+from common.exceptions import ServiceException
 from task.models import Task
 from task.serializers import TaskSerializer
 from utils.response import response_body
@@ -27,7 +31,9 @@ from utils.paginator import PageNumberPaginationWithWrapper
 from common.viewsets.viewsets import CustomeViewSets
 
 from sample.constants import SAMPLE_META_MODEL_ATTRS, SAMPLE_MODEL_ATTRS, FIELDS_OPERATORS, SearchType
+from logging import getLogger
 
+logger = getLogger(__name__)
 
 class SampleView(CustomeViewSets):
     queryset = Sample.objects.prefetch_related('sample_meta').all()
@@ -44,6 +50,11 @@ class SampleView(CustomeViewSets):
         data['identifier'] = str(uuid.uuid4())
         data['user'] = request.account.id
 
+        if data['fastq_merge_required']:
+            ok, resp = self.merge_fastq(data)
+            if not ok:
+                return resp
+
         serializer = self.get_serializer(data=data)
         is_valid = serializer.is_valid(raise_exception=False)
 
@@ -56,6 +67,42 @@ class SampleView(CustomeViewSets):
         obj.save()
 
         return response_body(data=serializer.data, msg="success")
+
+    @staticmethod
+    def merge_fastq(data) -> Tuple[bool, object]:
+        fp1 = data['fastq1_path_list']
+        fp2 = data['fastq2_path_list']
+        # 样本数据文件存放的路径
+        base_dir = os.getenv("DATA_DIR")
+        # fp1和fp2都是以逗号分隔的文件路径，是只包含一个文件文件的.gz格式的压缩文件
+        # 需要将这两个文件列表各自合并为一个文件，并且保留原始文件，文件命名以uuid+日期时间戳
+        # 例如：uuid_2021-08-01-12-00-00.gz
+        # 合并后的文件路径保存到fastq1_path和fastq2_path中
+        def merge(fp, out_fp):
+            with open(out_fp, 'wb') as f:
+                for path in fp.split(','):
+                    fastq = os.path.join(base_dir, path)
+                    if not os.path.exists(fastq):
+                        raise ServiceException(f'文件不存在：{fastq}', 400)
+                    with gzip.open(fastq, 'rb') as f1:
+                        shutil.copyfileobj(f1, f)
+        out_fp_pattern = f'{uuid.uuid4().hex[:8]}_{time.strftime("%Y%m%d%H%M%S")}_%s.gz'
+        out_fp1 = out_fp_pattern % 'R1'
+        out_fp2 = out_fp_pattern % 'R2'
+
+        try:
+            merge(fp1, out_fp1)
+            merge(fp2, out_fp2)
+        except ServiceException as e:
+            return False, response_body(status_code=e.status_code, msg=e.message)
+        except Exception as e:
+            return False, response_body(status_code=500, msg=str(e))
+        data['fastq1_path'] = out_fp1
+        data['fastq2_path'] = out_fp2
+
+        logger.info(f'合并样本数据文件：{fp1} -> {out_fp1}, {fp2} -> {out_fp2}')
+        return True, ''
+
 
     def post_retrieve(self, data, request, *args, **kwargs):
         pk = int(kwargs['pk'])

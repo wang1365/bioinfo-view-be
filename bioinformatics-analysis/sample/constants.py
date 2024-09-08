@@ -207,6 +207,27 @@ SAMPLE_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.choices
     },
+ {
+        'key': 'fastq_merge_required',
+        'name': '是否多文件合并',
+        'en_name': 'Enable Fastq Merge',
+        'value_type': 'string',
+        'search_type': SearchType.not_support
+    },
+    {
+        'key': 'fastq1_path_list',
+        'name': '待合并R1文件列表',
+        'en_name': 'R1 list to be merged',
+        'value_type': 'string',
+        'search_type': SearchType.not_support
+    },
+    {
+        'key': 'fastq2_path_list',
+        'name': '待合并R2文件列表',
+        'en_name': 'R2 list to be merged',
+        'value_type': 'string',
+        'search_type': SearchType.not_support
+    },
     {
         'key': 'fastq1_path',
         'name': 'R1文件',
