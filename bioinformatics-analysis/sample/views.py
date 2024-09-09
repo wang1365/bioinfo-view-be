@@ -1,9 +1,8 @@
+import traceback
 import uuid
 import tempfile
 import time
 import os
-import gzip
-import shutil
 from typing import Tuple
 
 from common.exceptions import ServiceException
@@ -79,13 +78,15 @@ class SampleView(CustomeViewSets):
         # 例如：uuid_2021-08-01-12-00-00.gz
         # 合并后的文件路径保存到fastq1_path和fastq2_path中
         def merge(fp, out_fp):
-            with open(out_fp, 'wb') as f:
-                for path in fp.split(','):
-                    fastq = os.path.join(base_dir, path)
-                    if not os.path.exists(fastq):
-                        raise ServiceException(f'文件不存在：{fastq}', 400)
-                    with gzip.open(fastq, 'rb') as f1:
-                        shutil.copyfileobj(f1, f)
+            if os.name != 'nt':
+                # linux下使用cat命令合并文件
+                src_files = ' '.join(fp.split(','))
+                os.system(f'cd {base_dir} && cat {src_files} > {out_fp}')
+            else:
+                # windows下不支持cat命令，使用copy /b命令合并文件
+                src_files = '+'.join(fp.split(','))
+                os.system(f'cd {base_dir} && copy /b {src_files} {out_fp}')
+
         out_fp_pattern = f'{uuid.uuid4().hex[:8]}_{time.strftime("%Y%m%d%H%M%S")}_%s.gz'
         out_fp1 = out_fp_pattern % 'R1'
         out_fp2 = out_fp_pattern % 'R2'
@@ -96,6 +97,7 @@ class SampleView(CustomeViewSets):
         except ServiceException as e:
             return False, response_body(status_code=e.status_code, msg=e.message)
         except Exception as e:
+            traceback.print_exc()
             return False, response_body(status_code=500, msg=str(e))
         data['fastq1_path'] = out_fp1
         data['fastq2_path'] = out_fp2
