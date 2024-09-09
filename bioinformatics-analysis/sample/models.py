@@ -136,9 +136,9 @@ class Sample(models.Model):
     # R1 / R2 是否多文件合并
     fastq_merge_required = models.BooleanField(default=False)
     # R1待合并文件列表
-    fastq1_path_list = models.CharField(max_length=1024, default="", null=True)
+    fastq1_path_list = models.CharField(max_length=1024, default="", blank=True, null=True)
     # R2待合并文件列表
-    fastq2_path_list = models.CharField(max_length=1024, default="", null=True)
+    fastq2_path_list = models.CharField(max_length=1024, default="", blank=True, null=True)
 
     # 样本所有者
     user = models.ForeignKey(to=Account, on_delete=models.CASCADE, blank=True, null=True)
