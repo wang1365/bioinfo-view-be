@@ -77,7 +77,10 @@ class FlowView(CustomeViewSets):
         not_supported_fields = ["id", "owner_id", "flow_type"]
         data = super().update_data(request, *args, **kwargs)
         data["owner_id"] = request.account.id
-        data["parameter_schema"] = json.dumps(data["parameters"])
+        if isinstance(data["parameters"], str):
+            data["parameter_schema"] = data["parameters"]
+        else:
+            data["parameter_schema"] = json.dumps(data["parameters"])
         for f in not_supported_fields:
             if f in data:
                 data.pop(f)
