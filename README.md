@@ -1,7 +1,7 @@
 # Bioinfomatics Analysis System
 A comprehensive analysis tool for genomics analysis and reporting.
 
-## Architecture
+## Technologies
 - Python3
 - [Django](https://www.djangoproject.com/) 
 - [Django Restful Framework](https://www.django-rest-framework.org/) : A powerful and flexible toolkit for building Web APIs.
