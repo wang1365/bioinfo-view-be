@@ -10,7 +10,7 @@ from flow.constants import BUILTIN_PARAMETER_SCHEMA
 
 class PanelGroup(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
-    desp = models.TextField(blank=True, default='')
+    desp = models.TextField(blank=True, default="")
     sort = models.IntegerField(default=0)
     enabled = models.BooleanField(default=True)
     create_time = models.DateTimeField("创建时间", default=now)
@@ -24,11 +24,17 @@ class PanelGroup(models.Model):
 
 class Panel(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
-    panel_group = models.ForeignKey(to=PanelGroup, related_name='panels', db_constraint=False, null=True, on_delete=SET_NULL)
+    panel_group = models.ForeignKey(
+        to=PanelGroup,
+        related_name="panels",
+        db_constraint=False,
+        null=True,
+        on_delete=SET_NULL,
+    )
     enabled = models.BooleanField(default=True)
     sort = models.IntegerField(default=0)
-    desp = models.TextField(blank=True, default='')
-    detail = models.TextField(blank=True, default='')
+    desp = models.TextField(blank=True, default="")
+    detail = models.TextField(blank=True, default="")
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", default=now)
 
@@ -44,10 +50,16 @@ class Panel(models.Model):
 class Flow(models.Model):
     name = models.CharField(max_length=100, blank=True, unique=True)
     code = models.CharField(max_length=128, blank=True, unique=True)
-    panel = models.ForeignKey(to=Panel, related_name='flows', db_constraint=False,
-                              on_delete=SET_NULL, null=True, default=None)
+    panel = models.ForeignKey(
+        to=Panel,
+        related_name="flows",
+        db_constraint=False,
+        on_delete=SET_NULL,
+        null=True,
+        default=None,
+    )
 
-    desp = models.TextField(blank=True, default='')
+    desp = models.TextField(blank=True, default="")
 
     owner_id = models.BigIntegerField(default=-1)
 
@@ -70,21 +82,22 @@ class Flow(models.Model):
     memory = models.BigIntegerField(default=1024)  # 单位 MB
 
     # 样本类型多少：single, double, multiple
-    sample_type = models.CharField(
-        max_length=64, blank=True, default="multiple"
-    )
+    sample_type = models.CharField(max_length=64,
+                                   blank=True,
+                                   default="multiple")
 
     flow_type = models.CharField(max_length=64, blank=True, default="normal")
 
-    flow_category = models.CharField(max_length=64, blank=True, default='')
+    flow_category = models.CharField(max_length=64, blank=True, default="")
 
     allow_nonstandard_samples = models.BooleanField(default=False)
+    allow_define_report = models.BooleanField(default=False)
 
     members = models.ManyToManyField(to=Account,
                                      through="FlowMembers",
                                      related_name="join_flows")
 
-    details = models.TextField(blank=True, default='')
+    details = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.name
@@ -103,10 +116,10 @@ class Flow(models.Model):
         return BUILTIN_PARAMETER_SCHEMA
 
     @classmethod
-    def qc_task(self, alignment_tool='bwa'):
+    def qc_task(self, alignment_tool="bwa"):
         try:
-            return self.objects.get(
-                alignment_tool=alignment_tool, flow_type='qc')
+            return self.objects.get(alignment_tool=alignment_tool,
+                                    flow_type="qc")
         except Exception:
             return None
 
@@ -135,7 +148,7 @@ class FlowMembers(models.Model):
     create_time = models.DateTimeField("创建时间", default=now)
 
     class Meta:
-        unique_together = ('account', 'flow')
+        unique_together = ("account", "flow")
         db_table = "flow_members"
         ordering = ["-id"]
         verbose_name = "流程的权限分配表"
