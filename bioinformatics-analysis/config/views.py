@@ -28,10 +28,14 @@ class ConfigView(CustomeViewSets):
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
+        print(request.data)
         try:
             instance = self.get_object()
+            print(instance)
         except Exception:
-            return self.create(request, args, kwargs)
+            res = self.create(request, args, kwargs)
+            print(res)
+            return res
         else:
             data = self.update_data(request, *args, **kwargs)
             serializer = self.get_serializer(instance,
