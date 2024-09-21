@@ -162,13 +162,13 @@ class UsersAPIView(
     def create_user(self, request, *args, **kwargs):
         register_form = RegisterForm(request.data, request=request)
 
-        managers = Config.objects.filter(name == "max_manager_user").all()
+        managers = Config.objects.filter(name="max_manager_user").all()
         manager_count = 0
         normal_count = 0
         if managers:
             manager_count_config = managers[0]
             manager_count = managers[0].value
-        normals = Config.objects.filter(name == "max_normal_user").all()
+        normals = Config.objects.filter(name="max_normal_user").all()
         if normals:
             normal_count_config = normals[0]
             normal_count = normals[0].value
