@@ -174,14 +174,14 @@ class UsersAPIView(
             normal_count = normals[0].value
         if "super" in request.role_list:
             role = Role.objects.filter(code="admin").first()
-            role_count = User2Role.objects.count(role=role)
+            role_count = User2Role.objects.filter(role=role).count()
             if manager_count and role_count > manager_count:
                 return response_body(
                     code=400, msg=str("Max User limit Error"), status_code=400
                 )
         elif "admin" in request.role_list:
             role = Role.objects.filter(code="normal").first()
-            role_count = User2Role.objects.count(role=role)
+            role_count = User2Role.objects.filter(role=role).count()
             if normal_count and role_count > normal_count:
                 return response_body(
                     code=400, msg=str("Max User limit Error"), status_code=400
@@ -208,10 +208,10 @@ class UsersAPIView(
 
             User2Role.objects.create(user=account, role=role)
             if "super" in request.role_list:
-                manager_count_config.used = User2Role.objects.count(role=role)
+                manager_count_config.used = User2Role.objects.filter(role=role).count()
                 manager_count_config.save()
             else:
-                normal_count_config.used = User2Role.objects.count(role=role)
+                normal_count_config.used = User2Role.objects.filter(role=role).count()
                 normal_count_config.save()
             return response_body(data=AccountSerializer(account).data)
         else:
