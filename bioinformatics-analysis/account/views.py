@@ -29,16 +29,18 @@ logger = logging.getLogger(__name__)
 
 
 class UserFilter(filters.FilterSet):
-    keyword = filters.CharFilter(method='filter_keyword', help_text='搜索关键字')
+    keyword = filters.CharFilter(method="filter_keyword", help_text="搜索关键字")
 
     class Meta:
         model = Account
-        fields = ('keyword',)
+        fields = ("keyword",)
 
     def filter_keyword(self, queryset, name, value):
-        return queryset.filter(Q(username__icontains=value)
-                               | Q(nickname__icontains=value)
-                               | Q(email__icontains=value))
+        return queryset.filter(
+            Q(username__icontains=value)
+            | Q(nickname__icontains=value)
+            | Q(email__icontains=value)
+        )
 
 
 class UsersAPIView(
@@ -46,7 +48,8 @@ class UsersAPIView(
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     mixins.UpdateModelMixin,
-    GenericViewSet):
+    GenericViewSet,
+):
     # 序列化类
     serializer_class = AccountSerializer
     # 查询集和结果集
@@ -54,7 +57,7 @@ class UsersAPIView(
     parser_classes = [FormParser, JSONParser, MultiPartParser]
     filter_class = UserFilter
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=["get"])
     def me(self, request, *args, **kwargs):
         ret = self.serializer_class(request.account).data
         ret["role_list"] = request.role_list
@@ -64,7 +67,7 @@ class UsersAPIView(
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         return self.kwargs.get(lookup_url_kwarg)
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=["put"])
     def reset_password(self, request, *args, **kwargs):
         user = Account.objects.filter(pk=int(kwargs.get("pk"))).first()
         user.password = get_md5(request.data.get("password"))
@@ -72,7 +75,7 @@ class UsersAPIView(
         return response_body(data="重置密码成功")
 
     def update(self, request, *args, **kwargs):
-        sum_dict = Account.objects.all().aggregate(sum_disk=Sum('disk_limit'))
+        sum_dict = Account.objects.all().aggregate(sum_disk=Sum("disk_limit"))
         disk_limit = request.data.get("disk_limit")
         if disk_limit:
             disk_config = Config.objects.filter(name="disk").first()
@@ -80,13 +83,15 @@ class UsersAPIView(
             if not sum_disk:
                 sum_disk = 0
             if sum_disk + int(disk_limit) > disk_config.value:
-                return response_body(status_code=200, code=1, msg=f"您最多只剩下{disk_config.value-sum_disk}MB的空间可配置")
+                return response_body(
+                    status_code=200,
+                    code=1,
+                    msg=f"您最多只剩下{disk_config.value-sum_disk}MB的空间可配置",
+                )
         resp = super().update(request, *args, **kwargs)
-        return response_body(
-            data=resp.data
-        )
+        return response_body(data=resp.data)
 
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=["patch"])
     def change_password(self, request, *args, **kwargs):
         user = Account.objects.filter(pk=request.user_id).first()
         if user.password != get_md5(request.data.get("old_password")):
@@ -101,8 +106,9 @@ class UsersAPIView(
             # accounts = Account.objects.filter(
             #     Q(is_delete=False) & (Q(user2role__role__code=account_constant.NORMAL) | Q(pk=request.account.id))).all()
             accounts = Account.objects.filter(
-                Q(is_delete=False) & (
-                            Q(parent=request.account) | Q(pk=request.account.id))).all()
+                Q(is_delete=False)
+                & (Q(parent=request.account) | Q(pk=request.account.id))
+            ).all()
         elif account_constant.SUPER in request.role_list:
             # accounts = Account.objects.filter(
             #     is_delete=False, user2role__role__code__in=[
@@ -112,11 +118,13 @@ class UsersAPIView(
             accounts = Account.objects.filter(is_delete=False)
 
         # 支持关键字检索
-        keyword = request.query_params.get('keyword')
+        keyword = request.query_params.get("keyword")
         if keyword:
-            accounts = accounts.filter(Q(username__icontains=keyword)
-                                       | Q(nickname__icontains=keyword)
-                                       | Q(email__icontains=keyword))
+            accounts = accounts.filter(
+                Q(username__icontains=keyword)
+                | Q(nickname__icontains=keyword)
+                | Q(email__icontains=keyword)
+            )
         pg = PageNumberPagination()
         # 在数据库中获取分页的数据,
         pager_accounts = pg.paginate_queryset(
@@ -127,23 +135,25 @@ class UsersAPIView(
         item_list = ser.data
         for item in item_list:
             item["role"] = list(
-                User2Role.objects.filter(
-                    user=item["id"]).values_list(
-                    "role__code",
-                    flat=True))
+                User2Role.objects.filter(user=item["id"]).values_list(
+                    "role__code", flat=True
+                )
+            )
             if len(item["role"]) == 0:
-                print("account user: ", item['username'], " role is empty")
+                print("account user: ", item["username"], " role is empty")
                 if "super" in request.role_list:
                     role = Role.objects.filter(code="admin").first()
                 elif "admin" in request.role_list:
                     role = Role.objects.filter(code="normal").first()
-                User2Role.objects.create(user_id=item['id'], role=role)
+                User2Role.objects.create(user_id=item["id"], role=role)
             item["role"] = list(
-                User2Role.objects.filter(
-                    user=item["id"]).values_list(
-                    "role__code",
-                    flat=True))
-            item['running_task'] = Task.objects.filter(creator_id=item["id"], status=2).count()
+                User2Role.objects.filter(user=item["id"]).values_list(
+                    "role__code", flat=True
+                )
+            )
+            item["running_task"] = Task.objects.filter(
+                creator_id=item["id"], status=2
+            ).count()
         return response_body(
             data={"item_list": item_list, "total_count": accounts.count()}
         )
@@ -151,6 +161,32 @@ class UsersAPIView(
     @action(detail=False, methods=["post"])
     def create_user(self, request, *args, **kwargs):
         register_form = RegisterForm(request.data, request=request)
+
+        managers = Config.objects.filter(name == "max_manager_user").all()
+        manager_count = 0
+        normal_count = 0
+        if managers:
+            manager_count_config = managers[0]
+            manager_count = managers[0].value
+        normals = Config.objects.filter(name == "max_normal_user").all()
+        if normals:
+            normal_count_config = normals[0]
+            normal_count = normals[0].value
+        if "super" in request.role_list:
+            role = Role.objects.filter(code="admin").first()
+            role_count = User2Role.objects.count(role=role)
+            if manager_count and role_count > manager_count:
+                return response_body(
+                    code=400, msg=str("Max User limit Error"), status_code=400
+                )
+        elif "admin" in request.role_list:
+            role = Role.objects.filter(code="normal").first()
+            role_count = User2Role.objects.count(role=role)
+            if normal_count and role_count > normal_count:
+                return response_body(
+                    code=400, msg=str("Max User limit Error"), status_code=400
+                )
+
         if register_form.is_valid():
             username = register_form.cleaned_data["username"]
             nickname = register_form.cleaned_data["nickname"]
@@ -164,16 +200,19 @@ class UsersAPIView(
                     email=email,
                     password=password,
                     is_active=True,
-                    parent=request.account
+                    parent=request.account,
                 )
                 account.save()
             except Exception as e:
                 return response_body(code=400, msg=str(e), status_code=400)
-            if "super" in request.role_list:
-                role = Role.objects.filter(code="admin").first()
-            elif "admin" in request.role_list:
-                role = Role.objects.filter(code="normal").first()
+
             User2Role.objects.create(user=account, role=role)
+            if "super" in request.role_list:
+                manager_count_config.used = User2Role.objects.count(role=role)
+                manager_count_config.save()
+            else:
+                normal_count_config.used = User2Role.objects.count(role=role)
+                normal_count_config.save()
             return response_body(data=AccountSerializer(account).data)
         else:
             email_error = register_form.errors.get("email")
@@ -213,7 +252,8 @@ class UsersAPIView(
                 return response_body(code=401, msg="用户名或密码错误", status_code=401)
         else:
             return response_body(
-                code=400, msg=obj_form.errors.get_json_data(), status_code=400)
+                code=400, msg=obj_form.errors.get_json_data(), status_code=400
+            )
 
     @action(detail=False, methods=["delete"])
     def delete_user(self, request, *args, **kwargs):
@@ -221,57 +261,61 @@ class UsersAPIView(
         #     pk__in=request.data.get(
         #         "ids", [])).update(
         #     is_delete=1)
-        count = Account.objects.filter(
-            pk__in=request.data.get(
-                "ids", [])).delete()
-        User2Role.objects.filter(
-            user_id__in=request.data.get(
-                "ids", [])).delete()
+        count = Account.objects.filter(pk__in=request.data.get("ids", [])).delete()
+        User2Role.objects.filter(user_id__in=request.data.get("ids", [])).delete()
         return response_body(data=count)
 
     @action(detail=False, methods=["post"])
     def manager(self, request, *args, **kwargs):
         role = request.data.get("role", [])
         if role:
-            User2Role.objects.filter(
-                user_id=request.data.get('userid')).delete()
+            User2Role.objects.filter(user_id=request.data.get("userid")).delete()
             for code in role:
                 role = Role.objects.filter(code=code).first()
-                User2Role.objects.create(
-                    user_id=request.data.get('userid'), role=role)
+                User2Role.objects.create(user_id=request.data.get("userid"), role=role)
         is_active = request.data.get("is_active")
         department = request.data.get("department")
         reset = request.data.get("reset")
         if is_active is not None:
-            Account.objects.filter(
-                id=request.data.get('userid')).update(
-                is_active=is_active)
+            Account.objects.filter(id=request.data.get("userid")).update(
+                is_active=is_active
+            )
         if department is not None:
-            Account.objects.filter(
-                id=request.data.get('userid')).update(
-                department=department)
+            Account.objects.filter(id=request.data.get("userid")).update(
+                department=department
+            )
         if reset:
-            Account.objects.filter(
-                id=request.data.get('userid')).update(
-                password=get_md5("123456"))
+            Account.objects.filter(id=request.data.get("userid")).update(
+                password=get_md5("123456")
+            )
         return response_body(data=True)
 
     @action(detail=False, methods=["get"])
     def summary(self, request, *args, **kwargs):
         if account_constant.ADMIN in request.role_list:
             accounts = Account.objects.filter(
-                is_delete=False, user2role__role__code__in=[
-                    account_constant.NORMAL, account_constant.ADMIN]).all()
+                is_delete=False,
+                user2role__role__code__in=[
+                    account_constant.NORMAL,
+                    account_constant.ADMIN,
+                ],
+            ).all()
         elif account_constant.SUPER in request.role_list:
             accounts = Account.objects.filter(
-                is_delete=False, user2role__role__code__in=[
-                    account_constant.SUPER, account_constant.ADMIN]).all()
+                is_delete=False,
+                user2role__role__code__in=[
+                    account_constant.SUPER,
+                    account_constant.ADMIN,
+                ],
+            ).all()
         else:
             accounts = Account.objects.filter(is_delete=False)
-        data = accounts.annotate(month=TruncMonth('create_time')).values('month').annotate(count=Count('id'))
-        return response_body(
-            data=[item for item in data]
+        data = (
+            accounts.annotate(month=TruncMonth("create_time"))
+            .values("month")
+            .annotate(count=Count("id"))
         )
+        return response_body(data=[item for item in data])
 
 
 def account_validate(request):
@@ -289,4 +333,5 @@ def account_validate(request):
     user.is_active = True
     user.save()
     # return HttpResponse("邮箱验证成功")
+
     return render(request, "account/result.html")
