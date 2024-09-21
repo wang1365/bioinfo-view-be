@@ -175,6 +175,7 @@ class UsersAPIView(
         if "super" in request.role_list:
             role = Role.objects.filter(code="admin").first()
             role_count = User2Role.objects.filter(role=role).count()
+            print("super, admin", role_count)
             if manager_count and role_count > manager_count:
                 return response_body(
                     code=400, msg=str("Max User limit Error"), status_code=400
@@ -182,6 +183,7 @@ class UsersAPIView(
         elif "admin" in request.role_list:
             role = Role.objects.filter(code="normal").first()
             role_count = User2Role.objects.filter(role=role).count()
+            print("admin, normal", role_count)
             if normal_count and role_count > normal_count:
                 return response_body(
                     code=400, msg=str("Max User limit Error"), status_code=400
