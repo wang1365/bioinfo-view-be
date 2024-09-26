@@ -22,3 +22,7 @@ ALTER TABLE "samples"
     ADD COLUMN "fastq1_path_list"     varchar(1024) DEFAULT ''    NULL,
     ADD COLUMN "fastq2_path_list"     varchar(1024) DEFAULT ''    NULL,
     ADD COLUMN "fastq_merge_required" boolean       DEFAULT false NOT NULL;
+
+-- 2024.09.26 添加字段 流式支持控制自定义报告
+alter table flow
+    add column allow_define_report boolean default false null;
