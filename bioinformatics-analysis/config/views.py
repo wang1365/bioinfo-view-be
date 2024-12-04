@@ -23,22 +23,51 @@ class ConfigView(CustomeViewSets):
     queryset = Config.objects.all()
     serializer_class = ConfigSerializer
     pagination_class = PageNumberPaginationWithWrapper
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, )
     filterset_class = ConfigFilterSet
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        print(request.data)
+        try:
+            instance = self.get_object()
+            print(instance)
+        except Exception:
+            res = self.create(request, args, kwargs)
+            print(res)
+            return res
+        else:
+            data = self.update_data(request, *args, **kwargs)
+            serializer = self.get_serializer(instance,
+                                             data=data,
+                                             partial=partial)
+            is_valid = serializer.is_valid(raise_exception=False)
+
+            if not is_valid:
+                return self.deal_with_update_error(serializer)
+            self.perform_update(serializer)
+
+            if getattr(instance, "_prefetched_objects_cache", None):
+                instance._prefetched_objects_cache = {}
+
+            return response_body(data=serializer.data, msg="success")
 
 
 class ResourceView(CustomeViewSets):
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
     pagination_class = PageNumberPaginationWithWrapper
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, )
     filterset_class = ResourceFilterSet
 
     @action(methods=["GET"], detail=False)
     def week(self, request, *args, **kwargs):
         now = datetime.now()
-        week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0)
-        tasks = Task.objects.filter(create_time__gte=week_start, create_time__lte=now)
+        week_start = (now - timedelta(days=now.weekday())).replace(hour=0,
+                                                                   minute=0,
+                                                                   second=0)
+        tasks = Task.objects.filter(create_time__gte=week_start,
+                                    create_time__lte=now)
         # if "super" in request.role_list:
         #     tasks = tasks.all()
         # elif "admin" in request.role_list:
@@ -49,7 +78,3 @@ class ResourceView(CustomeViewSets):
             if task.env.get("OUT_DIR"):
                 day_used_disk += dir_size(task.env.get("OUT_DIR"))
         return response_body(data=day_used_disk)
-
-
-
-
