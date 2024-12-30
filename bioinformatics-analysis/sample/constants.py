@@ -106,10 +106,24 @@ SAMPLE_META_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.exact
     },
-{
+    {
         'key': 'identifier',
         'name': '样本识别号',
         'en_name': 'Sample Identification',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'sampling_tube_brand',
+        'name': '采样管品牌',
+        'en_name': 'Sampling Tube Brand',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'specimen_type',
+        'name': '标本类型',
+        'en_name': 'Specimen Type',
         'value_type': 'string',
         'search_type': SearchType.exact
     },

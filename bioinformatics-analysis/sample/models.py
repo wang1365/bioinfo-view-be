@@ -48,6 +48,9 @@ class SampleMeta(models.Model):
                                        auto_now_add=True)
     modify_time = models.DateTimeField(null=True, blank=True, auto_now=True)
 
+    sampling_tube_brand = models.CharField(max_length=128, null=True, blank=True)
+    specimen_type = models.CharField(max_length=128, null=True, blank=True)
+
     class Meta:
         db_table = "sample_meta"
         ordering = ["-id"]
