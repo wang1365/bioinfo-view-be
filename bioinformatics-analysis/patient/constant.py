@@ -19,6 +19,8 @@ PATIENT_ZH_TO_EN = {
     "复发时间": "recurrence_time",
     "存活时间": "survival_time",
     "肿瘤分期": "tumor_stage",
+    "妊娠周期": "gestation",
+    "怀孕状态": "pregnancy_status",
 }
 
 
@@ -50,6 +52,8 @@ PATIENT_MODEL_ATTRS_MAP = {
     "Prognosis Time(day)": "预后时间（天）",
     "Time of Recurrence(day)": "复发时间（天）",
     "Survival Time(day)": "存活时间（天）",
+    "Gestation(Week)": "妊娠周期（周）",
+    "Pregnancy Status": "怀孕状态",
 }
 
 PATIENT_MODEL_ATTRS = [
@@ -242,6 +246,20 @@ PATIENT_MODEL_ATTRS = [
         'key': 'survival_time',
         'name': '存活时间（天）',
         'en_name': 'Survival Time(day)',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'gestation',
+        'name': '妊娠周期（周）',
+        'en_name': 'Gestation(Week)',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'pregnancy_status',
+        'name': '怀孕状态',
+        'en_name': 'Pregnancy Status',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
