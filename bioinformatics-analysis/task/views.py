@@ -877,7 +877,7 @@ def task_summary(request, *args, **kwargs):
 def read_file(request, pk):
     task = Task.objects.get(pk=pk)
     file_path = os.path.join(task.result_dir, request.GET["path"])
-    ignore_not_existed = request.GET["ignore_not_existed"] or False
+    ignore_not_existed = request.GET.get("ignore_not_existed") or False
     if not os.path.isfile(file_path) or not os.path.exists(file_path):
         return response_body(
             data=None,
