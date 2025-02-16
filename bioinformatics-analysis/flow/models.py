@@ -99,6 +99,8 @@ class Flow(models.Model):
 
     details = models.TextField(blank=True, default="")
 
+    config = models.JSONField(blank=True, default={})
+
     def __str__(self):
         return self.name
 

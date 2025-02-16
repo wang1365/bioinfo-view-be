@@ -7,9 +7,13 @@ from flow.models import Flow, PanelGroup, Panel
 from flow.core import load_image
 import os
 
+from task.models import Task
+
 
 class FlowSerializer(serializers.ModelSerializer):
     panel_name = serializers.CharField(source="panel.name", read_only=True)
+    # Flow关联的任务数量
+    task_count = serializers.SerializerMethodField()
 
     def validate_type(self, tp, **params):
         if tp not in ["array", "string", "number", "boolean", "file"]:
@@ -31,6 +35,10 @@ class FlowSerializer(serializers.ModelSerializer):
         except Exception:
             raise ValidationError("无法加载镜像")
         return real_tar_path
+
+    def get_task_count(self, obj):
+        cnt = Task.objects.filter(flow=obj).count()
+        return cnt
 
     class Meta:
         model = Flow
@@ -56,6 +64,8 @@ class FlowSerializer(serializers.ModelSerializer):
             "create_time",
             "allow_nonstandard_samples",
             "allow_define_report",
+            "config",
+            "task_count"
         ]
 
 
