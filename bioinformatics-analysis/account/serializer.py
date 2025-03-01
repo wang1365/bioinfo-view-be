@@ -16,6 +16,7 @@ class AccountSerializer(serializers.ModelSerializer):
                   "disk_limit",
                   "used_disk",
                   "task_limit",
-                  "task_count"
+                  "task_count",
+                  "permissions"
                   ]
 

@@ -11,5 +11,5 @@ ALTER TABLE public.sample_meta ADD specimen_type varchar(128) NULL;
 COMMENT ON COLUMN public.sample_meta.specimen_type IS '标本类型';
 
 
-alter table flow add config jsonb default '{"taskLimit": 99999}'::jsonb;
-
+alter table public.flow add config jsonb default '{"taskLimit": 99999}'::jsonb;
+alter table public.account add permissions jsonb not null default '[]'::jsonb;
