@@ -327,6 +327,9 @@ class SampleUploadView(CustomeViewSets):
         for record in records:
             data = value_process.process(record)
             if data[info['key']].strip() not in info['identifiers']:
+                record['info_key'] = info['key']
+                record['info_value'] = data[info['key']].strip()
+                record['identifiers'] = info['identifiers']
                 unsuccessful_records.append(record)
                 continue
             data['identifier'] = str(uuid.uuid4())
