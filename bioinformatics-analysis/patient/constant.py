@@ -21,6 +21,12 @@ PATIENT_ZH_TO_EN = {
     "肿瘤分期": "tumor_stage",
     "妊娠期": "gestation",
     "怀孕状态": "pregnancy_status",
+    "常规病理编号": "general_pathology_number",
+    "分子病理编号": "molecular_pathology_number",
+    "送检科室": "submitting_department",
+    "患者电话": "patient_phone_number",
+    "门诊/住院号": "outpatient_or_inpatient_number",
+    "床号": "bed_number"
 }
 
 
@@ -54,6 +60,12 @@ PATIENT_MODEL_ATTRS_MAP = {
     "Survival Time(day)": "存活时间（天）",
     "Gestation(Week)": "妊娠期（周）",
     "Pregnancy Status": "怀孕状态",
+    "General Pathology Number": "常规病理编号",
+    "Molecular Pathology Number": "分子病理编号",
+    "Submitting Department": "送检科室",
+    "Patient Phone Number": "患者电话",
+    "Outpatient/Inpatient Number": "门诊/住院号",
+    "Bed Number": "床号"
 }
 
 PATIENT_MODEL_ATTRS = [
@@ -263,12 +275,52 @@ PATIENT_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.exact
     },
+    {
+        'key': 'general_pathology_number',
+        'name': '常规病理编号',
+        'en_name': 'General Pathology Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'molecular_pathology_number',
+        'name': '分子病理编号',
+        'en_name': 'Molecular Pathology Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'submitting_department',
+        'name': '送检科室',
+        'en_name': 'Submitting Department',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'patient_phone_number',
+        'name': '患者电话',
+        'en_name': 'Patient Phone Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'outpatient_or_inpatient_number',
+        'name': '门诊/住院号',
+        'en_name': 'Outpatient/Inpatient Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'bed_number',
+        'name': '床号',
+        'en_name': 'Bed Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
 ]
 
-PATIENT_META_TEMPLATE_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources",
-    "patient-meta.xlsx")
+PATIENT_META_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources",
+                                          "patient-meta.xlsx")
 
-PATIENT_META_TEMPLATE_EN_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources",
-    "patient-meta-en.xlsx")
+PATIENT_META_TEMPLATE_EN_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources",
+                                             "patient-meta-en.xlsx")
