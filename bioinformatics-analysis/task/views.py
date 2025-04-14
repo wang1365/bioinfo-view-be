@@ -898,8 +898,10 @@ def read_mut_standard_file(request, pk):
 
     if name == "Mut_germline":
         parent_dir = os.path.join(task.result_dir, "Mut_germline")
-    else:
+    elif name == "Mut_somatic":
         parent_dir = os.path.join(task.result_dir, "Mut_somatic")
+    elif name == "Mut_wes":
+        parent_dir = os.path.join(task.result_dir, "Mut_wes")
 
     files = os.listdir(parent_dir)
     file_path = None
