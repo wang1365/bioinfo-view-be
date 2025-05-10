@@ -895,13 +895,7 @@ def read_mut_standard_file(request, pk):
     """读取突变 combined.standard-new.csv 文件."""
     task = Task.objects.get(pk=pk)
     name = request.GET["name"]
-
-    if name == "Mut_germline":
-        parent_dir = os.path.join(task.result_dir, "Mut_germline")
-    elif name == "Mut_somatic":
-        parent_dir = os.path.join(task.result_dir, "Mut_somatic")
-    elif name == "Mut_wes":
-        parent_dir = os.path.join(task.result_dir, "Mut_wes")
+    parent_dir = os.path.join(task.result_dir, name)
 
     files = os.listdir(parent_dir)
     file_path = None
