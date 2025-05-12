@@ -896,11 +896,13 @@ def read_mut_standard_file(request, pk):
     task = Task.objects.get(pk=pk)
     name = request.GET["name"]
     parent_dir = os.path.join(task.result_dir, name)
+    suffix =  'Mut_WES.txt' if name == 'Mut_WES' else "combined.standard-new.csv"
 
     files = os.listdir(parent_dir)
     file_path = None
+    # 根据后缀找到对应的数据文件
     for item in files:
-        if item.endswith("combined.standard-new.csv"):
+        if item.endswith(suffix):
             file_path = os.path.join(parent_dir, item)
             break
     if file_path is None:
