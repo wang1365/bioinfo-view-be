@@ -59,6 +59,7 @@ services:
       - DISK_RATIO=${DISK_RATIO}
       - PROXY=true
       - TZ=Aisa/Shanghai
+      - WEB_PORT=${PORT}
     env_file: .env
     ports:
       - ${PORT}:8080

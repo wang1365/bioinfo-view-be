@@ -346,7 +346,9 @@ class TaskView(ModelViewSet):
         env["TASK_RESULT_DIR"] = os.getenv("TASK_RESULT_DIR")
         out_dir = self._normal_task_dir(task)
         env["OUT_DIR"] = out_dir
-        env["TASK_URL"] = f"http://127.0.0.1:8080" + reverse(
+
+        port = os.getenv('WEB_PORT') or 8080
+        env["TASK_URL"] = f"http://127.0.0.1:{port}" + reverse(
             "task:single", kwargs={"pk": task.id}
         )
         env["SAMPLE_INFO"] = self._write_samples_txt(task)
