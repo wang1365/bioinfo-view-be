@@ -127,6 +127,12 @@ class TaskView(ModelViewSet):
         row.append(patient.prognosis_time if patient else "")
         row.append(patient.recurrence_time if patient else "")
         row.append(patient.survival_time if patient else "")
+        row.append(patient.general_pathology_number if patient else "")
+        row.append(patient.molecular_pathology_number if patient else "")
+        row.append(patient.submitting_department if patient else "")
+        row.append(patient.patient_phone_number if patient else "")
+        row.append(patient.outpatient_or_inpatient_number if patient else "")
+        row.append(patient.bed_number if patient else "")
 
         return row
 
@@ -347,7 +353,7 @@ class TaskView(ModelViewSet):
         out_dir = self._normal_task_dir(task)
         env["OUT_DIR"] = out_dir
 
-        port = os.getenv('WEB_PORT') or 8080
+        port = os.getenv("WEB_PORT") or 8080
         env["TASK_URL"] = f"http://127.0.0.1:{port}" + reverse(
             "task:single", kwargs={"pk": task.id}
         )
@@ -898,7 +904,7 @@ def read_mut_standard_file(request, pk):
     task = Task.objects.get(pk=pk)
     name = request.GET["name"]
     parent_dir = os.path.join(task.result_dir, name)
-    suffix =  'Mut_WES.txt' if name == 'Mut_WES' else "combined.standard-new.csv"
+    suffix = "Mut_WES.txt" if name == "Mut_WES" else "combined.standard-new.csv"
 
     files = os.listdir(parent_dir)
     file_path = None
