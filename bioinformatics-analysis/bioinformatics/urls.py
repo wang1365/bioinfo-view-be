@@ -42,4 +42,5 @@ urlpatterns = [
         r"^resource_limit",
         include(("resource_limit.urls", "resource_limit"),
                 namespace="resource_limit")),
+    url("verdict/", include(("verdict.urls", "verdict"), namespace="verdict")),
 ]

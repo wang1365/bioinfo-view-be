@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "patient",
     "report",
     "resource_limit",
+    "verdict",
     # "django_filters"
 ]
 
