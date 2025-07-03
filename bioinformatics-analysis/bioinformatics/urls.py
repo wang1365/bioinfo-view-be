@@ -43,4 +43,5 @@ urlpatterns = [
         include(("resource_limit.urls", "resource_limit"),
                 namespace="resource_limit")),
     url("verdict/", include(("verdict.urls", "verdict"), namespace="verdict")),
+    url("geneset/", include(("geneset.urls", "verdict"), namespace="geneset")),
 ]

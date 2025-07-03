@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "report",
     "resource_limit",
     "verdict",
+    "geneset",
     # "django_filters"
 ]
 
