@@ -926,12 +926,7 @@ def read_mut_standard_file_by_name(name:str, pk: int):
             file_path = os.path.join(parent_dir, item)
             break
     if file_path is None:
-        return response_body(
-            data=None,
-            status_code=200,
-            code=-1,
-            msg=f"文件不存在:{file_path}, result_dir:{parent_dir}",
-        )
+        return (None, 200, -1, f"文件不存在:{file_path}, result_dir:{parent_dir}")
     with open(file_path) as f:
         content = f.read()
         return (content, 200, 0, None, '')
