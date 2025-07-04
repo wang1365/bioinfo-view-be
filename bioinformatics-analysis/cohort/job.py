@@ -2,7 +2,6 @@ import datetime
 from sched import scheduler
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from django.http import HttpRequest
 
 from cohort.models import Cohort
 from task.models import Task
@@ -45,9 +44,12 @@ def parse_file_to_cohorts(csv_data, task_id, user_id, panel_id):
 
 @scheduler.scheduled_job(trigger='interval', seconds=60, id='check_multi_create_task')
 def check_multi_create_task():
+    del_flag = int(datetime.datetime.now().timestamp())
     # 获取所有cohort_status为"todo"的任务
     tasks = Task.objects.filter(cohort_status="todo")
     for task in tasks:
+        Cohort.objects.filter(task_id=task.id).update(del_flag=del_flag)
+
         user_id, task_id, panel_id = task.creator_id, task.id, task.flow.panel_id
         ret = read_mut_standard_file_by_name("Mut_WES", task.pk)
         mut_standard_file, ok = ret[0], ret[2] == 0
@@ -60,17 +62,11 @@ def check_multi_create_task():
         task.save()
 
     # 删除cohort表中task_id不在tasks中的记录（注意，不要直接删除，而是设置del_flag为当前时间戳）
-    del_flag = datetime.datetime.now().timestamp()
-
-    # all_tasks = Task.objects.all()
-    # task_ids = [task.id for task in all_tasks]
-    # cohort_obj = Cohort.objects.exclude(task_id__in=task_ids)
-    # cohort_obj.update(del_flag=del_flag)
     # 直接执行一条sql语句，将del_flag设置为当前时间戳
-    ids = list(Task.objects.raw(f"select t1.id from cohort t1 WHERE not exists (select 1 from task t2 where t2.id=t1.task_id) "))
+    ids = list(Task.objects.raw(
+        f"select t1.id from cohort t1 WHERE not exists (select 1 from task t2 where t2.id=t1.task_id) "))
     if ids:
         Cohort.objects.exclude(pk__in=ids).update(del_flag=del_flag)
-
 
 
 def start_cohort_scheduler():
