@@ -894,7 +894,7 @@ def read_file(request, pk):
             msg=f"文件不存在:{file_path}, result_dir:f{task.result_dir}",
         )
 
-    with open(file_path) as f:
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
         return response_body(data=content)
 

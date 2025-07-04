@@ -1,9 +1,12 @@
 from datetime import datetime
+
+from django.db import connection
 from django.db.models import Sum
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.viewsets.viewsets import CustomeViewSets
+from task.models import Task
 from utils.response import response_body
 from .models import Cohort
 
@@ -49,64 +52,17 @@ class CohortViewSet(CustomeViewSets):
     def stats_by_task(self, request):
         # 根据task_id统计比例
         task_id = request.query_params.get('task_id')
+        # 根据task_id查询task对象
+        task = Task.objects.get(id=task_id)
+        panel_id = task.flow.panel_id
+        task_count = Task.objects.filter(flow__panel_id=panel_id).count()
         if not task_id:
             return Response(response_body(code=1, msg="task_id不能为空"))
 
         # 获取当前task的统计
-        current_task_stats = Cohort.objects.filter(
-            task_id=task_id,
-            del_flag=0
-        ).values(
-            'ref_gene', 'chr', 'start', 'end', 'ref', 'alt'
-        ).annotate(
-            task_count=Sum('count')
-        )
-
-        # 获取所有相同panel的统计
-        panel = request.query_params.get('panel')
-        if not panel:
-            return Response(response_body(code=1, msg="panel不能为空"))
-
-        all_panel_stats = Cohort.objects.filter(
-            panel=panel,
-            del_flag=0
-        ).values(
-            'ref_gene', 'chr', 'start', 'end', 'ref', 'alt'
-        ).annotate(
-            total_count=Sum('count')
-        )
-
-        # 合并结果
-        result = []
-        for item in current_task_stats:
-            ref_gene = item['ref_gene']
-            chr = item['chr']
-            start = item['start']
-            end = item['end']
-            ref = item['ref']
-            alt = item['alt']
-
-            # 查找相同panel的总数
-            total = next((x for x in all_panel_stats
-                         if x['ref_gene'] == ref_gene
-                         and x['chr'] == chr
-                         and x['start'] == start
-                         and x['end'] == end
-                         and x['ref'] == ref
-                         and x['alt'] == alt), None)
-
-            if total:
-                ratio = item['task_count'] / total['total_count'] if total['total_count'] else 0
-                result.append({
-                    'ref_gene': ref_gene,
-                    'chr': chr,
-                    'start': start,
-                    'end': end,
-                    'ref': ref,
-                    'alt': alt,
-                    'task_count': item['task_count'],
-                    'total_count': total['total_count'],
-                    'ratio': ratio
-                })
-
+        with connection.cursor() as cursor:
+            cursor.execute(f'''
+            select gene_info, count(1) cnt from cohort where panel_id={panel_id} and del_flag = 0 group by gene_info;
+            ''')
+            result = [{ 'gene_info': row[0], 'cnt': row[1], 'total': task_count } for row in cursor.fetchall()]
         return response_body(data=result, msg="success")

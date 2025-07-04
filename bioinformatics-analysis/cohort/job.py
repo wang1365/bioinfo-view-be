@@ -42,7 +42,7 @@ def parse_file_to_cohorts(csv_data, task_id, user_id, panel_id):
     print(ret)
 
 
-@scheduler.scheduled_job(trigger='interval', seconds=60, id='check_multi_create_task')
+@scheduler.scheduled_job(trigger='interval', seconds=300, id='check_multi_create_task')
 def check_multi_create_task():
     del_flag = int(datetime.datetime.now().timestamp())
     # 获取所有cohort_status为"todo"的任务
