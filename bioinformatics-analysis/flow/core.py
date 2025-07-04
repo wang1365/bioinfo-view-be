@@ -1,16 +1,22 @@
 import logging
-
-import docker
-from docker.errors import DockerException
+import os
 
 G_CLIENT = None
-try:
-    G_CLIENT = docker.from_env()
-    print('create docker client success', G_CLIENT)
-    logging.getLogger().warning('create docker client success', G_CLIENT)
-except DockerException as e:
-    print('!!!create docker client failed', e)
-    logging.getLogger().warning('create docker client failed', e)
+# 如果是windows
+if os.name == "nt":
+    # do nothing
+    pass
+else:
+    import docker
+    from docker.errors import DockerException
+
+    try:
+        G_CLIENT = docker.from_env()
+        print('create docker client success', G_CLIENT)
+        logging.getLogger().warning('create docker client success', G_CLIENT)
+    except DockerException as e:
+        print('!!!create docker client failed', e)
+        logging.getLogger().warning('create docker client failed', e)
 
 
 def has_image(image_name):

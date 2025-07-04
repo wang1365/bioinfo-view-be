@@ -900,11 +900,23 @@ def read_file(request, pk):
 
 
 def read_mut_standard_file(request, pk):
+    name = request.GET["name"]
+    ret =  read_mut_standard_file_by_name(name, pk)
+    return response_body(data=ret[0], status_code=ret[1], code=ret[2], msg=ret[3])
+def read_mut_standard_file_by_name(name:str, pk: int):
     """读取突变 combined.standard-new.csv 文件."""
     task = Task.objects.get(pk=pk)
-    name = request.GET["name"]
     parent_dir = os.path.join(task.result_dir, name)
     suffix = "Mut_WES.txt" if name == "Mut_WES" else "combined.standard-new.csv"
+
+    if not os.path.exists(parent_dir):
+        print(f"文件不存在:{parent_dir}")
+        return (
+            None,
+            200,
+            -1,
+            f"文件不存在:{parent_dir}",
+        )
 
     files = os.listdir(parent_dir)
     file_path = None
@@ -922,7 +934,7 @@ def read_mut_standard_file(request, pk):
         )
     with open(file_path) as f:
         content = f.read()
-        return response_body(data=content)
+        return (content, 200, 0, None, '')
 
 
 class RunQcView(APIView):

@@ -5,6 +5,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from django.core.cache import cache
 from django.utils.timezone import now
 
+from cohort.job import start_cohort_scheduler
 from flow.core import G_CLIENT
 from utils.memory import SystemMemory
 from config.models import Config
@@ -181,3 +182,5 @@ def update_running_days():
 
 
 scheduler.start()
+
+start_cohort_scheduler()

@@ -21,6 +21,8 @@ comment on column verdict.is_deleted is '删除标识';
 comment on column verdict.deleted_at is '删除时间';
 
 
+alter table task add cohort_status varchar(100) default 'todo' not null;
+
 
 CREATE TABLE cohort (
     id SERIAL PRIMARY KEY,
