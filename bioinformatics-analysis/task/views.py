@@ -343,6 +343,7 @@ class TaskView(ModelViewSet):
                 "parameter": req_data.get("parameter"),
                 "creator_id": req_data.get("creator_id"),
                 "is_merge": False,
+                "cohort_status": "todo"
             }
         )
         # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
