@@ -58,19 +58,19 @@ class Patient(models.Model):
     # 金域平台功能需求 2025 年需求新增
     # 常规病理编号
     # General Pathology Number
-    general_pathology_number = models.CharField(max_length=256, null=True, default="")
+    general_pathology_number = models.CharField(max_length=256, null=True, default="",blank=True)
     # 分子病理编号
     # Molecular Pathology Number
-    molecular_pathology_number = models.CharField(max_length=256, null=True, default="")
+    molecular_pathology_number = models.CharField(max_length=256, null=True, default="",blank=True)
     # 送检科室
     # Submitting Department
-    submitting_department = models.CharField(max_length=256, null=True, default="")
+    submitting_department = models.CharField(max_length=256, null=True, default="",blank=True)
     # 患者电话
     # Patient Phone Number
-    patient_phone_number = models.CharField(max_length=256, null=True, default="")
+    patient_phone_number = models.CharField(max_length=256, null=True, default="",blank=True)
     # 门诊/住院号
     # Outpatient/Inpatient Number
-    outpatient_or_inpatient_number = models.CharField(max_length=256, null=True, default="")
+    outpatient_or_inpatient_number = models.CharField(max_length=256, null=True, default="",blank=True)
     # 床号
     # Bed Number
-    bed_number = models.CharField(max_length=256, null=True, default="")
+    bed_number = models.CharField(max_length=256, null=True, default="",blank=True)
