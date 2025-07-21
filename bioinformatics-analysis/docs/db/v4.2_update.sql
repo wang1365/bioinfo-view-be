@@ -25,9 +25,9 @@ ADD COLUMN bed_number VARCHAR(256) DEFAULT '' NULL;
 COMMENT ON COLUMN patient_patient.bed_number IS '床号';
 
 -- 用户诊断表
-create table verdict
+create table verdict_tt
 (
-    id                 integer  default nextval('diagnosis_id_seq'::regclass) not null primary key,
+    id                 integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     patient_identifier varchar(100),
     gene_identifier    varchar(100),
     result             jsonb,
@@ -50,7 +50,7 @@ alter table task add cohort_status varchar(100) default 'todo' not null;
 
 create table cohort
 (
-    id          serial  primary key,
+    id          integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     gene_info   varchar(1000) default ''::character varying,
     panel_id    varchar(255)  default ''::character varying,
     task_id     integer,
