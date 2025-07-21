@@ -48,7 +48,6 @@ comment on column verdict.deleted_at is '删除时间';
 -- 任务表增加字段：cohort状态
 alter table task add cohort_status varchar(100) default 'todo' not null;
 
-drop table if exists cohort;
 create table cohort
 (
     id          integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
