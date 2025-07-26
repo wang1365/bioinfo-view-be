@@ -18,7 +18,7 @@ from django.core.handlers.exception import response_for_exception
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpResponse
 
-logger = logging.getLogger('django.request')
+from loguru import logger
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bioinformatics.settings.prod")
 

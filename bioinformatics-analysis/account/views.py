@@ -25,7 +25,7 @@ from account import constants as account_constant
 from task.models import Task
 from config.models import Config
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class UserFilter(filters.FilterSet):

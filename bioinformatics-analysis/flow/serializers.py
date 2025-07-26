@@ -8,6 +8,8 @@ from flow.core import load_image
 import os
 
 from task.models import Task
+from loguru import logger
+from utils.env import image_dir
 
 
 class FlowSerializer(serializers.ModelSerializer):
@@ -28,11 +30,13 @@ class FlowSerializer(serializers.ModelSerializer):
     def validate_tar_path(self, tar_path, **params):
         real_tar_path = tar_path
         if not tar_path.startswith("/"):
-            real_tar_path = os.path.join("/data/bioinfo/image_dir", tar_path)
+            real_tar_path = os.path.join(image_dir, tar_path)
 
         try:
             load_image(real_tar_path, self.initial_data["image_name"])
         except Exception:
+            # 使用日志框架打印日志
+            logger.error(f"无法加载镜像: {real_tar_path}")
             raise ValidationError("无法加载镜像")
         return real_tar_path
 

@@ -16,6 +16,7 @@ from django.conf import settings
 
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
+from loguru import logger
 
 
 scheduler = BackgroundScheduler()
@@ -59,19 +60,19 @@ def run_task():
     totol_memory = SystemMemory().totol_memory
     running_tasks_count = len(running_tasks)
     running_tasks_count = Task.objects.filter(status=2).count()
-    log = logging.getLogger('RunTask')
-    log.info(f'max_task:{max_task}, running_task:{running_tasks_count}, used_memory:{used_memory}, total_memory:{totol_memory}, memory_rate:{memory_rate}')
+
+    logger.info(f'max_task:{max_task}, running_task:{running_tasks_count}, used_memory:{used_memory}, total_memory:{totol_memory}, memory_rate:{memory_rate}')
     if running_tasks_count < max_task and used_memory < totol_memory * memory_rate:
         # run task
         beto_run_tasks = Task.objects.filter(status=1).order_by(
             "-priority", "create_time")[0:max_task - running_tasks_count]
         to_run_count = max_task - running_tasks_count
-        log.info(f'start to run {to_run_count} tasks')
+        logger.info(f'start to run {to_run_count} tasks')
         for beto_run_task in beto_run_tasks:
-            log.info(f'Check task memory, task: {beto_run_task.id}, require mem:{beto_run_task.memory} ')
+            logger.info(f'Check task memory, task: {beto_run_task.id}, require mem:{beto_run_task.memory} ')
             # 内存检查的不对，临时除以2
             if used_memory + beto_run_task.memory / 2 < totol_memory * memory_rate:
-                log.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
+                logger.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
                 container = G_CLIENT.containers.run(
                     image=beto_run_task.flow.image_name,
                     environment=beto_run_task.env,
@@ -165,16 +166,16 @@ def cal_day_disk():
 def update_running_days():
     key, value = f'job_lock', os.getpid()
     if not cache.add(key, value, 30):
-        logging.getLogger().warning(f'Job已被{cache.get(key)}加锁, 忽略执行')
+        logger.warning(f'Job已被{cache.get(key)}加锁, 忽略执行')
         return
     else:
-        logging.getLogger().warning(f'Job加锁 {key} - {value}')
-    logging.getLogger('job').info("==========> update_running_days +1")
+        logger.warning(f'Job加锁 {key} - {value}')
+    logger.info("==========> update_running_days +1")
 
     # Config.objects.create(name="allowed_running_days", value=365, used=0, create_time=now(), update_time=now())
     if not Config.objects.filter(name="allowed_running_days").exists():
         Config.objects.create(name="allowed_running_days", value=365, used=0, create_time=now(), update_time=now())
-        logging.getLogger('job').info("==========> 配置项不存在，新建配置项")
+        logger.info("==========> 配置项不存在，新建配置项")
 
     config = Config.objects.filter(name="allowed_running_days").get()
     config.used += 1

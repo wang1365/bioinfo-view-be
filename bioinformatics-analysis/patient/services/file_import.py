@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 from patient.models import Patient
 
 
-_log = logging.getLogger('patient.services.file_import')
+from loguru import logger
 
 
 class _FileImporter:
@@ -31,17 +31,17 @@ class _FileImporter:
 
             if not any([id_card, identifier]):
                 msg = f'第{index+2}行的身份证号和患者失败号都为空'
-                _log.error(msg)
+                logger.error(msg)
                 raise APIException(msg)
 
             if id_card:
                 if id_card in self.id_card_dict:
                     msg = f'第{index + 2}行的身份证号和第{self.id_card_dict[id_card]}行重复'
-                    _log.error(msg)
+                    logger.error(msg)
                     raise APIException(msg)
                 elif len(id_card) not in [15, 18]:
                     msg = f'第{index+2}行的身份证号不符合长度规范'
-                    _log.error(msg)
+                    logger.error(msg)
                     raise APIException(msg)
                 else:
                     self.id_card_dict[id_card] = index
@@ -49,7 +49,7 @@ class _FileImporter:
             if identifier:
                 if identifier in self.identifier_index_dict:
                     msg = f'第{index + 2}行的身份证号和第{self.id_card_dict[id_card]}行重复'
-                    _log.error(msg)
+                    logger.error(msg)
                     raise APIException(msg)
                 else:
                     self.identifier_index_dict[identifier] = index

@@ -1,5 +1,6 @@
 import logging
 import os
+from loguru import logger
 
 G_CLIENT = None
 # 如果是windows
@@ -13,10 +14,10 @@ else:
     try:
         G_CLIENT = docker.from_env()
         print('create docker client success', G_CLIENT)
-        logging.getLogger().warning('create docker client success', G_CLIENT)
+        logger.warning('create docker client success', G_CLIENT)
     except DockerException as e:
         print('!!!create docker client failed', e)
-        logging.getLogger().warning('create docker client failed', e)
+        logger.warning('create docker client failed', e)
 
 
 def has_image(image_name):
@@ -26,7 +27,8 @@ def has_image(image_name):
     except docker.errors.ImageNotFound:
         return False
     except Exception as e:
-        print(e)
+        logger.error(e)
+        return False
 
 
 def load_image(tar_path, image_name):
@@ -37,5 +39,5 @@ def load_image(tar_path, image_name):
         with open(tar_path, "rb") as fp:
             G_CLIENT.images.load(fp)
     except Exception as e:
-        print(e)
+        logger.warning(e)
         raise Exception("Load Image Error")

@@ -30,9 +30,8 @@ from utils.paginator import PageNumberPaginationWithWrapper
 from common.viewsets.viewsets import CustomeViewSets
 
 from sample.constants import SAMPLE_META_MODEL_ATTRS, SAMPLE_MODEL_ATTRS, FIELDS_OPERATORS, SearchType
-from logging import getLogger
+from loguru import logger
 
-logger = getLogger(__name__)
 
 class SampleView(CustomeViewSets):
     queryset = Sample.objects.prefetch_related('sample_meta').all()

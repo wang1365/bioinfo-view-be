@@ -37,3 +37,4 @@ concurrent-log-handler==0.9.25
 pandas==2.2.3
 python-docx
 ipython
+loguru==0.7.3
