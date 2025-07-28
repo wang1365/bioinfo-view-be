@@ -25,7 +25,7 @@ ADD COLUMN bed_number VARCHAR(256) DEFAULT '' NULL;
 COMMENT ON COLUMN patient_patient.bed_number IS '床号';
 
 -- 用户诊断表
-create table verdict_tt
+create table verdict
 (
     id                 integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     patient_identifier varchar(100),
