@@ -24,6 +24,7 @@ ALTER TABLE patient_patient
 ADD COLUMN bed_number VARCHAR(256) DEFAULT '' NULL;
 COMMENT ON COLUMN patient_patient.bed_number IS '床号';
 
+drop table if exists verdict_tt;
 -- 用户诊断表
 create table verdict
 (
