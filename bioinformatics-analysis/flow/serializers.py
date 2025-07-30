@@ -37,7 +37,7 @@ class FlowSerializer(serializers.ModelSerializer):
         except Exception:
             # 使用日志框架打印日志
             logger.error(f"无法加载镜像: {real_tar_path}")
-            raise ValidationError("无法加载镜像")
+            # raise ValidationError("无法加载镜像")
         return real_tar_path
 
     def get_task_count(self, obj):
