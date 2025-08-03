@@ -44,4 +44,5 @@ urlpatterns = [
                 namespace="resource_limit")),
     url("verdict/", include(("verdict.urls", "verdict"), namespace="verdict")),
     url("cohort/", include(("cohort.urls", "cohort"), namespace="cohort")),
+    url(r"^file", include(("file.urls", "file"), namespace="file")),
 ]

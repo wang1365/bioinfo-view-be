@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "resource_limit",
     "verdict",
     "cohort",
+    "file",
     # "django_filters"
 ]
 
