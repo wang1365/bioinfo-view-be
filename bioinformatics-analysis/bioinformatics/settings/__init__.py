@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "verdict",
     "cohort",
     "file",
+    "cdc",
     # "django_filters"
 ]
 
