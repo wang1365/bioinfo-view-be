@@ -45,8 +45,8 @@ def collect_information(request):
 
     customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
     ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref/")
-    host, host_pick = ','.join(json_data['host']), ','.join(json_data['hostGenomeVersion'])
     sp, sp_pick = ','.join(json_data['virusName']), ','.join(json_data['virusType'])
+    host, host_pick = json_data['host'], json_data['hostGenomeVersion']
     new_ref_name = json_data['customDatabase']
 
     # 最终参数
