@@ -31,19 +31,22 @@ def collect_information(request):
 
     # 拼接参数，脚本参数说明如下：
     # sh make.ref.sh /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/   /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/   human   hg19   Norovirus   ALL   hg19_Norovirus    F
-    # sh make.ref.sh
-    # /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
-    # /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
-    # human
-    # hg19
-    # Norovirus
-    # ALL
-    # hg19_Norovirus
-    # F
+    #
+    # 脚本：sh make.ref.sh
+    # 参数说明：
+    # 1. /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
+    # 2. /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
+    # 3. host:          human  多个值的话用逗号分割
+    # 4. host_pick:     hg19   多个值的话用逗号分割
+    # 5. sp:            Norovirus  多个值的话用逗号分割
+    # 6. sp_pick:       ALL        多个值的话用逗号分割
+    # 7. new_ref_name:  hg19_Norovirus
+    # 8. F
+
     customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
     ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref/")
-    host, host_pick = json_data['host'], json_data['hostGenomeVersion']
-    sp, sp_pick = json_data['virusName'], json_data['virusType']
+    host, host_pick = ','.join(json_data['host']), ','.join(json_data['hostGenomeVersion'])
+    sp, sp_pick = ','.join(json_data['virusName']), ','.join(json_data['virusType'])
     new_ref_name = json_data['customDatabase']
 
     # 最终参数
