@@ -64,7 +64,7 @@ def collect_information(request):
 
     # 脚本执行完成后，会在脚本所在文件夹下生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
     # 读取这2个文件的内容
-    out_dir = os.path.join(database_dir, 'Pathogen_database/customize_ref_db/hg19_Norovirus')
+    out_dir = os.path.join(database_dir, f'Pathogen_database/customize_ref_db/{new_ref_name}')
     host_mapdb_info = os.path.join(out_dir, "host_mapdb.info")
     sp_mapdb_info = os.path.join(out_dir, "sp_mapdb.info")
     with open(host_mapdb_info, "r") as f:
