@@ -5,7 +5,7 @@ from loguru import logger
 from rest_framework.decorators import api_view
 from utils.response import response_body
 from utils.env import database_dir
-from utils.env import database_dir
+from pathlib import Path
 
 
 @api_view(['POST'])
@@ -64,9 +64,17 @@ def collect_information(request):
 
     # 脚本执行完成后，会在脚本所在文件夹下生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
     # 读取这2个文件的内容
-    out_dir = os.path.join(database_dir, f'Pathogen_database/customize_ref_db/{new_ref_name}')
-    host_mapdb_info = os.path.join(out_dir, "host_mapdb.info")
-    sp_mapdb_info = os.path.join(out_dir, "sp_mapdb.info")
+    out_dir = str(Path(database_dir) / f'Pathogen_database/customize_ref_db/{new_ref_name}')
+    host_mapdb_info = str(Path(out_dir) / "host_mapdb.info")
+    sp_mapdb_info = str(Path(out_dir) / "sp_mapdb.info")
+    if not os.path.exists(host_mapdb_info) or not os.path.exists(sp_mapdb_info):
+        return response_body(
+            status_code=500,
+            code=1,
+            msg=f'生成数据库失败，文件不存在: {host_mapdb_info}, {sp_mapdb_info}',
+            data={}
+        )
+
     with open(host_mapdb_info, "r") as f:
         host_mapdb_info = f.read()
     with open(sp_mapdb_info, "r") as f:

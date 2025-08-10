@@ -6,6 +6,8 @@ import uuid
 import os
 import json
 import csv
+from pathlib import Path
+
 from django.db.models import Q, F
 import shutil
 import subprocess
@@ -42,6 +44,7 @@ from account import constants as account_constant
 from sample.models import SampleMeta
 from patient.models import Patient
 from config.models import Config
+from utils.env import database_dir
 
 
 class TaskView(ModelViewSet):
@@ -306,7 +309,7 @@ class TaskView(ModelViewSet):
                 status_code=400,
                 msg="您的磁盘使用量已达到限制,请删除空间或联系管理员提高磁盘容量大小限制",
             )
-        req_data = request.POST.copy()
+        req_data = request.POST.copy() or request.data.copy()
         check_duplicate = request.query_params.get("check_duplicate")
         if check_duplicate:
             flag, old_task = self.has_duplicate(req_data)
@@ -333,6 +336,9 @@ class TaskView(ModelViewSet):
             item["key"]: str(item["value"]) for item in req_data.get("parameter", [])
         }
 
+        # 处理cdc任务相关的参数
+        self._prepare_cdc_params(req_data, env)
+
         task = Task.objects.create(
             **{
                 "name": req_data.get("name"),
@@ -341,6 +347,7 @@ class TaskView(ModelViewSet):
                 "flow_id": req_data.get("flow_id"),
                 "samples": req_data.get("samples"),
                 "parameter": req_data.get("parameter"),
+                "cdc_parameter": req_data.get("cdc_parameter"),
                 "creator_id": req_data.get("creator_id"),
                 "is_merge": False,
                 "cohort_status": "todo"
@@ -371,6 +378,67 @@ class TaskView(ModelViewSet):
         for sample_id in task.samples:
             TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id)
         return response_body(data=serializer.data)
+
+    def _prepare_cdc_params(self, req_data, env):
+        """
+        准备CDC任务相关的参数
+        {
+            ...
+            // 自建参考基因组
+            refGenomeData: {
+                "virusName": ['aa','bb'],
+                # 病毒分型
+                "virusType": ['aa', 'bb'],
+                # 宿主
+                "host": 'xxx',
+                # 宿主基因组版本
+                "hostGenomeVersion": 'xxx',
+                # 自定义数据库名称
+                "customDatabase": 'xxx',
+                "hostMapDbInfo": ""，
+                "spMapDbInfo": ""
+            },
+            "多样本组装及比对流程": {
+                "ref_name": "自建参考基因组名称",
+                "ref_fasta": "自建参考基因组fasta文件路径",
+                "ref_gtf": "自建参考基因组gtf文件路径",
+            },
+            "多样本突变检测与建树": {
+                "ref_name": "自建参考基因组名称",
+                "ref_fasta": "自建参考基因组fasta文件路径",
+                "ref_gtf": "自建参考基因组gtf文件路径",
+            },
+        }
+        """
+
+        flow_code = req_data.get("flow_code") or ''
+        ref_name = req_data['refGenomeData'].get("customDatabase", "")
+        if flow_code not in ["自建参考基因组", "多样本组装及比对流程", "多样本突变检测与建树"]:
+            return
+
+        # 将"自建参考基因组"的hostMapDbInfo和spMapDbInfo分别报错为1个本地文件，文件路径为
+        host_mapdb_out_file = str(Path(database_dir) /  r"Pathogen_database\customize_ref_db" / ref_name / "host_mapdb_out.info")
+        sp_mapdb_out_file = str(Path(database_dir) / r"Pathogen_database\customize_ref_db" / ref_name / "sp_mapdb_out.info")
+
+        if flow_code == "自建参考基因组":
+            ref_data = req_data["refGenomeData"]
+            with open(host_mapdb_out_file, "w") as f:
+                f.write(ref_data["hostMapDbInfo"])
+            with open(sp_mapdb_out_file, "w") as f:
+                f.write(ref_data["spMapDbInfo"])
+
+            env['CDC_HOST_MAPDB_FILE'] = host_mapdb_out_file
+            env['CDC_SP_MAPDB_FILE'] = sp_mapdb_out_file
+            env['CDC_REF_NAME'] = ref_name
+            env['CDC_VIRUS_NAME'] = ','.join(ref_data.get("virusName", ""))
+            env['CDC_VIRUS_NAME'] = ','.join(ref_data.get("virusType", ""))
+            env['CDC_HOST'] = ref_data.get("host", "")
+            env['CDC_HOST_GENOME_VERSION'] = ref_data.get("hostGenomeVersion", "")
+        elif flow_code in ["多样本组装及比对流程", "多样本突变检测与建树"]:
+            pass
+
+
+
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
