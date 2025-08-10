@@ -41,4 +41,4 @@ def dir_size(dirctory):
         stdout=subprocess.PIPE,
         encoding='utf8')
     size = res.stdout.read().split("\t")[0]
-    return int(float(size) / 1024)
+    return 0 if size == "" else int(float(size) / 1024)
