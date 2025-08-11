@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "cohort",
     "file",
     "cdc",
+    "reference_genome",
     # "django_filters"
 ]
 
