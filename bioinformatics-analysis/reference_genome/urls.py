@@ -1,11 +1,11 @@
 from django.urls import re_path as url, path
 from rest_framework.routers import DefaultRouter
-from .views import ReferenceGenomeViewSet
+from .views import ReferenceGenomeViewSet, collect_information
 
 router = DefaultRouter()
-router.register(r'reference-genomes', ReferenceGenomeViewSet, basename='reference-genome')
+router.register(r'', ReferenceGenomeViewSet, basename='reference-genome')
 
-urlpatterns = [
+other_urls = [
     # 自建参考基因组相关的URL会通过router自动生成
     # GET /reference-genomes/ - 查询参考基因组列表
     # POST /reference-genomes/ - 新建参考基因组
@@ -15,6 +15,7 @@ urlpatterns = [
     # DELETE /reference-genomes/{id}/ - 删除参考基因组（软删除）
     # POST /reference-genomes/{id}/restore/ - 恢复已删除的参考基因组
     # GET /reference-genomes/statistics/ - 获取统计信息
+    url(r'collect_information', collect_information),
 ]
 
-urlpatterns += router.urls
+urlpatterns = other_urls + router.urls

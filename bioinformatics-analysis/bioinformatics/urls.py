@@ -45,6 +45,5 @@ urlpatterns = [
     url("verdict/", include(("verdict.urls", "verdict"), namespace="verdict")),
     url("cohort/", include(("cohort.urls", "cohort"), namespace="cohort")),
     url(r"^file", include(("file.urls", "file"), namespace="file")),
-    url(r"^cdc", include(("cdc.urls", "cdc"), namespace="cdc")),
-    url(r"^", include(("reference_genome.urls", "reference_genome"), namespace="reference_genome")),
+    url(r"^reference_genomes/", include(("reference_genome.urls", "reference_genome"), namespace="reference_genome")),
 ]

@@ -16,6 +16,8 @@ class ReferenceGenome(models.Model):
     # 病毒种名 - 使用JSONField存储
     virus_name = models.JSONField(
         default=dict,
+        null=True,
+        blank=True,
         verbose_name="病毒种名",
         help_text="病毒种名信息，JSON格式"
     )
@@ -23,6 +25,8 @@ class ReferenceGenome(models.Model):
     # 病毒分型 - 使用JSONField存储
     virus_type = models.JSONField(
         default=dict,
+        null=True,
+        blank=True,
         verbose_name="病毒分型",
         help_text="病毒分型信息，JSON格式"
     )
@@ -30,6 +34,8 @@ class ReferenceGenome(models.Model):
     # 宿主
     host = models.CharField(
         max_length=255,
+        null=True,
+        blank=True,
         verbose_name="宿主",
         help_text="宿主信息"
     )
@@ -37,6 +43,8 @@ class ReferenceGenome(models.Model):
     # 宿主基因组版本
     host_genome_version = models.CharField(
         max_length=255,
+        null=True,
+        blank=True,
         verbose_name="宿主基因组版本",
         help_text="宿主基因组版本信息"
     )

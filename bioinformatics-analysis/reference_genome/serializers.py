@@ -30,17 +30,17 @@ class ReferenceGenomeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("自定义数据库名不能为空")
         return value.strip()
 
-    def validate_host(self, value):
-        """验证宿主信息"""
-        if not value or not value.strip():
-            raise serializers.ValidationError("宿主信息不能为空")
-        return value.strip()
-
-    def validate_host_genome_version(self, value):
-        """验证宿主基因组版本"""
-        if not value or not value.strip():
-            raise serializers.ValidationError("宿主基因组版本不能为空")
-        return value.strip()
+    # def validate_host(self, value):
+    #     """验证宿主信息"""
+    #     if not value or not value.strip():
+    #         raise serializers.ValidationError("宿主信息不能为空")
+    #     return value.strip()
+    #
+    # def validate_host_genome_version(self, value):
+    #     """验证宿主基因组版本"""
+    #     if not value or not value.strip():
+    #         raise serializers.ValidationError("宿主基因组版本不能为空")
+    #     return value.strip()
 
     # def validate_host_seq_file(self, value):
     #     """验证宿主原序列文件路径"""
