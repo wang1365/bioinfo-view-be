@@ -82,16 +82,6 @@ class ReferenceGenomeViewSet(ModelViewSet):
         """查询参考基因组列表"""
         queryset = self.filter_queryset(self.get_queryset())
 
-        # 权限控制：普通用户只能看到自己创建的
-        if account_constant.NORMAL in request.role_list:
-            queryset = queryset.filter(creator=request.account)
-        elif account_constant.ADMIN in request.role_list:
-            # 管理员可以看到所有普通用户和自己创建的
-            queryset = queryset.filter(
-                Q(creator__user2role__role__code=account_constant.NORMAL)
-                | Q(creator=request.account)
-            )
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -104,6 +94,36 @@ class ReferenceGenomeViewSet(ModelViewSet):
         """新建参考基因组"""
         data = request.data.copy()
         data["creator"] = request.account.id
+
+        # 处理host_map_db和sp_map_db文件写入
+        custom_database = data.get('custom_database')
+        host_map_db = data.get('host_map_db')
+        sp_map_db = data.get('sp_map_db')
+        
+        if custom_database and host_map_db and sp_map_db:
+            # 创建目录
+            db_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{custom_database}'
+            db_dir.mkdir(parents=True, exist_ok=True)
+            
+            # 处理host_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
+            host_content = host_map_db if isinstance(host_map_db, str) else json.dumps(host_map_db, ensure_ascii=False, indent=2)
+            
+            # 写入host_map_db文件
+            host_file_path = db_dir / 'host_mapdb_result.info'
+            with open(host_file_path, 'w', encoding='utf-8') as f:
+                f.write(host_content)
+            data['host_seq_file'] = str(host_file_path)
+            
+            # 处理sp_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
+            sp_content = sp_map_db if isinstance(sp_map_db, str) else json.dumps(sp_map_db, ensure_ascii=False, indent=2)
+            
+            # 写入sp_map_db文件
+            virus_file_path = db_dir / 'sp_mapdb_result.info'
+            with open(virus_file_path, 'w', encoding='utf-8') as f:
+                f.write(sp_content)
+            data['virus_seq_file'] = str(virus_file_path)
+            
+            logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)

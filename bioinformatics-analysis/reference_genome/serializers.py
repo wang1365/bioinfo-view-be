@@ -58,6 +58,10 @@ class ReferenceGenomeSerializer(serializers.ModelSerializer):
 class ReferenceGenomeCreateSerializer(ReferenceGenomeSerializer):
     """创建自建参考基因组的序列化器"""
     
+    # 添加host_map_db和sp_map_db字段，用于接收前端传递的数据
+    host_map_db = serializers.JSONField(required=False, allow_null=True, help_text="宿主原序列信息")
+    sp_map_db = serializers.JSONField(required=False, allow_null=True, help_text="病原原序列信息")
+    
     class Meta(ReferenceGenomeSerializer.Meta):
         fields = [
             'custom_database',
@@ -70,6 +74,7 @@ class ReferenceGenomeCreateSerializer(ReferenceGenomeSerializer):
             'host_map_db',
             'sp_map_db'
         ]
+        read_only_fields = []
 
 
 class ReferenceGenomeListSerializer(serializers.ModelSerializer):
