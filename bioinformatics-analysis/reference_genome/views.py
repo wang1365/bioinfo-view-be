@@ -1,34 +1,38 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.db.models import Q
-from account import constants as account_constant
+import json
+import os
+from pathlib import Path
 
+from django.db.models import Q
+from loguru import logger
+from rest_framework.decorators import action
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+
+from account import constants as account_constant
+from common.filters import CommonFilters
+from utils.env import database_dir
+from utils.paginator import PageNumberPaginationWithWrapper
+from utils.response import response_body
 from .models import ReferenceGenome
 from .serializers import (
     ReferenceGenomeSerializer,
     ReferenceGenomeCreateSerializer,
     ReferenceGenomeListSerializer
 )
-from utils.response import response_body
-from utils.paginator import PageNumberPaginationWithWrapper
-from common.filters import CommonFilters
-import json
-import os
-from django.http import JsonResponse
-from loguru import logger
-from rest_framework.decorators import api_view
-from utils.response import response_body
-from utils.env import database_dir
-from pathlib import Path
 
 
 class ReferenceGenomeFilter(CommonFilters):
     """自建参考基因组过滤器"""
 
     def filter_queryset(self, request, qs, view):
-        # 基础过滤
-        qs = super().filter_queryset(request, qs, view)
+        # 基础过滤（不包括排序）
+        filter_info = self.extract_filters(request.parser_context['request'])
+        search_keyword = filter_info['search_keyword']
+        payload = filter_info['payload']
+
+        qs = self.filter_queryset_by_search(qs, search_keyword)
+        qs = self.filter_queryset_by_filters(qs, payload)
 
         # 只显示未删除的记录
         qs = qs.filter(is_deleted=False)
@@ -47,6 +51,9 @@ class ReferenceGenomeFilter(CommonFilters):
         host_genome_version = request.GET.get('host_genome_version')
         if host_genome_version:
             qs = qs.filter(host_genome_version__icontains=host_genome_version)
+
+        # 覆盖基类的create_time排序，改为按id倒序
+        qs = qs.order_by('-id')
 
         return qs
 
@@ -69,7 +76,7 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
     def get_queryset(self):
         """获取查询集，只返回未删除的记录"""
-        return ReferenceGenome.objects.filter(is_deleted=False)
+        return ReferenceGenome.objects.filter(is_deleted=False).order_by('-id')
 
     def list(self, request, *args, **kwargs):
         """查询参考基因组列表"""
