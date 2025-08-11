@@ -1,6 +1,6 @@
 from django.urls import re_path as url, path
 from rest_framework.routers import DefaultRouter
-from .views import ReferenceGenomeViewSet, collect_information
+from .views import ReferenceGenomeViewSet, collect_information, check_file
 
 router = DefaultRouter()
 router.register(r'', ReferenceGenomeViewSet, basename='reference-genome')
@@ -16,6 +16,7 @@ other_urls = [
     # POST /reference-genomes/{id}/restore/ - 恢复已删除的参考基因组
     # GET /reference-genomes/statistics/ - 获取统计信息
     url(r'collect_information', collect_information),
+    url(r'check_file', check_file),
 ]
 
 urlpatterns = other_urls + router.urls

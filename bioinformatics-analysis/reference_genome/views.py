@@ -194,6 +194,45 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         return response_body(data=data)
 
+@api_view(['GET'])
+def check_file(request):
+    """
+    检查文件是否存在
+    """
+    custom_database = request.GET.get('custom_database')
+    out_dir = str(Path(database_dir) / f'Pathogen_database/customize_ref_db/{custom_database}')
+    if not os.path.exists(out_dir) or not os.path.exists(out_dir):
+        return response_body(
+            status_code=200,
+            code=0,
+            msg=f'',
+            data={
+                "ok": False,
+                "msg": f"文件不存在: {out_dir}",
+            }
+        )
+
+    host_mapdb_info = str(Path(out_dir) / "host_mapdb.info")
+    sp_mapdb_info = str(Path(out_dir) / "sp_mapdb.info")
+    if not os.path.exists(host_mapdb_info) or not os.path.exists(sp_mapdb_info):
+        return response_body(
+            status_code=200,
+            code=0,
+            msg=f'文件不存在: {host_mapdb_info}, {sp_mapdb_info}',
+            data={
+                "ok": False,
+                "msg": f"文件不存在: {host_mapdb_info}, {sp_mapdb_info}",
+            }
+        )
+    return response_body(
+        status_code=200,
+        code=0,
+        msg=f'',
+        data={
+            "ok": True,
+            "msg": f"",
+        }
+    )
 
 @api_view(['POST'])
 def collect_information(request):
