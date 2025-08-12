@@ -290,7 +290,7 @@ def collect_information(request):
     # 8. F
 
     customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
-    ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref/")
+    ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref_seq_db/")
 
     virus_name, virus_type = json_data.get('virusName'), json_data.get('virusType')
     sp, sp_pick = ','.join(virus_name) if virus_name else '-', ','.join(virus_type) if virus_type else '-'
