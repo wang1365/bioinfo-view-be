@@ -216,7 +216,7 @@ class ReferenceGenomeViewSet(ModelViewSet):
         return response_body(data=data)
 
 def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
-    return execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
+    return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
 def execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name):
     return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'F')
 def execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, type):
