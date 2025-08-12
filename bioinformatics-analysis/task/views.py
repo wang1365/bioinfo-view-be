@@ -412,9 +412,10 @@ class TaskView(ModelViewSet):
         """
 
         flow_code = req_data.get("flow_code") or ''
-        ref_name = req_data['refGenomeData'].get("customDatabase", "")
         if flow_code not in ["自建参考基因组", "多样本组装及比对流程", "多样本突变检测与建树"]:
             return
+
+        ref_name = req_data['refGenomeData'].get("customDatabase", "")
 
         # 将"自建参考基因组"的hostMapDbInfo和spMapDbInfo分别报错为1个本地文件，文件路径为
         host_mapdb_out_file = str(Path(database_dir) /  r"Pathogen_database\customize_ref_db" / ref_name / "host_mapdb_out.info")
