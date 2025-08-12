@@ -1,16 +1,23 @@
 import os
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from utils.response import response_body
 from utils.env import database_dir
 
 @api_view(['GET'])
 def read_file_from_database(request):
+    file_path = os.path.join(database_dir, request.GET.get('path'))
+    return read_file_from_local(file_path)
+
+
+@api_view(['GET'])
+def read_file(request):
+    return read_file_from_local(request.GET.get('path'))
+
+def read_file_from_local(file_path):
     """
     读取本地文件内容
     GET /file/read?path=文件路径
     """
-    file_path = os.path.join(database_dir, request.GET.get('path'))
 
     if not file_path:
         return response_body(
@@ -19,7 +26,7 @@ def read_file_from_database(request):
             code=-1,
             msg='缺少path参数'
         )
-    
+
     # 检查文件是否存在
     if not os.path.exists(file_path):
         return response_body(
@@ -28,7 +35,7 @@ def read_file_from_database(request):
             code=-1,
             msg=f'文件不存在: {file_path}'
         )
-    
+
     # 检查是否为文件（不是目录）
     if not os.path.isfile(file_path):
         return response_body(
@@ -37,7 +44,7 @@ def read_file_from_database(request):
             code=-1,
             msg=f'路径不是文件: {file_path}'
         )
-    
+
     try:
         # 尝试以UTF-8编码读取文件
         with open(file_path, 'r', encoding='utf-8') as f:
