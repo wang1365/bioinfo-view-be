@@ -299,43 +299,21 @@ def collect_information(request):
     new_ref_name = json_data['customDatabase']
 
     # 最终参数
-    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name}"
+    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name} F"
     # 脚本路径
     bash = os.path.join(database_dir, "Pathogen_database/bin/make.ref.sh")
     # 最终命令
     cmd = f"sh {bash} {params}"
-
     logger.info(f"cmd: {cmd}")
 
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
     exit_code = os.system(cmd)
-    logger.info(f"exit_code: {exit_code}")
 
     # 脚本执行完成后，会在脚本所在文件夹下生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
     # 读取这2个文件的内容
     out_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{new_ref_name}'
-    out_dir.mkdir(exist_ok=True)
 
-
-    # 执行脚本，生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
-    # sh   make.ref.sh   /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/   /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/   human   hg19   Adenoviridae   ALL   hg19_Adenoviridae    F
-
-    # 脚本路径 {database}\Pathogen_database\bin\make.ref.sh
-    # 脚本参数
-    # 1. /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
-    # 2. /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
-    # 3. host:          human  多个值的话用逗号分割
-    # 4. host_pick:     hg19   多个值的话用逗号分割
-    # 5. sp:            Adenoviridae  多个值的话用逗号分割
-    # 6. sp_pick:       ALL        多个值的话用逗号分割
-    # 7. new_ref_name:  hg19_Adenoviridae
-    # 8. T
-
-    bash = Path(database_dir) / "Pathogen_database/bin/make.ref.sh"
-    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name} F"
-    # 执行脚本
-    exit_code = os.system(f"sh {bash} {params}")
-    logger.info(f"exit_code: {exit_code} for command: {bash} {params}")
+    logger.info(f"exit_code: {exit_code} for command: {cmd} ")
 
     # 读取结果文件
     host_mapdb_info = str(out_dir / "host_mapdb.info")
