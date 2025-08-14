@@ -71,6 +71,8 @@ class TaskSample(models.Model):
                              related_name="task_samples",
                              on_delete=models.CASCADE)
     sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
+    custom_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="自定义名称")
+    sampling_rate = models.FloatField(blank=True, null=True, verbose_name="采样率")
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
 

@@ -375,8 +375,12 @@ class TaskView(ModelViewSet):
             task_count=F("task_count") + 1
         )
         serializer = self.get_serializer(task)
-        for sample_id in task.samples:
-            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id)
+        sample_details = req_data.get("sample_details", [])
+        for sample in sample_details:
+            sampling_rate = int(sample.get("sampling_rate"))
+            TaskSample.objects.create(sample_id=int(sample.get("sample_id")), task_id=task.id,
+                                      custom_name=sample.get("custom_name"),
+                                      sampling_rate=float(sampling_rate) if sampling_rate is not None else None)
         return response_body(data=serializer.data)
 
     def _prepare_cdc_params(self, req_data, env):

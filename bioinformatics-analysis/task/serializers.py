@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from account.serializer import AccountSerializer
 from project.serializer import ProjectSerializer
-from task.models import Task
+from task.models import Task, TaskSample
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -52,3 +52,9 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "log",
             "deleted_tempdir",
         ]
+
+
+class TaskSampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskSample
+        fields = "__all__"
