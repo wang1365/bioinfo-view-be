@@ -68,6 +68,8 @@ class FlowSerializer(serializers.ModelSerializer):
             "create_time",
             "allow_nonstandard_samples",
             "allow_define_report",
+            "support_custom_sample_name",
+            "support_sample_ratio",
             "config",
             "task_count"
         ]

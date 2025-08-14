@@ -92,6 +92,8 @@ class Flow(models.Model):
 
     allow_nonstandard_samples = models.BooleanField(default=False)
     allow_define_report = models.BooleanField(default=False)
+    support_custom_sample_name = models.BooleanField(default=False)
+    support_sample_ratio = models.BooleanField(default=False)
 
     members = models.ManyToManyField(to=Account,
                                      through="FlowMembers",
