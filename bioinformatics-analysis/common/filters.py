@@ -9,8 +9,13 @@ class CommonFilters:
     SEARCH_FIELDS = []
     SEARCH_KEY = None
 
+    def get_ordering(self):
+        """获取默认排序字段，子类可以重写此方法来自定义排序"""
+        return 'create_time'
+
     def filter_queryset(self, request, queryset, view):
-        queryset = queryset.order_by('create_time')
+        # 使用可重写的排序方法
+        queryset = queryset.order_by(self.get_ordering())
 
         filter_info = self.extract_filters(request.parser_context['request'])
         search_keyword = filter_info['search_keyword']

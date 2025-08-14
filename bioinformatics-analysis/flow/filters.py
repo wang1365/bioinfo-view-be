@@ -12,6 +12,10 @@ class FlowFilters(CommonFilters):
     ]
     SEARCH_KEY = 'keyword'
 
+    def get_ordering(self):
+        """重写排序方法，使用ID倒序排列"""
+        return '-id'
+
 
 class FilterByAccount:
 
