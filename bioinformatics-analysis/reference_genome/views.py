@@ -100,30 +100,31 @@ class ReferenceGenomeViewSet(ModelViewSet):
         host_map_db = data.get('host_map_db')
         sp_map_db = data.get('sp_map_db')
         
-        if custom_database and host_map_db and sp_map_db:
-            # 创建目录
-            db_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{custom_database}'
-            db_dir.mkdir(parents=True, exist_ok=True)
-            
-            # 处理host_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
-            host_content = host_map_db if isinstance(host_map_db, str) else json.dumps(host_map_db, ensure_ascii=False, indent=2)
-            
-            # 写入host_map_db文件
-            host_file_path = db_dir / 'host_mapdb_result.info'
-            with open(host_file_path, 'w', encoding='utf-8') as f:
-                f.write(host_content)
-            data['host_seq_file'] = str(host_file_path)
-            
-            # 处理sp_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
-            sp_content = sp_map_db if isinstance(sp_map_db, str) else json.dumps(sp_map_db, ensure_ascii=False, indent=2)
-            
-            # 写入sp_map_db文件
-            virus_file_path = db_dir / 'sp_mapdb_result.info'
-            with open(virus_file_path, 'w', encoding='utf-8') as f:
-                f.write(sp_content)
-            data['virus_seq_file'] = str(virus_file_path)
-            
-            logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
+        # 创建目录
+        db_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{custom_database}'
+        db_dir.mkdir(parents=True, exist_ok=True)
+
+        # 处理host_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
+        host_content = host_map_db if isinstance(host_map_db, str) else json.dumps(host_map_db, ensure_ascii=False, indent=2)
+
+        # 写入host_map_db文件
+        host_file_path = db_dir / 'host_mapdb.info'
+        with open(host_file_path, 'w', encoding='utf-8') as f:
+            f.write(host_content)
+        data['host_seq_file'] = str(host_file_path)
+
+        # 处理sp_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
+        sp_content = sp_map_db if isinstance(sp_map_db, str) else json.dumps(sp_map_db, ensure_ascii=False, indent=2)
+
+        # 写入sp_map_db文件
+        virus_file_path = db_dir / 'sp_mapdb.info'
+        with open(virus_file_path, 'w', encoding='utf-8') as f:
+            f.write(sp_content)
+        data['virus_seq_file'] = str(virus_file_path)
+
+        logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
+
+        execute_bash_t(data.get('virus_name'), data.get('virus_type'), data.get('host'), data.get('host_genome_version'), custom_database)
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -214,6 +215,46 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         return response_body(data=data)
 
+def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
+    return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
+def execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name):
+    return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'F')
+def execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, type):
+    """
+    拼接参数，脚本参数说明如下：
+    sh make.ref.sh /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/   /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/   human   hg19   Norovirus   ALL   hg19_Norovirus    F
+
+    脚本：sh make.ref.sh
+    参数说明：
+    1. /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
+    2. /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
+    3. host:          human  多个值的话用逗号分割
+    4. host_pick:     hg19   多个值的话用逗号分割
+    5. sp:            Norovirus  多个值的话用逗号分割
+    6. sp_pick:       ALL        多个值的话用逗号分割
+    7. new_ref_name:  hg19_Norovirus
+    8. F/T
+    """
+
+    customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
+    ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref_seq_db/")
+
+    sp, sp_pick = ','.join(virus_name) if virus_name else '-', ','.join(virus_type) if virus_type else '-'
+
+    host, host_pick = host or '-', host_pick or '-'
+
+    # 最终参数
+    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name} {type}"
+    # 脚本路径
+    bash = os.path.join(database_dir, "Pathogen_database/bin/make.ref.sh")
+    # 最终命令
+    cmd = f"sh {bash} {params}"
+    logger.info(f"cmd: {cmd}")
+
+    # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
+    exit_code = os.system(cmd)
+    logger.info(f"exit_code: {exit_code}")
+
 @api_view(['GET'])
 def check_file(request):
     """
@@ -275,47 +316,20 @@ def collect_information(request):
     # 解析json
     json_data = json.loads(json_data)
 
-    # 拼接参数，脚本参数说明如下：
-    # sh make.ref.sh /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/   /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/   human   hg19   Norovirus   ALL   hg19_Norovirus    F
-    #
-    # 脚本：sh make.ref.sh
-    # 参数说明：
-    # 1. /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
-    # 2. /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
-    # 3. host:          human  多个值的话用逗号分割
-    # 4. host_pick:     hg19   多个值的话用逗号分割
-    # 5. sp:            Norovirus  多个值的话用逗号分割
-    # 6. sp_pick:       ALL        多个值的话用逗号分割
-    # 7. new_ref_name:  hg19_Norovirus
-    # 8. F
-
-    customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
-    ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref/")
-
     virus_name, virus_type = json_data.get('virusName'), json_data.get('virusType')
-    sp, sp_pick = ','.join(virus_name) if virus_name else '-', ','.join(virus_type) if virus_type else '-'
-
-    host, host_pick = json_data.get('host') or '-', json_data.get('hostGenomeVersion') or '-'
+    host, host_pick = json_data.get('host'), json_data.get('hostGenomeVersion')
     new_ref_name = json_data['customDatabase']
 
-    # 最终参数
-    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name}"
-    # 脚本路径
-    bash = os.path.join(database_dir, "Pathogen_database/bin/make.ref.sh")
-    # 最终命令
-    cmd = f"sh {bash} {params}"
-
-    logger.info(f"cmd: {cmd}")
-
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
-    exit_code = os.system(cmd)
-    logger.info(f"exit_code: {exit_code}")
+    execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name)
 
     # 脚本执行完成后，会在脚本所在文件夹下生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
     # 读取这2个文件的内容
-    out_dir = str(Path(database_dir) / f'Pathogen_database/customize_ref_db/{new_ref_name}')
-    host_mapdb_info = str(Path(out_dir) / "host_mapdb.info")
-    sp_mapdb_info = str(Path(out_dir) / "sp_mapdb.info")
+    out_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{new_ref_name}'
+
+    # 读取结果文件
+    host_mapdb_info = str(out_dir / "host_mapdb.info")
+    sp_mapdb_info = str(out_dir / "sp_mapdb.info")
     if not os.path.exists(host_mapdb_info) or not os.path.exists(sp_mapdb_info):
         return response_body(
             status_code=500,
