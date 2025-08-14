@@ -516,7 +516,7 @@ class TaskView(ModelViewSet):
         # return response_body(code=1, msg="只有管理员和任务创建者可以删除任务", data=False)
 
     def _enrich_task_list(self, ret_data):
-        flow_list = Flow.objects.filter(id__in=[item["flow"] for item in ret_data])
+        flow_list = Flow.objects.select_related('panel').defer('panel__detail').filter(id__in=[item["flow"] for item in ret_data])
         project_list = Project.objects.filter(
             id__in=[item["project"] for item in ret_data]
         )

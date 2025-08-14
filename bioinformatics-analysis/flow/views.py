@@ -59,7 +59,8 @@ class PanelView(CustomeViewSets):
 
 
 class FlowView(CustomeViewSets):
-    queryset = Flow.objects.all()
+    
+    queryset = Flow.objects.select_related('panel').defer('panel__detail').all()
     serializer_class = FlowSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
@@ -97,7 +98,7 @@ class FlowView(CustomeViewSets):
     def list_types(self, request, *args, **kwargs):
         fields = ["flow_category", "alignment_tool"]
 
-        objects = Flow.objects.all()
+        objects = Flow.objects.select_related('panel').defer('panel__detail').all()
         if "admin" not in request.role_list:
             account_id = request.account.id
             flow_ids = FlowMembers.objects.filter(
