@@ -359,6 +359,17 @@ class TaskView(ModelViewSet):
                 "cohort_status": "todo"
             }
         )
+
+        # 保存TaskSample数据
+        sample_details = req_data.get("sample_details", '[]')
+        sample_details = json.loads(sample_details)
+        for i, sample_id in enumerate(task.samples):
+            detail = sample_details[i] if i < len(sample_details) else {}
+            sample_ratio = detail.get("sampleRatio")
+            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id,
+                                      custom_name=detail.get("customName"),
+                                      sample_ratio=float(sample_ratio) if sample_ratio is not None else None)
+
         # env["SAMPLE_DIR"] = os.getenv("SAMPLE_DIR")
         env["BIO_ROOT"] = os.getenv("BIO_ROOT")
         env["DATA_DIR"] = os.getenv("DATA_DIR")
@@ -381,14 +392,7 @@ class TaskView(ModelViewSet):
             task_count=F("task_count") + 1
         )
         serializer = self.get_serializer(task)
-        sample_details = req_data.get("sample_details", '[]')
-        sample_details = json.loads(sample_details)
-        for i, sample_id in enumerate(task.samples):
-            detail = sample_details[i] if i < len(sample_details) else {}
-            sample_ratio = detail.get("sampleRatio")
-            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id,
-                                      custom_name=detail.get("customName"),
-                                      sample_ratio=float(sample_ratio) if sample_ratio is not None else None)
+
         return response_body(data=serializer.data)
 
     def _prepare_cdc_params(self, req_data, env):
