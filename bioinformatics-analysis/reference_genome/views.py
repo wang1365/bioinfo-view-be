@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from django.db.models import Q
+from docker.models.containers import Container
 from loguru import logger
 from rest_framework.decorators import action
 from rest_framework.decorators import api_view
@@ -11,7 +12,9 @@ from rest_framework.viewsets import ModelViewSet
 
 from account import constants as account_constant
 from common.filters import CommonFilters
-from utils.env import database_dir
+from config.models import Config
+from flow.core import G_CLIENT
+from utils.env import database_dir, bio_root, task_result_dir, data_dir, sample_dir, all
 from utils.paginator import PageNumberPaginationWithWrapper
 from utils.response import response_body
 from .models import ReferenceGenome
@@ -99,13 +102,14 @@ class ReferenceGenomeViewSet(ModelViewSet):
         custom_database = data.get('custom_database')
         host_map_db = data.get('host_map_db')
         sp_map_db = data.get('sp_map_db')
-        
+
         # 创建目录
         db_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{custom_database}'
         db_dir.mkdir(parents=True, exist_ok=True)
 
         # 处理host_map_db数据（如果是字符串直接使用，如果是JSON则转换为字符串）
-        host_content = host_map_db if isinstance(host_map_db, str) else json.dumps(host_map_db, ensure_ascii=False, indent=2)
+        host_content = host_map_db if isinstance(host_map_db, str) else json.dumps(host_map_db, ensure_ascii=False,
+                                                                                   indent=2)
 
         # 写入host_map_db文件
         host_file_path = db_dir / 'host_mapdb.info'
@@ -124,16 +128,63 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
 
-        execute_bash_t(data.get('virus_name'), data.get('virus_type'), data.get('host'), data.get('host_genome_version'), custom_database)
-
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
+        config = Config.objects.filter(name="ref_genome_docker_image")[0]
+
+        virus_name = data.get('virus_name')
+        virus_type = data.get('virus_type')
+        host = data.get('host')
+        host_pick = data.get('host_genome_version')
+        host, host_pick = host or '-', host_pick or '-'
+
+        result = self.run_docker(config.data if config else '', {
+            'CUSTOMIZE_REF_DB': os.path.join(database_dir, "Pathogen_database/customize_ref_db/"),
+            'REF_SEQ_DB': os.path.join(database_dir, "Pathogen_database/ref_seq_db/"),
+            'HOST_NAME': host,
+            'HOST_PICK': host_pick,
+            'SP': ','.join(virus_name) if virus_name else '-',
+            'SP_PICK': ','.join(virus_type) if virus_type else '-',
+            'NEW_REF_NAME': custom_database,
+        })
+
         # 返回完整的对象信息
         instance = serializer.instance
         response_serializer = ReferenceGenomeSerializer(instance)
-        return response_body(data=response_serializer.data, msg="创建成功")
+        return response_body(data=response_serializer.data, msg=f"创建成功: {result}")
+
+    @staticmethod
+    def run_docker(image, params):
+        environment = all.copy() | params
+        _ = lambda x: {'bind': x, 'mode': 'rw'}
+        volumes = {
+            task_result_dir: _(task_result_dir),
+            bio_root: _(bio_root),
+            sample_dir: _(sample_dir),
+            data_dir: _(data_dir),
+            database_dir: _(database_dir),
+            "/etc/localtime": _("/etc/localtime")
+        }
+        logger.info(f"Start Run docker image: {image} {environment} {volumes}")
+
+        try:
+            container: Container = G_CLIENT.containers.run(
+                image=image,
+                environment=environment,
+                volumes=volumes,
+                detach=True,
+                remove=True,
+                network_mode="host"
+            )
+        except Exception as e:
+            logger.error(f"Run docker image error: {e}")
+            return str(e)
+        else:
+            logs = container.logs().decode('utf-8')
+            logger.info(f"Run docker image: {image} {logs}")
+            return logs
 
     def retrieve(self, request, *args, **kwargs):
         """查询参考基因组详情"""
@@ -215,10 +266,15 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         return response_body(data=data)
 
+
 def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
     return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
+
+
 def execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name):
     return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'F')
+
+
 def execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, type):
     """
     拼接参数，脚本参数说明如下：
@@ -254,6 +310,7 @@ def execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, type):
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
     exit_code = os.system(cmd)
     logger.info(f"exit_code: {exit_code}")
+
 
 @api_view(['GET'])
 def check_file(request):
@@ -294,6 +351,7 @@ def check_file(request):
             "msg": f"",
         }
     )
+
 
 @api_view(['POST'])
 def collect_information(request):

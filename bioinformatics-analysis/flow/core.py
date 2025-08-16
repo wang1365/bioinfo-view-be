@@ -1,8 +1,9 @@
-import logging
 import os
+
+from docker import DockerClient
 from loguru import logger
 
-G_CLIENT = None
+G_CLIENT: DockerClient | None = None
 # 如果是windows
 if os.name == "nt":
     # do nothing
