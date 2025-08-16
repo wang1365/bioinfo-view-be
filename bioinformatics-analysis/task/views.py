@@ -67,18 +67,22 @@ class TaskView(ModelViewSet):
     def _write_samples_txt(self, task):
         file_path = os.path.join(self._normal_task_dir(task), f"samples.txt")
 
+        task_samples =TaskSample.objects.filter(task_id=task.id)
+
         with open(file_path, "w") as f:
             f.write("\t".join(SAMPLE_HEADERS))
             f.write("\n")
             for sample in [
                 Sample.objects.get(id=sample_id) for sample_id in sorted(task.samples)
             ]:
-                row = self._build_row(task, sample)
+                task_sample = task_samples.filter(sample=sample.id).first()
+
+                row = self._build_row(task, sample, task_sample)
                 f.write("\t".join([str(item) for item in row]))
                 f.write("\n")
         return file_path
 
-    def _build_row(self, task, sample):
+    def _build_row(self, task, sample, task_sample: TaskSample):
         row = []
         sample_meta = SampleMeta.objects.filter(id=sample.sample_meta_id).first()
         patient = None
@@ -136,6 +140,8 @@ class TaskView(ModelViewSet):
         row.append(patient.patient_phone_number if patient else "")
         row.append(patient.outpatient_or_inpatient_number if patient else "")
         row.append(patient.bed_number if patient else "")
+        row.append(task_sample.custom_name if task_sample else "")
+        row.append(task_sample.sample_ratio if task_sample else "")
 
         return row
 
