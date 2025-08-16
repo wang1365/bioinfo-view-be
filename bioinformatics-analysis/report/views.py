@@ -19,6 +19,7 @@ from sample.models import Sample, SampleMeta
 from patient.models import Patient
 from common.viewsets.viewsets import CustomeViewSets
 from model_query.views import ReportSerializer as MReportSerializer
+from utils.env import bio_root
 
 
 def get_meta_data(request, taskid, name):
@@ -52,13 +53,12 @@ def read_file(request):
     读取系统文件
     """
     path = request.GET['path']
-    root = os.getenv("BIO_ROOT")
-    file = os.path.join(root, path)
+    file = os.path.join(bio_root, path)
     if not os.path.isfile(file) or not os.path.exists(file):
         return response_body(data=None,
                              status_code=200,
                              code=-1,
-                             msg=f'文件不存在:{file}, root:{root}')
+                             msg=f'文件不存在:{file}, root:{bio_root}')
     with open(file) as f:
         content = f.read()
         return response_body(data=content)

@@ -5,7 +5,7 @@ ALTER TABLE "task" ADD COLUMN "cdc_parameter" jsonb DEFAULT '{}'::jsonb NULL;
 ALTER TABLE task_sample ADD COLUMN custom_name VARCHAR(255);
 
 -- 为task_sample表添加sampling_rate字段
-ALTER TABLE task_sample ADD COLUMN sampling_rate DOUBLE PRECISION;
+ALTER TABLE task_sample ADD COLUMN sample_ratio DOUBLE PRECISION;
 
 ALTER TABLE flow ADD COLUMN support_custom_sample_name BOOLEAN NOT NULL DEFAULT FALSE;
 

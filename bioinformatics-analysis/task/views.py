@@ -28,7 +28,7 @@ from flow.serializers import FlowSerializer
 from project.serializer import ProjectSerializer
 from account.serializer import AccountSerializer
 from task.models import Task, TaskSample
-from task.serializers import TaskSerializer, ListTaskSerializer
+from task.serializers import TaskSerializer, ListTaskSerializer, TaskSampleSerializer
 from utils.asy import async_func
 from utils.hostip import get_host_ip
 from utils.message import send_email
@@ -375,12 +375,14 @@ class TaskView(ModelViewSet):
             task_count=F("task_count") + 1
         )
         serializer = self.get_serializer(task)
-        sample_details = req_data.get("sample_details", [])
-        for sample in sample_details:
-            sampling_rate = int(sample.get("sampling_rate"))
-            TaskSample.objects.create(sample_id=int(sample.get("sample_id")), task_id=task.id,
-                                      custom_name=sample.get("custom_name"),
-                                      sampling_rate=float(sampling_rate) if sampling_rate is not None else None)
+        sample_details = req_data.get("sample_details", '[]')
+        sample_details = json.loads(sample_details)
+        for i, sample_id in enumerate(task.samples):
+            detail = sample_details[i] if i < len(sample_details) else {}
+            sample_ratio = detail.get("sampleRatio")
+            TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id,
+                                      custom_name=detail.get("customName"),
+                                      sample_ratio=float(sample_ratio) if sample_ratio is not None else None)
         return response_body(data=serializer.data)
 
     def _prepare_cdc_params(self, req_data, env):
@@ -464,6 +466,12 @@ class TaskView(ModelViewSet):
             log_EN_data = self._load_EN_log_data(instance)
         data["log_CN"] = json.loads(log_CN_data)
         data["log_EN"] = json.loads(log_EN_data)
+
+        id = instance.id
+        ts = TaskSampleSerializer(
+            TaskSample.objects.filter(task_id=id), many=True
+        )
+        data["sample_details"] = ts.data
         return response_body(data=data)
 
     def _clean_out_dir(self, task):
