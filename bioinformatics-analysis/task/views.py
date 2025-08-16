@@ -140,8 +140,12 @@ class TaskView(ModelViewSet):
         row.append(patient.patient_phone_number if patient else "")
         row.append(patient.outpatient_or_inpatient_number if patient else "")
         row.append(patient.bed_number if patient else "")
-        row.append(task_sample.custom_name if task_sample else "")
-        row.append(task_sample.sample_ratio if task_sample else "")
+
+        # 针对CDC补充的2个字段
+        custom_name = task_sample.custom_name if task_sample else ""
+        sample_ratio = task_sample.sample_ratio if task_sample else ""
+        row.append(custom_name or "")
+        row.append(sample_ratio or "")
 
         return row
 
