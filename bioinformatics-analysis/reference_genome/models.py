@@ -104,6 +104,24 @@ class ReferenceGenome(models.Model):
         help_text="软删除标识，True表示已删除"
     )
     
+    # 状态字段
+    status = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        default="RUNNING",
+        verbose_name="状态",
+        help_text="参考基因组状态"
+    )
+    
+    # 消息字段
+    message = models.JSONField(
+        default=dict,
+        null=True,
+        blank=True,
+        verbose_name="消息",
+        help_text="相关消息信息，JSON格式"
+    )
 
     class Meta:
         verbose_name = "自建参考基因组"

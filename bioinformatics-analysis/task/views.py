@@ -347,7 +347,7 @@ class TaskView(ModelViewSet):
         }
 
         # 处理cdc任务相关的参数
-        self._prepare_cdc_params(req_data, env)
+        # self._prepare_cdc_params(req_data, env)
 
         task = Task.objects.create(
             **{
@@ -357,7 +357,6 @@ class TaskView(ModelViewSet):
                 "flow_id": req_data.get("flow_id"),
                 "samples": req_data.get("samples"),
                 "parameter": req_data.get("parameter"),
-                "cdc_parameter": req_data.get("cdc_parameter"),
                 "creator_id": req_data.get("creator_id"),
                 "is_merge": False,
                 "cohort_status": "todo"

@@ -45,7 +45,6 @@ class Task(models.Model):
     samples_second = JSONField(default=[])
     log = models.TextField(null=True)
     parameter = JSONField(null=True)
-    cdc_parameter = models.JSONField(null=True, blank=True, default=dict, verbose_name="CDC参数")
     error_message = models.TextField(null=True, default="")
     error_message_EN = models.TextField(null=True, default="")
     error_message_CN = models.TextField(null=True, default="")
