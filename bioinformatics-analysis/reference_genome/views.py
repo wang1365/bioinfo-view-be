@@ -126,21 +126,13 @@ class ReferenceGenomeViewSet(ModelViewSet):
             f.write(sp_content)
         data['virus_seq_file'] = str(virus_file_path)
 
-        logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        config = Config.objects.filter(name="ref_genome_docker_image")[0]
-
         virus_name = data.get('virus_name')
         virus_type = data.get('virus_type')
         host = data.get('host')
         host_pick = data.get('host_genome_version')
         host, host_pick = host or '-', host_pick or '-'
 
-        result = self.run_docker(config.data if config else '', {
+        result = self.run_docker({
             'CUSTOMIZE_REF_DB': os.path.join(database_dir, "Pathogen_database/customize_ref_db/"),
             'REF_SEQ_DB': os.path.join(database_dir, "Pathogen_database/ref_seq_db/"),
             'HOST_NAME': host,
@@ -150,13 +142,24 @@ class ReferenceGenomeViewSet(ModelViewSet):
             'NEW_REF_NAME': custom_database,
         })
 
+        data['message'] = result
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
+
+
         # 返回完整的对象信息
         instance = serializer.instance
         response_serializer = ReferenceGenomeSerializer(instance)
         return response_body(data=response_serializer.data, msg=f"创建成功: {result}")
 
     @staticmethod
-    def run_docker(image, params):
+    def run_docker(params):
+        config = Config.objects.filter(name="ref_genome_docker_image")[0]
+        image = config.data or ''
+
         environment = all.copy() | params
         _ = lambda x: {'bind': x, 'mode': 'rw'}
         volumes = {

@@ -18,6 +18,8 @@ class ReferenceGenomeSerializer(serializers.ModelSerializer):
             'virus_seq_file',
             'host_map_db',
             'sp_map_db',
+            'status',
+            'message',
             'create_time',
             'update_time',
             'is_deleted'
@@ -72,7 +74,8 @@ class ReferenceGenomeCreateSerializer(ReferenceGenomeSerializer):
             'host_seq_file',
             'virus_seq_file',
             'host_map_db',
-            'sp_map_db'
+            'sp_map_db',
+            'message',
         ]
         read_only_fields = []
 
@@ -89,6 +92,7 @@ class ReferenceGenomeListSerializer(serializers.ModelSerializer):
             'host_genome_version',
             'virus_name',
             'virus_type',
+            'status',
             'create_time',
             'update_time'
         ]
