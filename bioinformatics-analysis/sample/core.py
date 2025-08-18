@@ -39,9 +39,7 @@ class ExcelHandler:
     def _deal_with_headers(self, cells):
 
         def _compare_name(value):
-            return value.replace('\n', '').replace(' ',
-                                                   '').replace('\t',
-                                                               '').lower()
+            return value.replace('\n', '').replace(' ', '').replace('\t', '').lower()
 
         if not self.is_english:
             mappings = {
@@ -106,11 +104,7 @@ class ValueProcess:
 
 
 def export_to_csv(querset, is_en=False):
-    if is_en:
-        headers = [a['en_name'] for a in SAMPLE_MODEL_ATTRS]
-    else:
-        headers = [a['name'] for a in SAMPLE_MODEL_ATTRS]
-
+    headers = [a['en_name' if is_en else 'name'] for a in SAMPLE_MODEL_ATTRS]
     data = [headers]
 
     for o in querset:
@@ -125,7 +119,6 @@ def export_to_csv(querset, is_en=False):
                                 quoting=csv.QUOTE_MINIMAL)
         for row in data:
             spamwriter.writerow(row)
-
     return filename
 
 
@@ -148,7 +141,6 @@ def export_to_csv_sample_meta(querset, is_en=False):
         data = [headers]
 
         for o in querset:
-
             data.append([
                 getattr(o, a.get('alias', a['key']))
                 for a in SAMPLE_META_MODEL_ATTRS

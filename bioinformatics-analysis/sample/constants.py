@@ -221,7 +221,7 @@ SAMPLE_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.choices
     },
- {
+    {
         'key': 'fastq_merge_required',
         'name': '是否多文件合并',
         'en_name': 'Enable Fastq Merge',
