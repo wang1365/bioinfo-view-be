@@ -263,4 +263,11 @@ SAMPLE_MODEL_ATTRS = [
         'value_type': 'string',
         'search_type': SearchType.exact
     },
+    {
+        'key': 'msre',
+        'name': 'MSRE',
+        'en_name': 'MSRE',
+        'value_type': 'bool',
+        'search_type': SearchType.exact
+    },
 ]

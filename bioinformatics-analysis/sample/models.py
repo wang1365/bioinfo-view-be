@@ -151,6 +151,9 @@ class SampleData(models.Model):
                                        auto_now_add=True)
     modify_time = models.DateTimeField(null=True, blank=True, auto_now=True)
 
+    # MSRE字段
+    msre = models.BooleanField(default=False)
+
     class Meta:
         db_table = "samples"
         ordering = ["-id"]
