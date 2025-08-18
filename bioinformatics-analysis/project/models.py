@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.core.validators import RegexValidator
 from account.models import Account
-from sample.models import Sample
+from sample.models import SampleData
 
 # from django_mysql.models import JSONField
 
@@ -24,7 +24,7 @@ class Project(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     is_visible = models.BooleanField(default=True)
     is_builtin = models.BooleanField(default=False)
-    samples = models.ManyToManyField(to=Sample)
+    samples = models.ManyToManyField(to=SampleData)
     members = models.ManyToManyField(to=Account,
                                      through="ProjectMembers",
                                      related_name="join_projects")

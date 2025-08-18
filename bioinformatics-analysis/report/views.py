@@ -15,7 +15,7 @@ from report.constant import FILE_MAPPINGS
 from report.serializers import ReportSerializer
 from utils.response import response_body
 from utils.paginator import PageNumberPaginationWithWrapper
-from sample.models import Sample, SampleMeta
+from sample.models import SampleData, SampleMeta
 from patient.models import Patient
 from common.viewsets.viewsets import CustomeViewSets
 from model_query.views import ReportSerializer as MReportSerializer
@@ -141,7 +141,7 @@ class ReportView(CustomeViewSets):
         sample_identifier = request.GET.get('sample_identifier', None)
 
         filtered = False
-        samples = Sample.objects
+        samples = SampleData.objects
         if sample_identifier:
             filtered = True
             samples = samples.filter(identifier=sample_identifier)
@@ -225,7 +225,7 @@ def pathogen_read(request):
                 # 'user':sample.user,
                 #'create_time':sample.create_time,
                 #'modify_time':sample.modify_time,
-            } for sample in Sample.objects.filter(id__in=item.samples).all()
+            } for sample in SampleData.objects.filter(id__in=item.samples).all()
         ]
         task = {
             'id': item.id,

@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from sample.models import Sample
+from sample.models import SampleData
 from task.models import Task
 
 from project.models import Project, ProjectMembers
@@ -50,7 +50,7 @@ class ProjectsAPIView(ModelViewSet):
         # if Project.objects.filter(owner=request.account, name=project_name).exists():
         #     return response_body(code=1, msg=f"您已创建了名为{project_name}的项目")
         samples = [
-            Sample.objects.get(pk=i) for i in request.data.get("samples", [])
+            SampleData.objects.get(pk=i) for i in request.data.get("samples", [])
         ]
         members = [request.account]
         members.extend([
@@ -134,7 +134,7 @@ class ProjectsAPIView(ModelViewSet):
             request_samples = request.data.get("samples", None)
             if request_samples is not None:
                 samples = [
-                    Sample.objects.get(pk=i) for i in set(request_samples)
+                    SampleData.objects.get(pk=i) for i in set(request_samples)
                 ]
                 instance.samples.set(samples)
 

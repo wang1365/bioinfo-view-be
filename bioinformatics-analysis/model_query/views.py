@@ -4,7 +4,7 @@ import json
 from django.core.paginator import Paginator
 from django.http.request import HttpRequest
 from django.http.response import JsonResponse
-from sample.models import Sample, SampleMeta
+from sample.models import SampleData, SampleMeta
 from patient.models import Patient
 from project.models import Project
 from task.models import Task
@@ -16,7 +16,7 @@ from utils.query_filter import build_q
 from report.models import Report
 
 MODEL_MAP = {
-    'sample': Sample,
+    'sample': SampleData,
     'sample_meta': SampleMeta,
     'project': Project,
     'patient': Patient,
@@ -46,7 +46,7 @@ class SampleSerializer(ModelSerializer):
     sample_meta = SampleMetaSerializer(read_only=True)
 
     class Meta:
-        model = Sample
+        model = SampleData
         fields = '__all__'
         depth = 1
 
@@ -57,9 +57,9 @@ class TaskSerializer(ModelSerializer):
         """Convert `username` to lowercase."""
         ret = super().to_representation(instance)
         ret['samples'] = SampleSerializer(
-            Sample.objects.filter(id__in=list(instance.samples)).all(),
+            SampleData.objects.filter(id__in=list(instance.samples)).all(),
             many=True).to_representation(
-                Sample.objects.filter(id__in=list(instance.samples)).all())
+                SampleData.objects.filter(id__in=list(instance.samples)).all())
         return ret
 
     class Meta:

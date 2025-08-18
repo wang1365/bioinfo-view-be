@@ -20,7 +20,7 @@ from rest_framework.views import APIView
 from django.http import HttpResponse, QueryDict
 
 from patient.models import Patient
-from sample.models import Sample, SampleMeta
+from sample.models import SampleData, SampleMeta
 from sample.core import ExcelHandler, ValueProcess, export_to_csv, export_to_csv_sample_meta
 from sample.serializers import SampleMetaSerializer, SampleSerializer, SampleMeta
 from sample.filters import (SampleFilters, SampleProjectFilters,
@@ -34,7 +34,7 @@ from loguru import logger
 
 
 class SampleView(CustomeViewSets):
-    queryset = Sample.objects.prefetch_related('sample_meta').all()
+    queryset = SampleData.objects.prefetch_related('sample_meta').all()
     serializer_class = SampleSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
@@ -352,7 +352,7 @@ class SampleUploadView(CustomeViewSets):
 
 
 def download(request, pk):
-    file = Sample.objects.get(id=pk).result_path
+    file = SampleData.objects.get(id=pk).result_path
     if not file:
         return response_body(code=1, msg="要下载的文件不存在,请检查任务完成后有没有上报结果文件")
     return download_by_filename(file)

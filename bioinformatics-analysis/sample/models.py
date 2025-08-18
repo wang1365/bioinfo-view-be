@@ -67,7 +67,7 @@ class SampleMeta(models.Model):
             return ""
 
 
-class Sample(models.Model):
+class SampleData(models.Model):
     """样本数据."""
 
     class NucleicLevelChoices(models.TextChoices):

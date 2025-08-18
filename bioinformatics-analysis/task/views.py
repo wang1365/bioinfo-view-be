@@ -20,7 +20,7 @@ from django.http.response import FileResponse
 from django.urls import reverse
 from rest_framework.viewsets import ModelViewSet
 
-from sample.models import Sample
+from sample.models import SampleData
 from project.models import Project
 from account.models import Account
 from flow.models import Flow
@@ -53,7 +53,7 @@ class TaskView(ModelViewSet):
     pagination_class = PageNumberPagination
 
     def _enrich_envs(self, envs, sample_objs):
-        fields = [field.column for field in Sample._meta.fields]
+        fields = [field.column for field in SampleData._meta.fields]
         for field in fields:
             envs[f"sample_{field}_list".upper()] = ",".join(
                 str(getattr(sample, field)) for sample in sample_objs
@@ -73,7 +73,7 @@ class TaskView(ModelViewSet):
             f.write("\t".join(SAMPLE_HEADERS))
             f.write("\n")
             for sample in [
-                Sample.objects.get(id=sample_id) for sample_id in sorted(task.samples)
+                SampleData.objects.get(id=sample_id) for sample_id in sorted(task.samples)
             ]:
                 task_sample = task_samples.filter(sample=sample.id).first()
 
@@ -270,7 +270,7 @@ class TaskView(ModelViewSet):
         flow = Flow.objects.get(id=flow_id)
         if not flow.allow_nonstandard_samples:
             for sample_id in sample_ids:
-                sample = Sample.objects.filter(id=sample_id).first()
+                sample = SampleData.objects.filter(id=sample_id).first()
                 if sample:
                     if not sample.is_standard:
                         return False
@@ -495,7 +495,7 @@ class TaskView(ModelViewSet):
 
     def _unset_sample_task_id(self, task):
         if task.is_qc:
-            Sample.objects.filter(id=task.samples[0]).update(task_id=None)
+            SampleData.objects.filter(id=task.samples[0]).update(task_id=None)
         if task.is_qc and task.status != 2:
             # 去除qc样本
             try:
@@ -544,7 +544,7 @@ class TaskView(ModelViewSet):
         account_list = Account.objects.filter(
             id__in=[item["creator"] for item in ret_data]
         )
-        sample_list = Sample.objects.filter(
+        sample_list = SampleData.objects.filter(
             id__in=[sample_id for item in ret_data for sample_id in item["samples"]]
         )
 
@@ -606,17 +606,17 @@ class TaskView(ModelViewSet):
             tasks = tasks.filter(status=status_code)
 
         if patient and library_number:
-            samples = Sample.objects.filter(
+            samples = SampleData.objects.filter(
                 sample_meta__patient__name=patient, library_number=library_number
             ).values_list("id", flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples)
         if patient and not library_number:
-            samples = Sample.objects.filter(
+            samples = SampleData.objects.filter(
                 sample_meta__patient__name=patient
             ).values_list("id", flat=True)
             tasks = tasks.filter(task_samples__sample_id__in=samples)
         if not patient and library_number:
-            samples = Sample.objects.filter(library_number=library_number).values_list(
+            samples = SampleData.objects.filter(library_number=library_number).values_list(
                 "id", flat=True
             )
             tasks = tasks.filter(task_samples__sample_id__in=samples)
@@ -635,7 +635,7 @@ class TaskView(ModelViewSet):
 
     def _update_sample_bam(self, task):
         if task.is_qc:
-            sample = Sample.objects.get(id=task.samples[0])
+            sample = SampleData.objects.get(id=task.samples[0])
             out_dir = task.env["OUT_DIR"]
             bam1_path = os.path.join(
                 settings.BAM_PATH, f"{sample.name}", f"{task.flow.alignment_tool}"
@@ -691,7 +691,7 @@ class TaskView(ModelViewSet):
             self._update_normal_task_result_path(task)
 
     def _update_qc_task_result_path(self, task):
-        sample = Sample.objects.get(id=task.samples[0])
+        sample = SampleData.objects.get(id=task.samples[0])
         dest_dir = os.path.join(
             settings.MOVE_QC_DIR,
             task.creator.username,
@@ -719,7 +719,7 @@ class TaskView(ModelViewSet):
 
     def _get_sample_by_name(self, name):
         library_type, index_number = name.split("--")
-        return Sample.objects.filter(
+        return SampleData.objects.filter(
             library_type=library_type, index_number=index_number
         ).first()
 
@@ -758,7 +758,7 @@ class TaskView(ModelViewSet):
 
     def _update_sample_result_path(self, task):
         dest = task.result_path
-        sample = Sample.objects.get(id=task.samples[0])
+        sample = SampleData.objects.get(id=task.samples[0])
         sample.result_path = dest
         sample.save()
 
@@ -1035,7 +1035,7 @@ class RunQcView(APIView):
         sample_id = request.data.get("sample_id")
         project = Project.objects.filter(is_builtin=True).first()
         flow = Flow.qc_task()
-        sample = Sample.objects.get(id=sample_id)
+        sample = SampleData.objects.get(id=sample_id)
         qc_data = {
             "name": f"qc_{sample.id}",
             "samples": [sample_id],

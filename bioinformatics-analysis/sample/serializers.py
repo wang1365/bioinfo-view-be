@@ -3,7 +3,7 @@
 from rest_framework import serializers
 
 from patient.serializer import PatientSerializer
-from sample.models import Sample, SampleMeta
+from sample.models import SampleData, SampleMeta
 from sample.constants import SAMPLE_MODEL_ATTRS, SAMPLE_META_MODEL_ATTRS
 
 
@@ -29,7 +29,7 @@ class SampleSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Sample
+        model = SampleData
         fields = [
             "id",
             "sample_meta",
