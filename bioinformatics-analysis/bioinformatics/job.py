@@ -39,7 +39,26 @@ scheduler = BackgroundScheduler()
 #             network_mode="host")
 #         f.write(container.id)
 
+def _e(k):
+    return os.getenv(k)
 
+def _v(k):
+    return {
+        'bind': _e(k),
+        'mode': 'rw'
+    }
+
+volumes = {
+    _e("TASK_RESULT_DIR"): _v("TASK_RESULT_DIR"),
+    _e("BIO_ROOT"):        _v("BIO_ROOT"),
+    _e("SAMPLE_DIR"):      _v("SAMPLE_DIR"),
+    _e("DATA_DIR"):        _v("DATA_DIR"),
+    _e("DATABASE_DIR"):    _v("DATABASE_DIR"),
+    "/etc/localtime": {
+        'bind': "/etc/localtime",
+        'mode': "ro"
+    }
+}
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
 def run_task():
     if settings.DISABLE_JOB_RUN:
@@ -73,43 +92,22 @@ def run_task():
             # 内存检查的不对，临时除以2
             if used_memory + beto_run_task.memory / 2 < totol_memory * memory_rate:
                 logger.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
-                container = G_CLIENT.containers.run(
-                    image=beto_run_task.flow.image_name,
-                    environment=beto_run_task.env,
-                    volumes={
-                        os.getenv("TASK_RESULT_DIR"): {
-                            'bind': os.getenv("TASK_RESULT_DIR"),
-                            'mode': 'rw'
-                        },
-                        os.getenv("BIO_ROOT"): {
-                            'bind': os.getenv("BIO_ROOT"),
-                            'mode': 'rw'
-                        },
-                        os.getenv("SAMPLE_DIR"): {
-                            'bind': os.getenv("SAMPLE_DIR"),
-                            'mode': 'rw'
-                        },
-                        os.getenv("DATA_DIR"): {
-                            'bind': os.getenv("DATA_DIR"),
-                            'mode': 'rw'
-                        },
-                        os.getenv("DATABASE_DIR"): {
-                            'bind': os.getenv("DATABASE_DIR"),
-                            'mode': 'rw'
-                        },
-                        "/etc/localtime": {
-                            'bind': "/etc/localtime",
-                            'mode': "ro"
-                        }
-                    },
-                    detach=True,
-                    remove=True,
-                    network_mode="host"
-                )
-                beto_run_task.status = 2
-                beto_run_task.pid = container.id
-                beto_run_task.save()
-                used_memory += beto_run_task.memory
+
+                try:
+                    container = G_CLIENT.containers.run(
+                        image=beto_run_task.flow.image_name,
+                        environment=beto_run_task.env,
+                        volumes=volumes,
+                        detach=True,
+                        remove=True,
+                        network_mode="host"
+                    )
+                    beto_run_task.status = 2
+                    beto_run_task.pid = container.id
+                    beto_run_task.save()
+                    used_memory += beto_run_task.memory
+                except Exception as e:
+                    logger.error(f'Run task: {beto_run_task.id}-{beto_run_task.name} error: {e}')
 
 
 # @scheduler.scheduled_job(trigger='interval',
@@ -142,7 +140,7 @@ def clean_task_log():
 def cal_disk_config():
     from config.models import Config
     from utils.disk import dir_size
-    result_dir = os.getenv("TASK_RESULT_DIR")
+    result_dir = _e("TASK_RESULT_DIR")
     Config.objects.filter(name="disk").update(used=dir_size(result_dir))
 
 
