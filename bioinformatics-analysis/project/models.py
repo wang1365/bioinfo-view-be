@@ -24,7 +24,7 @@ class Project(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     is_visible = models.BooleanField(default=True)
     is_builtin = models.BooleanField(default=False)
-    samples = models.ManyToManyField(to=SampleData)
+    samples = models.ManyToManyField(to=SampleData, through="ProjectSamples")
     members = models.ManyToManyField(to=Account,
                                      through="ProjectMembers",
                                      related_name="join_projects")
@@ -60,5 +60,17 @@ class ProjectMembers(models.Model):
         db_table = "project_members"
         ordering = ["-id"]
         verbose_name = "项目成员表"
+        verbose_name_plural = verbose_name
+        get_latest_by = "id"
+
+class ProjectSamples(models.Model):
+    sample = models.ForeignKey(to=SampleData, on_delete=models.CASCADE)
+    project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
+    create_time = models.DateTimeField("创建时间", default=now)
+
+    class Meta:
+        db_table = "project_samples"
+        ordering = ["-id"]
+        verbose_name = "项目样本数据表"
         verbose_name_plural = verbose_name
         get_latest_by = "id"

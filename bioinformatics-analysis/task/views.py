@@ -144,6 +144,7 @@ class TaskView(ModelViewSet):
         # 针对CDC补充的2个字段
         custom_name = task_sample.custom_name if task_sample else ""
         sample_ratio = task_sample.sample_ratio if task_sample else ""
+        row.append(sample.msre if sample else "")
         row.append(custom_name or "")
         row.append(sample_ratio or "")
 
