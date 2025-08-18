@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.timezone import now
 
 # from django_mysql.models import JSONField
-from sample.models import Sample
+from sample.models import SampleData
 
 from django.db.models import JSONField
 
@@ -69,7 +69,7 @@ class TaskSample(models.Model):
     task = models.ForeignKey(Task,
                              related_name="task_samples",
                              on_delete=models.CASCADE)
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
+    sample = models.ForeignKey(SampleData, on_delete=models.CASCADE)
     custom_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="自定义名称")
     sample_ratio = models.FloatField(blank=True, null=True, verbose_name="抽样比例")
     create_time = models.DateTimeField("创建时间", default=now)
