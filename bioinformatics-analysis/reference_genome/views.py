@@ -268,7 +268,7 @@ def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
             remove=True,
             network_mode="host"
         )
-
+        logger.info(f"启动容器: {container_name} (ID: {container_id})")
         if index == 'F':
             container.wait()
     except Exception as e:
