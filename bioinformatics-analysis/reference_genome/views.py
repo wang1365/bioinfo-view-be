@@ -236,10 +236,10 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
 def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
     params ={
-        'HOST': ','.join(host or []),
-        'HOSTPICK': ','.join(host_pick or []),
-        'SP': sp or '-',
-        'SPPICK': sp_pick or '-',
+        'HOST': host or '-',
+        'HOSTPICK': host_pick or '-',
+        'SP': ','.join(sp or []),
+        'SPPICK': ','.join(hosp_pick or []),
         'NEWREFNAME': new_ref_name,
         'INDEX': index,
     }
@@ -275,8 +275,8 @@ def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
         logger.error(f"Run docker image error: {e}")
         return str(e)
     else:
-        logs = container.logs().decode('utf-8')
-        logger.info(f"Run docker image: {image} {logs}")
+        logs = f"Run docker image: {image}"
+        logger.info(logs)
         return logs
 def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
     return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
