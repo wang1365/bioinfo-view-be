@@ -132,15 +132,14 @@ class ReferenceGenomeViewSet(ModelViewSet):
         host_pick = data.get('host_genome_version')
         host, host_pick = host or '-', host_pick or '-'
 
-        result = self.run_docker({
-            'CUSTOMIZE_REF_DB': os.path.join(database_dir, "Pathogen_database/customize_ref_db/"),
-            'REF_SEQ_DB': os.path.join(database_dir, "Pathogen_database/ref_seq_db/"),
-            'HOST_NAME': host,
-            'HOST_PICK': host_pick,
-            'SP': ','.join(virus_name) if virus_name else '-',
-            'SP_PICK': ','.join(virus_type) if virus_type else '-',
-            'NEW_REF_NAME': custom_database,
-        })
+        result = run_docker(
+            host= host,
+            host_pick=host_pick,
+            sp=virus_name,
+            sp_pick=virus_type,
+            new_ref_name= custom_database,
+            index='T'
+        )
 
         data['message'] = result
 
@@ -154,40 +153,6 @@ class ReferenceGenomeViewSet(ModelViewSet):
         instance = serializer.instance
         response_serializer = ReferenceGenomeSerializer(instance)
         return response_body(data=response_serializer.data, msg=f"创建成功: {result}")
-
-    @staticmethod
-    def run_docker(params):
-        config = Config.objects.filter(name="ref_genome_docker_image")[0]
-        image = config.data or ''
-
-        environment = all.copy() | params
-        _ = lambda x: {'bind': x, 'mode': 'rw'}
-        volumes = {
-            task_result_dir: _(task_result_dir),
-            bio_root: _(bio_root),
-            sample_dir: _(sample_dir),
-            data_dir: _(data_dir),
-            database_dir: _(database_dir),
-            "/etc/localtime": _("/etc/localtime")
-        }
-        logger.info(f"Start Run docker image: {image} {environment} {volumes}")
-
-        try:
-            container: Container = G_CLIENT.containers.run(
-                image=image,
-                environment=environment,
-                volumes=volumes,
-                detach=True,
-                remove=True,
-                network_mode="host"
-            )
-        except Exception as e:
-            logger.error(f"Run docker image error: {e}")
-            return str(e)
-        else:
-            logs = container.logs().decode('utf-8')
-            logger.info(f"Run docker image: {image} {logs}")
-            return logs
 
     def retrieve(self, request, *args, **kwargs):
         """查询参考基因组详情"""
@@ -269,7 +234,50 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         return response_body(data=data)
 
+def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
+    params ={
+        'HOST': ','.join(host or []),
+        'HOSTPICK': ','.join(host_pick or []),
+        'SP': sp or '-',
+        'SPPICK': sp_pick or '-',
+        'NEWREFNAME': new_ref_name,
+        'INDEX': index,
+    }
 
+    config = Config.objects.filter(name="ref_genome_docker_image")[0]
+    image = config.data or ''
+
+    environment = all.copy() | params
+    _ = lambda x: {'bind': x, 'mode': 'rw'}
+    volumes = {
+        task_result_dir: _(task_result_dir),
+        bio_root: _(bio_root),
+        sample_dir: _(sample_dir),
+        data_dir: _(data_dir),
+        database_dir: _(database_dir),
+        "/etc/localtime": _("/etc/localtime")
+    }
+    logger.info(f"Start Run docker image: {image} {environment} {volumes}")
+
+    try:
+        container: Container = G_CLIENT.containers.run(
+            image=image,
+            environment=environment,
+            volumes=volumes,
+            detach=True,
+            remove=True,
+            network_mode="host"
+        )
+
+        if index == 'F':
+            container.wait()
+    except Exception as e:
+        logger.error(f"Run docker image error: {e}")
+        return str(e)
+    else:
+        logs = container.logs().decode('utf-8')
+        logger.info(f"Run docker image: {image} {logs}")
+        return logs
 def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
     return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
 
@@ -382,7 +390,13 @@ def collect_information(request):
     new_ref_name = json_data['customDatabase']
 
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
-    execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name)
+    result = run_docker(
+        host=host,
+        host_pick=host_pick,
+        sp=virus_name,
+        sp_pick=virus_type,
+        new_ref_name=new_ref_name,
+    )
 
     # 脚本执行完成后，会在脚本所在文件夹下生成2个文件，分别是host_mapdb.info 和  sp_mapdb.info
     # 读取这2个文件的内容
