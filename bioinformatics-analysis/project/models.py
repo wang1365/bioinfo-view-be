@@ -66,7 +66,6 @@ class ProjectMembers(models.Model):
 class ProjectSamples(models.Model):
     sample = models.ForeignKey(to=SampleData, on_delete=models.CASCADE)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
-    create_time = models.DateTimeField("创建时间", default=now)
 
     class Meta:
         db_table = "project_samples"
