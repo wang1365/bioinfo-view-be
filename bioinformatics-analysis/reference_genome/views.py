@@ -239,7 +239,7 @@ def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
         'HOST': host or '-',
         'HOSTPICK': host_pick or '-',
         'SP': ','.join(sp or []),
-        'SPPICK': ','.join(hosp_pick or []),
+        'SPPICK': ','.join(sp_pick or []),
         'NEWREFNAME': new_ref_name,
         'INDEX': index,
     }
