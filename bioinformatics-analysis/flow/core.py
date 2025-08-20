@@ -13,7 +13,7 @@ else:
     from docker.errors import DockerException
 
     try:
-        G_CLIENT = docker.from_env()
+        G_CLIENT: DockerClient = docker.from_env()
         print('create docker client success', G_CLIENT)
         logger.warning('create docker client success', G_CLIENT)
     except DockerException as e:

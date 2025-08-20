@@ -7,6 +7,7 @@ from django.utils.timezone import now
 
 from cohort.job import start_cohort_scheduler
 from flow.core import G_CLIENT
+from reference_genome.job import start_ref_genome_scheduler
 from utils.memory import SystemMemory
 from config.models import Config
 from task.models import Task
@@ -183,3 +184,5 @@ def update_running_days():
 scheduler.start()
 
 start_cohort_scheduler()
+
+start_ref_genome_scheduler()
