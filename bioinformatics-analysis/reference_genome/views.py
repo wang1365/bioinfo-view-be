@@ -352,7 +352,7 @@ def collect_information(request):
     new_ref_name = json_data['customDatabase']
 
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
-    result, _, _ = run_docker(
+    run_docker(
         host=host,
         host_pick=host_pick,
         sp=virus_name,

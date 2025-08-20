@@ -125,7 +125,7 @@ class ReferenceGenome(models.Model):
     
     # 容器名称
     container_name = models.CharField(
-        max_length=255,
+        max_length=100,
         null=True,
         blank=True,
         verbose_name="容器名称",
@@ -134,7 +134,7 @@ class ReferenceGenome(models.Model):
     
     # 容器ID
     container_id = models.CharField(
-        max_length=255,
+        max_length=100,
         null=True,
         blank=True,
         verbose_name="容器ID",
