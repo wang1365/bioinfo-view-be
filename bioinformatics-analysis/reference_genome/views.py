@@ -148,7 +148,7 @@ class ReferenceGenomeViewSet(ModelViewSet):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}")
+        logger.info(f"Created database files for {custom_database}: {host_file_path}, {virus_file_path}, {container_name}, {container_id}")
 
 
         # 返回完整的对象信息
