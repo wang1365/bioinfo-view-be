@@ -20,6 +20,8 @@ class ReferenceGenomeSerializer(serializers.ModelSerializer):
             'sp_map_db',
             'status',
             'message',
+            'container_name',
+            'container_id',
             'create_time',
             'update_time',
             'is_deleted'
@@ -76,6 +78,8 @@ class ReferenceGenomeCreateSerializer(ReferenceGenomeSerializer):
             'host_map_db',
             'sp_map_db',
             'message',
+            'container_name',
+            'container_id',
         ]
         read_only_fields = []
 
