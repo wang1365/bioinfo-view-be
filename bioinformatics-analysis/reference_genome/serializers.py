@@ -93,6 +93,9 @@ class ReferenceGenomeListSerializer(serializers.ModelSerializer):
             'virus_name',
             'virus_type',
             'status',
+            'message',
+            'container_name',
+            'container_id',
             'create_time',
             'update_time'
         ]
