@@ -132,7 +132,7 @@ class ReferenceGenomeViewSet(ModelViewSet):
         host_pick = data.get('host_genome_version')
         host, host_pick = host or '-', host_pick or '-'
 
-        result = run_docker(
+        result, container_name, container_id = run_docker(
             host= host,
             host_pick=host_pick,
             sp=virus_name,
@@ -142,6 +142,8 @@ class ReferenceGenomeViewSet(ModelViewSet):
         )
 
         data['message'] = result
+        data['container_name'] = container_name
+        data['container_id'] = container_id
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -259,6 +261,7 @@ def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
     }
     logger.info(f"Start Run docker image: {image} {environment} {volumes}")
 
+    container_name, container_id = '', ''
     try:
         container: Container = G_CLIENT.containers.run(
             image=image,
@@ -268,59 +271,18 @@ def run_docker(new_ref_name, host, host_pick, sp, sp_pick, index='F'):
             remove=True,
             network_mode="host"
         )
-        logger.info(f"启动容器: {container_name} (ID: {container_id})")
+        container_name, container_id = container.name, container.id
+        logger.info(f"启动容器: {container.name} (ID: {container.id})")
         if index == 'F':
             container.wait()
     except Exception as e:
         logger.error(f"Run docker image error: {e}")
-        return str(e)
+        return str(e), container_name, container_id
     else:
         logs = f"Run docker image: {image}"
         logger.info(logs)
-        return logs
-def execute_bash_t(virus_name, virus_type, host, host_pick, new_ref_name):
-    return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'T')
+        return logs, container_name, container_id
 
-
-def execute_bash_f(virus_name, virus_type, host, host_pick, new_ref_name):
-    return execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, 'F')
-
-
-def execute_bash(virus_name, virus_type, host, host_pick, new_ref_name, type):
-    """
-    拼接参数，脚本参数说明如下：
-    sh make.ref.sh /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/   /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/   human   hg19   Norovirus   ALL   hg19_Norovirus    F
-
-    脚本：sh make.ref.sh
-    参数说明：
-    1. /data/bioinfo/database_dir/Pathogen_database/customize_ref_db/
-    2. /data/bioinfo/database_dir/Pathogen_database/ref_seq_db/
-    3. host:          human  多个值的话用逗号分割
-    4. host_pick:     hg19   多个值的话用逗号分割
-    5. sp:            Norovirus  多个值的话用逗号分割
-    6. sp_pick:       ALL        多个值的话用逗号分割
-    7. new_ref_name:  hg19_Norovirus
-    8. F/T
-    """
-
-    customize_ref_db = os.path.join(database_dir, "Pathogen_database/customize_ref_db/")
-    ref_seq_db = os.path.join(database_dir, "Pathogen_database/ref_seq_db/")
-
-    sp, sp_pick = ','.join(virus_name) if virus_name else '-', ','.join(virus_type) if virus_type else '-'
-
-    host, host_pick = host or '-', host_pick or '-'
-
-    # 最终参数
-    params = f"{customize_ref_db} {ref_seq_db} {host} {host_pick} {sp} {sp_pick} {new_ref_name} {type}"
-    # 脚本路径
-    bash = os.path.join(database_dir, "Pathogen_database/bin/make.ref.sh")
-    # 最终命令
-    cmd = f"sh {bash} {params}"
-    logger.info(f"cmd: {cmd}")
-
-    # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
-    exit_code = os.system(cmd)
-    logger.info(f"exit_code: {exit_code}")
 
 
 @api_view(['GET'])
@@ -390,7 +352,7 @@ def collect_information(request):
     new_ref_name = json_data['customDatabase']
 
     # 调用本地脚本 /data/bioinfo/database_dir/Pathogen_database/bin/make.ref.sh
-    result = run_docker(
+    result, _, _ = run_docker(
         host=host,
         host_pick=host_pick,
         sp=virus_name,

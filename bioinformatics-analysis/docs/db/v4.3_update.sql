@@ -20,11 +20,13 @@ create table reference_genome
     virus_seq_file      varchar(500),
     host_map_db         jsonb                    default '{}'::jsonb,
     sp_map_db           jsonb                    default '{}'::jsonb,
+    container_name      VARCHAR(255),
+    container_id        VARCHAR(255),
+    status              varchar(50)              default 'RUNNING'::character varying,
+    message             jsonb                    default '{}'::jsonb,
     create_time         timestamp with time zone default now() not null,
     update_time         timestamp with time zone default now() not null,
-    is_deleted          boolean                  default false not null,
-    status              varchar(50)              default 'RUNNING'::character varying,
-    message             jsonb                    default '{}'::jsonb
+    is_deleted          boolean                  default false not null
 );
 comment on table reference_genome is '自建参考基因组表';
 comment on column reference_genome.id is '主键ID';

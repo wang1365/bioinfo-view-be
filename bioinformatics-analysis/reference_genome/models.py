@@ -122,6 +122,24 @@ class ReferenceGenome(models.Model):
         verbose_name="消息",
         help_text="相关消息信息，JSON格式"
     )
+    
+    # 容器名称
+    container_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="容器名称",
+        help_text="Docker容器名称"
+    )
+    
+    # 容器ID
+    container_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="容器ID",
+        help_text="Docker容器ID"
+    )
 
     class Meta:
         verbose_name = "自建参考基因组"
