@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
 from flow.core import G_CLIENT
+from django.db import connection
 from reference_genome.models import ReferenceGenome
 
 scheduler = BackgroundScheduler()
@@ -13,6 +14,8 @@ scheduler = BackgroundScheduler()
 
 @scheduler.scheduled_job(trigger='interval', seconds=60, id='check_ref_genome_task')
 def check_ref_genome_task():
+    # 确保使用新的数据库连接
+    connection.close_if_unusable_or_obsolete()
     # 获取所有status为"todo"的任务
     tasks = ReferenceGenome.objects.filter(status="RUNNING")
     for task in tasks:
