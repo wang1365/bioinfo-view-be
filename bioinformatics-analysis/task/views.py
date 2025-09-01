@@ -368,7 +368,8 @@ class TaskView(ModelViewSet):
         sample_details = req_data.get("sample_details", '[]')
         sample_details = json.loads(sample_details)
         for i, sample_id in enumerate(task.samples):
-            detail = sample_details[i] if i < len(sample_details) else {}
+            # 通过id从sample_details中查找sample
+            detail = next((item for item in sample_details if item["id"] == sample_id), {})
             sample_ratio = detail.get("sampleRatio")
             TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id,
                                       custom_name=detail.get("customName"),
@@ -398,67 +399,6 @@ class TaskView(ModelViewSet):
         serializer = self.get_serializer(task)
 
         return response_body(data=serializer.data)
-
-    def _prepare_cdc_params(self, req_data, env):
-        """
-        准备CDC任务相关的参数
-        {
-            ...
-            // 自建参考基因组
-            refGenomeData: {
-                "virusName": ['aa','bb'],
-                # 病毒分型
-                "virusType": ['aa', 'bb'],
-                # 宿主
-                "host": 'xxx',
-                # 宿主基因组版本
-                "hostGenomeVersion": 'xxx',
-                # 自定义数据库名称
-                "customDatabase": 'xxx',
-                "hostMapDbInfo": ""，
-                "spMapDbInfo": ""
-            },
-            "多样本组装及比对流程": {
-                "ref_name": "自建参考基因组名称",
-                "ref_fasta": "自建参考基因组fasta文件路径",
-                "ref_gtf": "自建参考基因组gtf文件路径",
-            },
-            "多样本突变检测与建树": {
-                "ref_name": "自建参考基因组名称",
-                "ref_fasta": "自建参考基因组fasta文件路径",
-                "ref_gtf": "自建参考基因组gtf文件路径",
-            },
-        }
-        """
-
-        flow_code = req_data.get("flow_code") or ''
-        if flow_code not in ["自建参考基因组", "多样本组装及比对流程", "多样本突变检测与建树"]:
-            return
-
-        ref_name = req_data['refGenomeData'].get("customDatabase", "")
-
-        # 将"自建参考基因组"的hostMapDbInfo和spMapDbInfo分别报错为1个本地文件，文件路径为
-        host_mapdb_out_file = str(Path(database_dir) /  r"Pathogen_database\customize_ref_db" / ref_name / "host_mapdb_out.info")
-        sp_mapdb_out_file = str(Path(database_dir) / r"Pathogen_database\customize_ref_db" / ref_name / "sp_mapdb_out.info")
-
-        if flow_code == "自建参考基因组":
-            ref_data = req_data["refGenomeData"]
-            with open(host_mapdb_out_file, "w") as f:
-                f.write(ref_data["hostMapDbInfo"])
-            with open(sp_mapdb_out_file, "w") as f:
-                f.write(ref_data["spMapDbInfo"])
-
-            env['CDC_HOST_MAPDB_FILE'] = host_mapdb_out_file
-            env['CDC_SP_MAPDB_FILE'] = sp_mapdb_out_file
-            env['CDC_REF_NAME'] = ref_name
-            env['CDC_VIRUS_NAME'] = ','.join(ref_data.get("virusName", ""))
-            env['CDC_VIRUS_NAME'] = ','.join(ref_data.get("virusType", ""))
-            env['CDC_HOST'] = ref_data.get("host", "")
-            env['CDC_HOST_GENOME_VERSION'] = ref_data.get("hostGenomeVersion", "")
-        elif flow_code in ["多样本组装及比对流程", "多样本突变检测与建树"]:
-            pass
-
-
 
 
     def retrieve(self, request, *args, **kwargs):
