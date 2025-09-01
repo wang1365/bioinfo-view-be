@@ -369,7 +369,7 @@ class TaskView(ModelViewSet):
         sample_details = json.loads(sample_details)
         for i, sample_id in enumerate(task.samples):
             # 通过id从sample_details中查找sample
-            detail = next((item for item in sample_details if item["id"] == sample_id), {})
+            detail = next((item for item in sample_details if item["id"] == int(sample_id)), {})
             sample_ratio = detail.get("sampleRatio")
             TaskSample.objects.create(sample_id=int(sample_id), task_id=task.id,
                                       custom_name=detail.get("customName"),
