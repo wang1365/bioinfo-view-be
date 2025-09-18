@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 
 from django.db.models import Q
@@ -192,7 +193,30 @@ class ReferenceGenomeViewSet(ModelViewSet):
 
         # 执行软删除
         instance.soft_delete()
+
+        # 从all.ref.path中删除对行
+        self.remove_database_from_file(instance.custom_database)
         return response_body(data={}, msg="删除成功")
+
+    def remove_database_from_file(self, name):
+        db_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/all.ref.path'
+        if not db_dir.exists():
+            logger.warning(f"Database directory {db_dir} does not exist.")
+            return
+
+        with open(db_dir, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        new_lines = []
+        for line in lines:
+            items = line.split('\t')
+            if len(items) > 0 and items[0] != name:
+                new_lines.append(line)
+        # 备份db_dir，文件名增加时间戳
+        backup_file = db_dir.parent / f'{db_dir.name}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak'
+        db_dir.rename(backup_file)
+        with open(db_dir, 'w', encoding='utf-8') as f:
+            f.writelines(new_lines)
 
     @action(methods=['post'], detail=True)
     def restore(self, request, pk=None):
