@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -217,6 +218,14 @@ class ReferenceGenomeViewSet(ModelViewSet):
         db_dir.rename(backup_file)
         with open(db_dir, 'w', encoding='utf-8') as f:
             f.writelines(new_lines)
+
+        # 删除无用的目录
+        unused_dir = Path(database_dir) / f'Pathogen_database/customize_ref_db/{name}'
+        if unused_dir.exists():
+            shutil.rmtree(unused_dir, ignore_errors=True)
+            logger.info(f"Removed unused database directory {unused_dir}")
+        else:
+            logger.info(f"Unused database directory {unused_dir} does not exist.")
 
     @action(methods=['post'], detail=True)
     def restore(self, request, pk=None):
