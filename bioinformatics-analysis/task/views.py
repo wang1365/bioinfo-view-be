@@ -522,6 +522,7 @@ class TaskView(ModelViewSet):
     def list(self, request, *args, **kwargs):
         close_old_connections()
 
+        id = request.query_params.get("id")
         project_id = request.query_params.get("project_id")
         status = request.query_params.get("status")
         patient = request.query_params.get("patient")
@@ -540,6 +541,8 @@ class TaskView(ModelViewSet):
             )
         else:
             tasks = Task.objects.filter(creator=request.account)
+        if id:
+            tasks = tasks.filter(id=id)
         if project_id:
             tasks = tasks.filter(project_id=project_id)
         if status:
