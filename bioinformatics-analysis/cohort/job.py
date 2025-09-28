@@ -61,12 +61,8 @@ def check_multi_create_task():
         task.cohort_status = "done"
         task.save()
 
-    # 删除cohort表中task_id不在tasks中的记录（注意，不要直接删除，而是设置del_flag为当前时间戳）
-    # 直接执行一条sql语句，将del_flag设置为当前时间戳
-    ids = list(Task.objects.raw(
-        f"select t1.id from cohort t1 WHERE not exists (select 1 from task t2 where t2.id=t1.task_id) "))
-    if ids:
-        Cohort.objects.exclude(pk__in=ids).update(del_flag=del_flag)
+    # 将del_flag设置为当前时间戳：仅针对那些task_id在Task表中不存在的cohort记录
+    Cohort.objects.exclude(task_id__in=Task.objects.values_list('id', flat=True)).update(del_flag=del_flag)
 
 
 def start_cohort_scheduler():
