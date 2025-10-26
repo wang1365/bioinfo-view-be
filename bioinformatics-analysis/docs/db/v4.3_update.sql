@@ -7,6 +7,8 @@ ALTER TABLE flow ADD COLUMN support_custom_sample_name BOOLEAN NOT NULL DEFAULT 
 -- 为flow表添加support_sample_ratio字段
 ALTER TABLE flow ADD COLUMN support_sample_ratio BOOLEAN NOT NULL DEFAULT FALSE;
 
+alter table samples add msre bool default false not null;
+
 
 create table reference_genome
 (
