@@ -1,5 +1,5 @@
-FROM python:3.10
-ARG PROXY=false
+FROM python:3.10-bullseye
+ARG PROXY=true
 RUN set -ex; \
     if [ "$PROXY" = "true" ] ; then \
         . /etc/os-release; \
