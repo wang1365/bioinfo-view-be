@@ -368,6 +368,8 @@ def check_fastq_files(request):
 
     samples = SampleData.objects.filter(identifier__in=identifiers)
     data_dir = os.getenv('DATA_DIR') or ''
+    if not samples:
+        return response_body(data={}, msg='success')
 
     def resolve_path(p: str):
         if not p:
@@ -381,6 +383,8 @@ def check_fastq_files(request):
             "check_time": datetime.now().isoformat(),
             "size": 0,
             "ready": False,
+            "path": full_path or "",
+            "exists": False,
         }
         if not full_path or not os.path.exists(full_path) or not os.path.isfile(full_path):
             return info
@@ -392,6 +396,7 @@ def check_fastq_files(request):
         except Exception:
             return info
 
+        info["exists"] = True
         ready = info["size"] > 0
         if str(full_path).endswith('.gz'):
             try:
