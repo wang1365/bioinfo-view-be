@@ -3,6 +3,9 @@ import uuid
 import tempfile
 import time
 import os
+import json
+import gzip
+from datetime import datetime
 from typing import Tuple
 
 from common.exceptions import ServiceException
@@ -17,6 +20,7 @@ from account import constants as account_constant
 
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from django.http import HttpResponse, QueryDict
 
 from patient.models import Patient
@@ -350,6 +354,62 @@ class SampleUploadView(CustomeViewSets):
             msg="success" if is_all_success else "part success",
         )
 
+
+@api_view(['POST'])
+def check_fastq_files(request):
+    try:
+        body = json.loads(request.body.decode('utf-8')) if request.body else {}
+    except Exception:
+        body = request.data
+
+    identifiers = body if isinstance(body, list) else body.get('identifiers') or []
+    if not isinstance(identifiers, list):
+        return response_body(status_code=400, code=-1, msg='参数必须是列表或包含identifiers字段的对象')
+
+    samples = SampleData.objects.filter(identifier__in=identifiers)
+    data_dir = os.getenv('DATA_DIR') or ''
+
+    def resolve_path(p: str):
+        if not p:
+            return None
+        return p if os.path.isabs(p) else os.path.join(data_dir, p)
+
+    def file_info(full_path: str):
+        info = {
+            "create_time": None,
+            "last_modify_time": None,
+            "check_time": datetime.now().isoformat(),
+            "size": 0,
+            "ready": False,
+        }
+        if not full_path or not os.path.exists(full_path) or not os.path.isfile(full_path):
+            return info
+
+        try:
+            info["size"] = os.path.getsize(full_path)
+            info["create_time"] = datetime.fromtimestamp(os.path.getctime(full_path)).isoformat()
+            info["last_modify_time"] = datetime.fromtimestamp(os.path.getmtime(full_path)).isoformat()
+        except Exception:
+            return info
+
+        ready = info["size"] > 0
+        if str(full_path).endswith('.gz'):
+            try:
+                with gzip.open(full_path, 'rb') as f:
+                    f.read(1)
+            except Exception:
+                ready = False
+        info["ready"] = ready
+        return info
+
+    result = {}
+    for s in samples:
+        for p in [s.fastq1_path, s.fastq2_path]:
+            if p:
+                fp = resolve_path(p)
+                result[p] = file_info(fp)
+
+    return response_body(data=result)
 
 def download(request, pk):
     file = SampleData.objects.get(id=pk).result_path
