@@ -1,5 +1,6 @@
 import logging
 import os
+import gzip
 
 from apscheduler.triggers.interval import IntervalTrigger
 from django.core.cache import cache
@@ -11,6 +12,7 @@ from reference_genome.job import start_ref_genome_scheduler
 from utils.memory import SystemMemory
 from config.models import Config
 from task.models import Task
+from sample.models import SampleData
 
 from django.db import close_old_connections
 from django.conf import settings
@@ -60,6 +62,51 @@ volumes = {
         'mode': "ro"
     }
 }
+def _extract_sample_ids(samples):
+    if isinstance(samples, list):
+        return [int(i) for i in samples if str(i).isdigit()]
+    if isinstance(samples, dict):
+        ids = []
+        for k in samples.keys():
+            try:
+                ids.append(int(k))
+            except Exception:
+                pass
+        return ids
+    return []
+
+def _resolve_path(p):
+    if not p:
+        return None
+    base = os.getenv("DATA_DIR") or ""
+    return p if os.path.isabs(p) else os.path.join(base, p)
+
+def _check_file_ready(full_path):
+    if not full_path or not os.path.exists(full_path) or not os.path.isfile(full_path):
+        return False
+    if str(full_path).endswith('.gz'):
+        try:
+            with gzip.open(full_path, 'rb') as f:
+                f.read(1)
+        except Exception:
+            return False
+    return True
+
+def fastq_ready(task: Task):
+    sample_ids = _extract_sample_ids(task.samples)
+    ready = True
+    issues = []
+    if sample_ids:
+        for s in SampleData.objects.filter(id__in=sample_ids):
+            for p in [s.fastq1_path, s.fastq2_path]:
+                if not p:
+                    continue
+                fp = _resolve_path(p)
+                if not _check_file_ready(fp):
+                    ready = False
+                    issues.append(f'{s.id}:{p}')
+    return ready, issues
+
 @scheduler.scheduled_job(trigger='interval', seconds=30, id='run_task')
 def run_task():
     if settings.DISABLE_JOB_RUN:
@@ -92,7 +139,11 @@ def run_task():
             logger.info(f'Check task memory, task: {beto_run_task.id}, require mem:{beto_run_task.memory} ')
             # 内存检查的不对，临时除以2
             if used_memory + beto_run_task.memory / 2 < totol_memory * memory_rate:
-                logger.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}')
+                logger.info(f'Run task: {beto_run_task.id}-{beto_run_task.name}，memory:{beto_run_task.memory}')
+                ready, issues = fastq_ready(beto_run_task)
+                if not ready:
+                    logger.warning(f'Task {beto_run_task.id} fastq files not ready: {", ".join(issues)}')
+                    continue
 
                 try:
                     container = G_CLIENT.containers.run(
