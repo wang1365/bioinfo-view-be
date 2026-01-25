@@ -48,6 +48,7 @@ other_urls = [
         views.SampleUploadView.as_view({"post": "upload_meta"})),
     url(r"^/samples/upload", views.SampleUploadView.as_view({"post":
                                                              "upload"})),
+    url(r"^/samples/check_fastq", views.check_fastq_files),
 ]
 
 urlpatterns = other_urls + router.urls

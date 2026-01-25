@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from cohort.models import Cohort
 from task.models import Task
 from task.views import read_mut_standard_file_by_name
+from loguru import logger as log
 
 scheduler = BackgroundScheduler()
 
@@ -39,11 +40,11 @@ def parse_file_to_cohorts(csv_data, task_id, user_id, panel_id):
         cohorts.append(cohort)
     # 批量插入cohorts
     ret = Cohort.objects.bulk_create(cohorts)
-    print(ret)
+    log.info(f"Insert {len(ret)} cohorts for task {task_id}, user_id {user_id}, panel_id {panel_id}")
 
 
-@scheduler.scheduled_job(trigger='interval', seconds=300, id='check_multi_create_task')
-def check_multi_create_task():
+@scheduler.scheduled_job(trigger='interval', seconds=180, id='check_cohort')
+def check_cohort():
     del_flag = int(datetime.datetime.now().timestamp())
     # 获取所有cohort_status为"todo"的任务
     tasks = Task.objects.filter(cohort_status="todo")
@@ -57,7 +58,7 @@ def check_multi_create_task():
             # 解析mut_standard_file，第一行是header，提取下面这些header： Gene.refGene GeneDetail.refGene AAChange Chr Start End Ref Alt，
             parse_file_to_cohorts(mut_standard_file, task_id, user_id, panel_id)
 
-        print(f"Task {task.pk} cohort_status updated to done.")
+        log.info(f"Task {task.pk} cohort_status updated to done.")
         task.cohort_status = "done"
         task.save()
 
