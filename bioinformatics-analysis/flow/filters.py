@@ -8,7 +8,7 @@ from django_filters import filterset
 
 class FlowFilters(CommonFilters):
     SEARCH_FIELDS = [
-        'flow_category', 'name', 'desp', 'location', 'alignment_tool'
+        'flow_category', 'name', 'desp', 'alignment_tool'
     ]
     SEARCH_KEY = 'keyword'
 
