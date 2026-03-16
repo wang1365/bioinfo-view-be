@@ -100,6 +100,20 @@ SAMPLE_META_MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
+        'key': 'is_nc_sample',
+        'name': 'NC样本',
+        'en_name': 'NC Sample',
+        'value_type': 'bool',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'tag_label',
+        'name': 'Tag标签',
+        'en_name': 'Tag Label',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
         'key': 'patient_identifier',
         'name': '患者识别号',
         'en_name': 'Patient Identification',

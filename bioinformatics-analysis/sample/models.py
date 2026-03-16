@@ -50,6 +50,8 @@ class SampleMeta(models.Model):
 
     sampling_tube_brand = models.CharField(max_length=128, null=True, blank=True)
     specimen_type = models.CharField(max_length=128, null=True, blank=True)
+    is_nc_sample = models.BooleanField(default=None, null=True, blank=True)
+    tag_label = models.TextField(default=None, null=True, blank=True)
 
     class Meta:
         db_table = "sample_meta"

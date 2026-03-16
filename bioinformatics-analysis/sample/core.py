@@ -87,13 +87,25 @@ class ValueProcess:
             return self._default_user_id
 
     def _process_boolean(self, b):
-        return True if b.lower() in {"true", "y", "是"} else False
+        if b is None:
+            return None
+        if isinstance(b, bool):
+            return b
+        value = str(b).strip().lower()
+        if value in {'', 'none', 'null'}:
+            return None
+        if value in {'true', 'y', 'yes', '1', '\u662f'}:
+            return True
+        if value in {'false', 'n', 'no', '0', '\u5426'}:
+            return False
+        return None
 
     def _handle_functions(self):
         return {
             'sample_date': self._process_date,
             'test_date': self._process_date,
             'risk': self._process_boolean,
+            'is_nc_sample': self._process_boolean,
         }
 
     def _get_function(self, key):
@@ -123,6 +135,15 @@ def export_to_csv(querset, is_en=False):
 
 
 def export_to_csv_sample_meta(querset, is_en=False):
+    def _format_export_value(item, value):
+        if item['key'] == 'is_nc_sample':
+            if value is True:
+                return '\u662f'
+            if value is False:
+                return '\u5426'
+            return ''
+        return value
+
     if is_en:
         headers = [a['en_name'] for a in SAMPLE_META_MODEL_ATTRS]
         data = [headers]
@@ -134,17 +155,18 @@ def export_to_csv_sample_meta(querset, is_en=False):
                 if 'en_value_map' in item:
                     row.append(item['en_value_map'].get(value, value))
                 else:
-                    row.append(value)
+                    row.append(_format_export_value(item, value))
             data.append(row)
     else:
         headers = [a['name'] for a in SAMPLE_META_MODEL_ATTRS]
         data = [headers]
 
         for o in querset:
-            data.append([
-                getattr(o, a.get('alias', a['key']))
-                for a in SAMPLE_META_MODEL_ATTRS
-            ])
+            row = []
+            for item in SAMPLE_META_MODEL_ATTRS:
+                value = getattr(o, item.get('alias', item['key']))
+                row.append(_format_export_value(item, value))
+            data.append(row)
 
     _, filename = tempfile.mkstemp(suffix='.csv')
     with open(filename, 'w', newline='') as csvfile:
