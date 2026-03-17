@@ -12,7 +12,7 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST") or "db",
         "PORT": os.getenv("POSTGRES_PORT") or "5432",
 
-        'CONN_MAX_AGE': 300,  # 连接最大存活时间（秒），建议设置为60-300
+        'CONN_MAX_AGE': 120,  # 连接最大存活时间（秒），建议设置为60-300
         'OPTIONS': {
             'connect_timeout': 10,  # 连接超时时间
             'keepalives': 1,
