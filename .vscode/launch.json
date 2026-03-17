@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django (UAT) Runserver",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bioinformatics-analysis/manage.py",
+      "args": ["runserver", "0.0.0.0:8000"],
+      "django": true,
+      "cwd": "${workspaceFolder}/bioinformatics-analysis",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "bioinformatics.settings.uat",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true
+    },
+    {
+      "name": "Django (UAT) Shell",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bioinformatics-analysis/manage.py",
+      "args": ["shell"],
+      "django": true,
+      "cwd": "${workspaceFolder}/bioinformatics-analysis",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "bioinformatics.settings.uat"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true
+    }
+  ]
+}
+

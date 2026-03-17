@@ -4,7 +4,8 @@ __pycache__/
 
 venv
 start-pg.sh
-.vscode
+.vscode/*
+!.vscode/launch.json
 .DS_Store
 zr.py
 
@@ -33,3 +34,5 @@ MANIFEST
 
 compose
 storage
+_tmp-change-summary.md
+change-summary-since-2025-12.auto.md
