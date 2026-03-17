@@ -923,7 +923,17 @@ def task_summary(request, *args, **kwargs):
 
 def read_file(request, pk):
     task = Task.objects.get(pk=pk)
-    file_path = os.path.join(task.result_dir, request.GET["path"])
+    from_task_root = str(request.GET.get("from_task_root", "")).lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    base_dir = (
+        os.path.dirname(task.result_dir.rstrip("/\\"))
+        if from_task_root
+        else task.result_dir
+    )
+    file_path = os.path.join(base_dir, request.GET["path"])
     ignore_not_existed = request.GET.get("ignore_not_existed") or False
     if not os.path.isfile(file_path) or not os.path.exists(file_path):
         return response_body(
