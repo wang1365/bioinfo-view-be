@@ -41,8 +41,11 @@ class FlowSerializer(serializers.ModelSerializer):
         return real_tar_path
 
     def get_task_count(self, obj):
-        cnt = Task.objects.filter(flow=obj).count()
-        return cnt
+        # Prefer annotated value from queryset to avoid N+1 queries.
+        annotated_count = getattr(obj, "task_count", None)
+        if annotated_count is not None:
+            return annotated_count
+        return Task.objects.filter(flow=obj).count()
 
     class Meta:
         model = Flow
@@ -75,6 +78,40 @@ class FlowSerializer(serializers.ModelSerializer):
         ]
 
 
+class FlowListSerializer(serializers.ModelSerializer):
+    panel_name = serializers.CharField(source="panel.name", read_only=True)
+    task_count = serializers.IntegerField(read_only=True, default=0)
+
+    class Meta:
+        model = Flow
+        fields = [
+            "id",
+            "name",
+            "code",
+            "panel",
+            "panel_name",
+            "flow_category",
+            "memory",
+            "tar_path",
+            "image_name",
+            "create_time",
+            "config",
+            "task_count",
+        ]
+
+
+class PanelFlowBriefSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flow
+        fields = ["id", "name"]
+
+
+class PanelNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Panel
+        fields = ["id", "name"]
+
+
 class PanelSerializer(serializers.ModelSerializer):
     panel_group_name = serializers.CharField(source="panel_group.name",
                                              read_only=True)
@@ -85,8 +122,60 @@ class PanelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class PanelBriefFlowSerializer(serializers.ModelSerializer):
+    panel_group_name = serializers.CharField(source="panel_group.name",
+                                             read_only=True)
+    flows = PanelFlowBriefSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Panel
+        fields = [
+            "id",
+            "name",
+            "panel_group",
+            "panel_group_name",
+            "enabled",
+            "sort",
+            "create_time",
+            "update_time",
+            "flows",
+        ]
+
+
+class PanelSimpleSerializer(serializers.ModelSerializer):
+    panel_group_name = serializers.CharField(source="panel_group.name",
+                                             read_only=True)
+
+    class Meta:
+        model = Panel
+        fields = [
+            "id",
+            "name",
+            "panel_group",
+            "panel_group_name",
+            "enabled",
+            "sort",
+            "create_time",
+            "update_time",
+        ]
+
+
 class PanelGroupSerializer(serializers.ModelSerializer):
     panels = PanelSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = PanelGroup
+        fields = "__all__"
+
+
+class PanelGroupSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PanelGroup
+        fields = ["id", "name", "sort", "enabled", "create_time", "update_time"]
+
+
+class PanelGroupPanelBriefSerializer(serializers.ModelSerializer):
+    panels = PanelNameSerializer(read_only=True, many=True)
 
     class Meta:
         model = PanelGroup

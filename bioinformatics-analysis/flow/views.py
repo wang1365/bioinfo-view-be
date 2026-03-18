@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count
 from openpyxl import load_workbook
 
 from utils.response import response_body
@@ -16,7 +17,16 @@ from flow.filters import (
     PanelFilters,
     CustomPanelFilterSet,
 )
-from flow.serializers import FlowSerializer, PanelGroupSerializer, PanelSerializer
+from flow.serializers import (
+    FlowSerializer,
+    FlowListSerializer,
+    PanelGroupSerializer,
+    PanelGroupSimpleSerializer,
+    PanelGroupPanelBriefSerializer,
+    PanelSerializer,
+    PanelSimpleSerializer,
+    PanelBriefFlowSerializer,
+)
 from utils.paginator import PageNumberPaginationWithWrapper
 
 
@@ -42,14 +52,25 @@ def upload_excel(request):
 
 
 class PanelGroupView(CustomeViewSets):
-    queryset = PanelGroup.objects.all()
+    queryset = PanelGroup.objects.prefetch_related("panels").all()
     serializer_class = PanelGroupSerializer
 
     filter_backends = [FilterByAccount]
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            simple = self.request.query_params.get("simple")
+            if str(simple).lower() in ("1", "true", "yes"):
+                return PanelGroupSimpleSerializer
+
+            panel_brief = self.request.query_params.get("panel_brief")
+            if str(panel_brief).lower() in ("1", "true", "yes"):
+                return PanelGroupPanelBriefSerializer
+        return super().get_serializer_class()
+
 
 class PanelView(CustomeViewSets):
-    queryset = Panel.objects.prefetch_related("panel_group").all()
+    queryset = Panel.objects.select_related("panel_group").prefetch_related("flows").all()
     serializer_class = PanelSerializer
     # pagination_class = PageNumberPaginationWithWrapper
 
@@ -57,16 +78,39 @@ class PanelView(CustomeViewSets):
     filter_backends = [DjangoFilterBackend, PanelFilters]
     filterset_class = CustomPanelFilterSet
 
+    def get_serializer_class(self):
+        # Lightweight list response for selector and tab pages.
+        if self.action == "list":
+            simple = self.request.query_params.get("simple")
+            if str(simple).lower() in ("1", "true", "yes"):
+                return PanelSimpleSerializer
+
+            flow_brief = self.request.query_params.get("flow_brief")
+            if str(flow_brief).lower() in ("1", "true", "yes"):
+                return PanelBriefFlowSerializer
+        return super().get_serializer_class()
+
 
 class FlowView(CustomeViewSets):
     
-    queryset = Flow.objects.select_related('panel').defer('panel__detail').all()
+    queryset = (
+        Flow.objects.select_related("panel")
+        .defer("details", "parameter_schema", "panel__detail")
+        .annotate(task_count=Count("task"))
+        .all()
+    )
     serializer_class = FlowSerializer
     pagination_class = PageNumberPaginationWithWrapper
 
     # 暂不进行权限过滤
     # filter_backends = [FilterByAccount, FlowFilters]
     filter_backends = [FlowFilters]
+
+    def get_serializer_class(self):
+        # List pages only need lightweight fields.
+        if self.action in ("list", "query"):
+            return FlowListSerializer
+        return super().get_serializer_class()
 
     def create_data(self, request, *args, **kwargs):
         data = super().create_data(request, *args, **kwargs)
@@ -91,8 +135,7 @@ class FlowView(CustomeViewSets):
 
 
     def list(self, request, *args, **kwargs):
-        data = super().list(self, request, *args, **kwargs)
-        return data
+        return super().list(request, *args, **kwargs)
 
 
     def list_types(self, request, *args, **kwargs):
