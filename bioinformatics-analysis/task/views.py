@@ -6,6 +6,7 @@ import uuid
 import os
 import json
 import csv
+import logging
 from pathlib import Path
 
 from django.db.models import Q, F
@@ -45,6 +46,8 @@ from sample.models import SampleMeta
 from patient.models import Patient
 from config.models import Config
 from utils.env import database_dir
+
+logger = logging.getLogger(__name__)
 
 
 class TaskView(ModelViewSet):
@@ -946,6 +949,250 @@ def read_file(request, pk):
     with open(file_path, encoding="utf-8") as f:
         content = f.read()
         return response_body(data=content)
+
+
+def _safe_realpath_join(base_dir, relative_path):
+    base_real = os.path.realpath(base_dir)
+    target_real = os.path.realpath(os.path.join(base_real, relative_path))
+    if target_real == base_real or target_real.startswith(base_real + os.sep):
+        return target_real
+    raise ValueError(f"invalid path: {relative_path}")
+
+
+def _normalize_line_numbers(line_numbers):
+    numbers = []
+    for item in line_numbers or []:
+        try:
+            value = int(item)
+            if value > 0:
+                numbers.append(value)
+        except Exception:
+            continue
+    return sorted(list(set(numbers)))
+
+
+def _write_filtered_table_file(source_file, target_file, selected_line_numbers):
+    with open(source_file, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    if not lines:
+        with open(target_file, "w", encoding="utf-8") as f:
+            f.write("")
+        return
+
+    kept_lines = [lines[0]]
+    for line_number in selected_line_numbers:
+        idx = line_number
+        if 0 <= idx < len(lines):
+            kept_lines.append(lines[idx])
+
+    with open(target_file, "w", encoding="utf-8") as f:
+        f.writelines(kept_lines)
+
+
+def generate_rp2_custom_report(request, pk):
+    logger.info("[RP2_CUSTOM_REPORT] start task_id=%s method=%s", pk, request.method)
+    if request.method != "POST":
+        logger.warning("[RP2_CUSTOM_REPORT] invalid method=%s task_id=%s", request.method, pk)
+        return response_body(status_code=405, code=1, msg="method not allowed")
+
+    task = Task.objects.filter(pk=pk).first()
+    if task is None:
+        logger.warning("[RP2_CUSTOM_REPORT] task not found task_id=%s", pk)
+        return response_body(status_code=404, code=1, msg="task not found")
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        payload = {}
+        logger.exception("[RP2_CUSTOM_REPORT] parse payload failed task_id=%s", pk)
+
+    sample_name = str(payload.get("sample_name", "")).strip()
+    selections = payload.get("selections") or []
+    logger.info(
+        "[RP2_CUSTOM_REPORT] payload parsed task_id=%s sample_name=%s selections_count=%s",
+        pk,
+        sample_name,
+        len(selections) if isinstance(selections, list) else "invalid",
+    )
+
+    if not sample_name:
+        logger.warning("[RP2_CUSTOM_REPORT] sample_name missing task_id=%s", pk)
+        return response_body(status_code=400, code=1, msg="sample_name is required")
+    if not isinstance(selections, list) or len(selections) == 0:
+        logger.warning("[RP2_CUSTOM_REPORT] selections missing task_id=%s sample=%s", pk, sample_name)
+        return response_body(status_code=400, code=1, msg="selections is required")
+
+    task_root_dir = os.path.dirname(task.result_dir.rstrip("/\\"))
+    sample_dir = os.path.join(task_root_dir, sample_name)
+    sample_dir_real = os.path.realpath(sample_dir)
+    logger.info(
+        "[RP2_CUSTOM_REPORT] dirs task_id=%s result_dir=%s task_root_dir=%s sample_dir=%s sample_dir_real=%s",
+        pk,
+        task.result_dir,
+        task_root_dir,
+        sample_dir,
+        sample_dir_real,
+    )
+    if not os.path.isdir(sample_dir_real):
+        logger.error("[RP2_CUSTOM_REPORT] sample dir not found task_id=%s sample_dir_real=%s", pk, sample_dir_real)
+        return response_body(status_code=400, code=1, msg=f"sample dir not found: {sample_dir}")
+
+    category_file_map = {}
+    request_id = uuid.uuid4().hex[:8]
+    filtered_dir = os.path.join(sample_dir_real, "customer_report_temp", request_id)
+    os.makedirs(filtered_dir, exist_ok=True)
+
+    try:
+        for item in selections:
+            if not isinstance(item, dict):
+                logger.warning("[RP2_CUSTOM_REPORT] skip invalid selection item=%s", item)
+                continue
+
+            category = str(item.get("category", "")).strip().lower()
+            file_path = str(item.get("file_path", "")).strip()
+            selected_rows = _normalize_line_numbers(item.get("row_numbers") or [])
+            logger.info(
+                "[RP2_CUSTOM_REPORT] selection task_id=%s sample=%s category=%s file_path=%s selected_rows_count=%s",
+                pk,
+                sample_name,
+                category,
+                file_path,
+                len(selected_rows),
+            )
+
+            if not category or not file_path:
+                logger.warning("[RP2_CUSTOM_REPORT] skip empty category/file category=%s file_path=%s", category, file_path)
+                continue
+
+            try:
+                source_file = _safe_realpath_join(task_root_dir, file_path)
+            except Exception:
+                logger.exception(
+                    "[RP2_CUSTOM_REPORT] invalid file path task_id=%s sample=%s file_path=%s",
+                    pk,
+                    sample_name,
+                    file_path,
+                )
+                return response_body(status_code=400, code=1, msg=f"invalid file_path: {file_path}")
+
+            if not (
+                source_file == sample_dir_real
+                or source_file.startswith(sample_dir_real + os.sep)
+            ):
+                logger.error(
+                    "[RP2_CUSTOM_REPORT] file outside sample dir task_id=%s source_file=%s sample_dir_real=%s",
+                    pk,
+                    source_file,
+                    sample_dir_real,
+                )
+                return response_body(status_code=400, code=1, msg=f"file not in sample dir: {file_path}")
+
+            if not os.path.isfile(source_file):
+                logger.error("[RP2_CUSTOM_REPORT] source file missing task_id=%s source_file=%s", pk, source_file)
+                return response_body(status_code=400, code=1, msg=f"source file missing: {source_file}")
+
+            filtered_file = os.path.join(filtered_dir, os.path.basename(source_file))
+            _write_filtered_table_file(source_file, filtered_file, selected_rows)
+            category_file_map[category] = filtered_file
+            logger.info(
+                "[RP2_CUSTOM_REPORT] filtered file generated task_id=%s category=%s filtered_file=%s",
+                pk,
+                category,
+                filtered_file,
+            )
+
+        missing_categories = [
+            category for category in ("bacteria", "fungus", "virus")
+            if category not in category_file_map
+        ]
+        if missing_categories:
+            logger.error(
+                "[RP2_CUSTOM_REPORT] missing categories task_id=%s missing=%s categories_found=%s",
+                pk,
+                missing_categories,
+                list(category_file_map.keys()),
+            )
+            return response_body(
+                status_code=400,
+                code=1,
+                msg=f"missing categories: {','.join(missing_categories)}",
+            )
+
+        output_dir = os.path.join(sample_dir_real, "customer_report")
+        os.makedirs(output_dir, exist_ok=True)
+
+        script_path = "/data/bioinfo/database_dir/RIV_report/RIA.new_report.sh"
+        if not os.path.isfile(script_path):
+            logger.error("[RP2_CUSTOM_REPORT] script not found task_id=%s script_path=%s", pk, script_path)
+            return response_body(status_code=400, code=1, msg=f"script not found: {script_path}")
+
+        command = [
+            "sh",
+            script_path,
+            sample_dir_real,
+            category_file_map["bacteria"],
+            category_file_map["fungus"],
+            category_file_map["virus"],
+            output_dir,
+        ]
+        logger.info(
+            "[RP2_CUSTOM_REPORT] execute command task_id=%s command=%s cwd=%s os_name=%s",
+            pk,
+            command,
+            os.getcwd(),
+            os.name,
+        )
+        run_result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        logger.info(
+            "[RP2_CUSTOM_REPORT] command finished task_id=%s returncode=%s stdout=%s stderr=%s",
+            pk,
+            run_result.returncode,
+            (run_result.stdout or "")[:1000],
+            (run_result.stderr or "")[:1000],
+        )
+        if run_result.returncode != 0:
+            err_msg = (run_result.stderr or run_result.stdout or "").strip()
+            return response_body(
+                status_code=500,
+                code=1,
+                msg=f"report script failed: {err_msg[:500]}",
+            )
+
+        generated_files = []
+        for filename in os.listdir(output_dir):
+            if filename.lower().endswith(".docx"):
+                generated_files.append(os.path.join(output_dir, filename))
+        generated_files.sort()
+        logger.info(
+            "[RP2_CUSTOM_REPORT] success task_id=%s sample=%s output_dir=%s docx_count=%s",
+            pk,
+            sample_name,
+            output_dir,
+            len(generated_files),
+        )
+
+        return response_body(
+            data={
+                "output_dir": output_dir,
+                "files": generated_files,
+                "filtered_dir": filtered_dir,
+            },
+            msg="success",
+        )
+    except Exception as ex:
+        logger.exception(
+            "[RP2_CUSTOM_REPORT] exception task_id=%s sample=%s payload=%s",
+            pk,
+            sample_name,
+            payload,
+        )
+        return response_body(status_code=500, code=1, msg=f"generate report failed: {ex}")
 
 
 def read_mut_standard_file(request, pk):

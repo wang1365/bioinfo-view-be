@@ -22,6 +22,9 @@ urlpatterns = [
     url("^/(?P<pk>\d+)/mufile/$",
         views.read_mut_standard_file,
         name="read_mut_standard_file"),
+    url("^/(?P<pk>\d+)/rp2_custom_report/$",
+        views.generate_rp2_custom_report,
+        name="generate_rp2_custom_report"),
     url("^/(?P<pk>\d+)/remove_temp/$", views.remove_temp, name="remove_temp"),
         url("^/check_multi_create_task$", views.check_multi_create_task, name="check_multi_create_task"),
 ]
