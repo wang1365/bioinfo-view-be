@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
+import os
 
 from bioinformatics.settings import *  # noqa
+
+
+def _int_env(name, default):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
 DATABASES = {
     "default": {
@@ -12,7 +23,7 @@ DATABASES = {
         "HOST": "10.10.0.208",
         "PORT": "5432",
 
-        'CONN_MAX_AGE': 60,  # 连接最大存活时间（秒），建议设置为60-300
+        'CONN_MAX_AGE': _int_env("DB_CONN_MAX_AGE", 60),  # 本地联调可设 DB_CONN_MAX_AGE=0，避免连接长时间占用
         'OPTIONS': {
             'connect_timeout': 10,  # 连接超时时间
             'keepalives': 1,
