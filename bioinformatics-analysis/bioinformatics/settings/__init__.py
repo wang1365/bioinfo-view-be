@@ -233,7 +233,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-DISABLE_JOB_RUN = False
+DISABLE_JOB_RUN = str(os.getenv("DISABLE_JOB_RUN", "false")).lower() in ("1", "true", "yes", "y", "on")
 
 # REST_FRAMEWORK = {
 #    # 过滤器默认后端
