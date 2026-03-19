@@ -416,6 +416,46 @@ def check_fastq_files(request):
 
     return response_body(data=result)
 
+
+def _filter_queryset_by_role(queryset, request, owner_field='user'):
+    if account_constant.NORMAL in request.role_list:
+        return queryset.filter(**{owner_field: request.account})
+    if account_constant.ADMIN in request.role_list:
+        return queryset.filter(
+            Q(**{f'{owner_field}__user2role__role__code': account_constant.NORMAL})
+            | Q(**{owner_field: request.account})
+        )
+    return queryset
+
+
+@api_view(['GET'])
+def sample_meta_id_by_identifier(request):
+    identifier = (request.GET.get('identifier') or '').strip()
+    if not identifier:
+        return response_body(status_code=400, code=-1, msg='identifier is required')
+
+    queryset = _filter_queryset_by_role(SampleMeta.objects.all(), request, owner_field='user')
+    obj = queryset.filter(identifier=identifier).values('id', 'identifier').first()
+    if not obj:
+        return response_body(status_code=404, code=-1, msg='sample meta not found')
+
+    return response_body(data=obj, msg='success')
+
+
+@api_view(['GET'])
+def sample_id_by_identifier(request):
+    identifier = (request.GET.get('identifier') or '').strip()
+    if not identifier:
+        return response_body(status_code=400, code=-1, msg='identifier is required')
+
+    queryset = _filter_queryset_by_role(SampleData.objects.all(), request, owner_field='user')
+    obj = queryset.filter(identifier=identifier).values('id', 'identifier').first()
+    if not obj:
+        return response_body(status_code=404, code=-1, msg='sample data not found')
+
+    return response_body(data=obj, msg='success')
+
+
 def download(request, pk):
     file = SampleData.objects.get(id=pk).result_path
     if not file:
