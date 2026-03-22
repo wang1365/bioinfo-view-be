@@ -72,6 +72,10 @@ class TaskSample(models.Model):
     sample = models.ForeignKey(SampleData, on_delete=models.CASCADE)
     custom_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="自定义名称")
     sample_ratio = models.FloatField(blank=True, null=True, verbose_name="抽样比例")
+    custom_report_path_cn = models.TextField(null=True, blank=True)
+    custom_report_path_en = models.TextField(null=True, blank=True)
+    active_report_type = models.CharField(max_length=32, null=True, blank=True, default="default")
+    custom_report_updated_at = models.DateTimeField(null=True, blank=True)
     create_time = models.DateTimeField("创建时间", default=now)
     update_time = models.DateTimeField("修改时间", auto_now=True)
 

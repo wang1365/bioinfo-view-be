@@ -13,6 +13,7 @@ from django.db.models import Q, F
 import shutil
 import subprocess
 from datetime import datetime
+from urllib.parse import quote
 
 from django.http import HttpResponse
 from django.db import close_old_connections
@@ -38,6 +39,7 @@ from utils.paginator import PageNumberPagination
 from utils.response import response_body
 from utils.kill_process import stop_docker
 from django.conf import settings
+from django.utils.timezone import now
 from flow.models import Flow2Sample
 from utils.disk import cal_dir_size
 from task.constants import SAMPLE_HEADERS
@@ -48,6 +50,39 @@ from config.models import Config
 from utils.env import database_dir
 
 logger = logging.getLogger(__name__)
+
+
+def _get_rp2_task_root_dir(task):
+    return os.path.dirname(task.result_dir.rstrip("/\\")) if task.result_dir else ""
+
+
+def _get_rp2_default_report_path(task_root_dir, sample_name, language):
+    return os.path.join(
+        task_root_dir,
+        sample_name,
+        "report",
+        f"{sample_name}.{language}_RP_Panel_report.docx",
+    )
+
+
+def _split_rp2_report_files(files):
+    paths = {"CN": "", "EN": ""}
+    for file_path in files or []:
+        normalized = str(file_path or "")
+        upper_name = os.path.basename(normalized).upper()
+        if ".CN_" in upper_name:
+            paths["CN"] = normalized
+        elif ".EN_" in upper_name:
+            paths["EN"] = normalized
+    return paths
+
+
+def _get_rp2_task_sample(task_id, sample_name):
+    return (
+        TaskSample.objects.select_related("sample")
+        .filter(task_id=task_id, sample__identifier=sample_name)
+        .first()
+    )
 
 
 class TaskView(ModelViewSet):
@@ -1169,6 +1204,22 @@ def generate_rp2_custom_report(request, pk):
             if filename.lower().endswith(".docx"):
                 generated_files.append(os.path.join(output_dir, filename))
         generated_files.sort()
+        report_paths = _split_rp2_report_files(generated_files)
+        task_sample = _get_rp2_task_sample(pk, sample_name)
+        if task_sample:
+            task_sample.custom_report_path_cn = report_paths["CN"] or None
+            task_sample.custom_report_path_en = report_paths["EN"] or None
+            task_sample.active_report_type = "custom"
+            task_sample.custom_report_updated_at = now()
+            task_sample.save(
+                update_fields=[
+                    "custom_report_path_cn",
+                    "custom_report_path_en",
+                    "active_report_type",
+                    "custom_report_updated_at",
+                    "update_time",
+                ]
+            )
         logger.info(
             "[RP2_CUSTOM_REPORT] success task_id=%s sample=%s output_dir=%s docx_count=%s",
             pk,
@@ -1182,6 +1233,7 @@ def generate_rp2_custom_report(request, pk):
                 "output_dir": output_dir,
                 "files": generated_files,
                 "filtered_dir": filtered_dir,
+                "saved_report_paths": report_paths,
             },
             msg="success",
         )
@@ -1193,6 +1245,81 @@ def generate_rp2_custom_report(request, pk):
             payload,
         )
         return response_body(status_code=500, code=1, msg=f"generate report failed: {ex}")
+
+
+def get_rp2_sample_reports(request, pk):
+    task = Task.objects.filter(pk=pk).first()
+    if task is None:
+        return response_body(status_code=404, code=1, msg="task not found")
+
+    task_root_dir = _get_rp2_task_root_dir(task)
+    if not task_root_dir:
+        return response_body(status_code=400, code=1, msg="task root dir not found")
+
+    sample_names = [
+        item.strip() for item in str(request.GET.get("sample_names", "")).split(",") if item.strip()
+    ]
+    queryset = TaskSample.objects.select_related("sample").filter(task_id=pk)
+    if sample_names:
+        queryset = queryset.filter(sample__identifier__in=sample_names)
+
+    reports = []
+    for task_sample in queryset:
+        sample_name = task_sample.sample.identifier
+        default_cn = _get_rp2_default_report_path(task_root_dir, sample_name, "CN")
+        default_en = _get_rp2_default_report_path(task_root_dir, sample_name, "EN")
+        custom_cn = task_sample.custom_report_path_cn or ""
+        custom_en = task_sample.custom_report_path_en or ""
+        reports.append(
+            {
+                "sample_name": sample_name,
+                "default_available": os.path.isfile(default_cn) or os.path.isfile(default_en),
+                "custom_report_path": {
+                    "CN": custom_cn,
+                    "EN": custom_en,
+                },
+                "custom_available": os.path.isfile(custom_cn) or os.path.isfile(custom_en),
+                "active_report_type": task_sample.active_report_type or "default",
+            }
+        )
+
+    return response_body(data=reports, msg="success")
+
+
+def download_rp2_report(request, pk):
+    task = Task.objects.filter(pk=pk).first()
+    if task is None:
+        return response_body(status_code=404, code=1, msg="task not found")
+
+    sample_name = str(request.GET.get("sample_name", "")).strip()
+    report_type = str(request.GET.get("report_type", "default")).strip().lower()
+    if not sample_name:
+        return response_body(status_code=400, code=1, msg="sample_name is required")
+    if report_type not in {"default", "custom"}:
+        return response_body(status_code=400, code=1, msg="invalid report_type")
+
+    language = "EN" if getattr(request, "is_english", False) else "CN"
+    task_root_dir = _get_rp2_task_root_dir(task)
+    if report_type == "default":
+        file_path = _get_rp2_default_report_path(task_root_dir, sample_name, language)
+    else:
+        task_sample = _get_rp2_task_sample(pk, sample_name)
+        if task_sample is None:
+            return response_body(status_code=404, code=1, msg="sample report not found")
+        file_path = (
+            task_sample.custom_report_path_en
+            if language == "EN"
+            else task_sample.custom_report_path_cn
+        )
+
+    if not file_path or not os.path.isfile(file_path):
+        return response_body(status_code=404, code=1, msg="report file not found")
+
+    filename = quote(os.path.basename(file_path))
+    response = FileResponse(open(file_path, "rb"), as_attachment=True)
+    response["Content-Type"] = "application/octet-stream"
+    response["Content-Disposition"] = f"attachment; filename*=UTF-8''{filename}"
+    return response
 
 
 def read_mut_standard_file(request, pk):

@@ -25,6 +25,12 @@ urlpatterns = [
     url("^/(?P<pk>\d+)/rp2_custom_report/$",
         views.generate_rp2_custom_report,
         name="generate_rp2_custom_report"),
+    url("^/(?P<pk>\d+)/rp2_sample_reports/$",
+        views.get_rp2_sample_reports,
+        name="get_rp2_sample_reports"),
+    url("^/(?P<pk>\d+)/rp2_report_download/$",
+        views.download_rp2_report,
+        name="download_rp2_report"),
     url("^/(?P<pk>\d+)/remove_temp/$", views.remove_temp, name="remove_temp"),
         url("^/check_multi_create_task$", views.check_multi_create_task, name="check_multi_create_task"),
 ]
