@@ -54,4 +54,6 @@ SAMPLE_HEADERS = [
     "MSRE",
     "样本名称", # CDC 自定义样本名
     "抽样比例",
+    "是否NC",
+    "Tag标签",
 ]
