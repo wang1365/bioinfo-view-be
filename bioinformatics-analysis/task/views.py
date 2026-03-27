@@ -1027,32 +1027,22 @@ def _write_filtered_table_file(source_file, target_file, selected_line_numbers):
         f.writelines(kept_lines)
 
 
-def _infer_rp2_source_file(sample_dir_real, category, fallback_file_path=""):
-    if fallback_file_path:
-        return _safe_realpath_join(os.path.dirname(sample_dir_real), fallback_file_path)
-
-    category_dir_map = {
-        "bacteria": "Bacteria",
-        "fungus": "Fungus",
-        "virus": "Virus",
+def _infer_rp2_source_file(sample_dir_real, category):
+    category_source_file_map = {
+        "bacteria": ("Bacteria", "Bacteria_CN_pintai.RPM.txt"),
+        "fungus": ("Fungus", "Fungus_CN_pintai.RPM.txt"),
+        "virus": ("Virus", "Virus_CN_report.RPM.txt"),
     }
-    dir_name = category_dir_map.get(category)
-    if not dir_name:
+    category_info = category_source_file_map.get(category)
+    if not category_info:
         raise ValueError(f"unknown category: {category}")
 
-    final_result_dir = os.path.join(sample_dir_real, "final_result", dir_name)
-    if not os.path.isdir(final_result_dir):
-        raise FileNotFoundError(f"category dir not found: {final_result_dir}")
+    dir_name, filename = category_info
+    source_file = os.path.join(sample_dir_real, "final_result", dir_name, filename)
+    if not os.path.isfile(source_file):
+        raise FileNotFoundError(f"source file not found: {source_file}")
 
-    candidates = [
-        os.path.join(final_result_dir, filename)
-        for filename in sorted(os.listdir(final_result_dir))
-        if filename.endswith(".RPM.txt")
-    ]
-    if not candidates:
-        raise FileNotFoundError(f"source file not found in category dir: {final_result_dir}")
-
-    return candidates[0]
+    return source_file
 
 
 def generate_rp2_custom_report(request, pk):
@@ -1137,18 +1127,16 @@ def generate_rp2_custom_report(request, pk):
 
         for category in ("bacteria", "fungus", "virus"):
             selection = selection_map.get(category, {})
-            file_path = str(selection.get("file_path", "")).strip()
             selected_rows = selection.get("selected_rows") or []
 
             try:
-                source_file = _infer_rp2_source_file(sample_dir_real, category, file_path)
+                source_file = _infer_rp2_source_file(sample_dir_real, category)
             except Exception:
                 logger.exception(
-                    "[RP2_CUSTOM_REPORT] resolve source file failed task_id=%s sample=%s category=%s file_path=%s",
+                    "[RP2_CUSTOM_REPORT] resolve source file failed task_id=%s sample=%s category=%s",
                     pk,
                     sample_name,
                     category,
-                    file_path,
                 )
                 return response_body(
                     status_code=400,
@@ -1166,7 +1154,7 @@ def generate_rp2_custom_report(request, pk):
                     source_file,
                     sample_dir_real,
                 )
-                return response_body(status_code=400, code=1, msg=f"file not in sample dir: {file_path}")
+                return response_body(status_code=400, code=1, msg=f"file not in sample dir: {category}")
 
             if not os.path.isfile(source_file):
                 logger.error("[RP2_CUSTOM_REPORT] source file missing task_id=%s source_file=%s", pk, source_file)
