@@ -1027,6 +1027,34 @@ def _write_filtered_table_file(source_file, target_file, selected_line_numbers):
         f.writelines(kept_lines)
 
 
+def _infer_rp2_source_file(sample_dir_real, category, fallback_file_path=""):
+    if fallback_file_path:
+        return _safe_realpath_join(os.path.dirname(sample_dir_real), fallback_file_path)
+
+    category_dir_map = {
+        "bacteria": "Bacteria",
+        "fungus": "Fungus",
+        "virus": "Virus",
+    }
+    dir_name = category_dir_map.get(category)
+    if not dir_name:
+        raise ValueError(f"unknown category: {category}")
+
+    final_result_dir = os.path.join(sample_dir_real, "final_result", dir_name)
+    if not os.path.isdir(final_result_dir):
+        raise FileNotFoundError(f"category dir not found: {final_result_dir}")
+
+    candidates = [
+        os.path.join(final_result_dir, filename)
+        for filename in sorted(os.listdir(final_result_dir))
+        if filename.endswith(".RPM.txt")
+    ]
+    if not candidates:
+        raise FileNotFoundError(f"source file not found in category dir: {final_result_dir}")
+
+    return candidates[0]
+
+
 def generate_rp2_custom_report(request, pk):
     logger.info("[RP2_CUSTOM_REPORT] start task_id=%s method=%s", pk, request.method)
     if request.method != "POST":
@@ -1056,9 +1084,9 @@ def generate_rp2_custom_report(request, pk):
     if not sample_name:
         logger.warning("[RP2_CUSTOM_REPORT] sample_name missing task_id=%s", pk)
         return response_body(status_code=400, code=1, msg="sample_name is required")
-    if not isinstance(selections, list) or len(selections) == 0:
-        logger.warning("[RP2_CUSTOM_REPORT] selections missing task_id=%s sample=%s", pk, sample_name)
-        return response_body(status_code=400, code=1, msg="selections is required")
+    if not isinstance(selections, list):
+        logger.warning("[RP2_CUSTOM_REPORT] selections invalid task_id=%s sample=%s", pk, sample_name)
+        return response_body(status_code=400, code=1, msg="selections must be a list")
 
     task_root_dir = os.path.dirname(task.result_dir.rstrip("/\\"))
     sample_dir = os.path.join(task_root_dir, sample_name)
@@ -1076,6 +1104,7 @@ def generate_rp2_custom_report(request, pk):
         return response_body(status_code=400, code=1, msg=f"sample dir not found: {sample_dir}")
 
     category_file_map = {}
+    selection_map = {}
     request_id = uuid.uuid4().hex[:8]
     filtered_dir = os.path.join(sample_dir_real, "customer_report_temp", request_id)
     os.makedirs(filtered_dir, exist_ok=True)
@@ -1098,20 +1127,34 @@ def generate_rp2_custom_report(request, pk):
                 len(selected_rows),
             )
 
-            if not category or not file_path:
-                logger.warning("[RP2_CUSTOM_REPORT] skip empty category/file category=%s file_path=%s", category, file_path)
+            if not category:
+                logger.warning("[RP2_CUSTOM_REPORT] skip empty category item=%s", item)
                 continue
+            selection_map[category] = {
+                "file_path": file_path,
+                "selected_rows": selected_rows,
+            }
+
+        for category in ("bacteria", "fungus", "virus"):
+            selection = selection_map.get(category, {})
+            file_path = str(selection.get("file_path", "")).strip()
+            selected_rows = selection.get("selected_rows") or []
 
             try:
-                source_file = _safe_realpath_join(task_root_dir, file_path)
+                source_file = _infer_rp2_source_file(sample_dir_real, category, file_path)
             except Exception:
                 logger.exception(
-                    "[RP2_CUSTOM_REPORT] invalid file path task_id=%s sample=%s file_path=%s",
+                    "[RP2_CUSTOM_REPORT] resolve source file failed task_id=%s sample=%s category=%s file_path=%s",
                     pk,
                     sample_name,
+                    category,
                     file_path,
                 )
-                return response_body(status_code=400, code=1, msg=f"invalid file_path: {file_path}")
+                return response_body(
+                    status_code=400,
+                    code=1,
+                    msg=f"invalid source file for category: {category}",
+                )
 
             if not (
                 source_file == sample_dir_real
@@ -1137,23 +1180,6 @@ def generate_rp2_custom_report(request, pk):
                 pk,
                 category,
                 filtered_file,
-            )
-
-        missing_categories = [
-            category for category in ("bacteria", "fungus", "virus")
-            if category not in category_file_map
-        ]
-        if missing_categories:
-            logger.error(
-                "[RP2_CUSTOM_REPORT] missing categories task_id=%s missing=%s categories_found=%s",
-                pk,
-                missing_categories,
-                list(category_file_map.keys()),
-            )
-            return response_body(
-                status_code=400,
-                code=1,
-                msg=f"missing categories: {','.join(missing_categories)}",
             )
 
         output_dir = os.path.join(sample_dir_real, "customer_report")
