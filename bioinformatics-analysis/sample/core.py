@@ -2,6 +2,7 @@
 import csv
 import datetime
 import tempfile
+import re
 import pendulum
 from openpyxl import load_workbook
 from sample.constants import SAMPLE_MODEL_ATTRS, SAMPLE_META_MODEL_ATTRS
@@ -71,7 +72,16 @@ class ValueProcess:
 
     def _process_date(self, d):
         if isinstance(d, str):
-            return pendulum.parse(d).date()
+            text = d.strip()
+            if not text:
+                return None
+
+            normalized = text.replace('/', '-')
+            if re.fullmatch(r'\d{4}-\d{1,2}-\d{1,2}', normalized):
+                year, month, day = normalized.split('-')
+                return datetime.date(int(year), int(month), int(day))
+
+            return pendulum.parse(text).date()
         if isinstance(d, datetime.datetime):
             return d.date()
         if isinstance(d, datetime.date):
