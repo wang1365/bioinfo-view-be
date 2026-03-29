@@ -1,12 +1,25 @@
--- 样本管理（sample_meta）新增字段：NC样本、Tag标签
+-- 样本管理（sample_meta）新增字段：NC样本
 
 ALTER TABLE sample_meta
     ADD COLUMN IF NOT EXISTS is_nc_sample BOOLEAN DEFAULT NULL;
 COMMENT ON COLUMN sample_meta.is_nc_sample IS 'NC样本';
 
-ALTER TABLE sample_meta
+-- 样本数据（samples）新增字段：Tag标签
+
+ALTER TABLE samples
     ADD COLUMN IF NOT EXISTS tag_label TEXT DEFAULT NULL;
-COMMENT ON COLUMN sample_meta.tag_label IS 'Tag标签';
+COMMENT ON COLUMN samples.tag_label IS 'Tag标签';
+
+UPDATE samples
+SET tag_label = sample_meta.tag_label
+FROM sample_meta
+WHERE samples.sample_meta_id = sample_meta.id
+  AND (samples.tag_label IS NULL OR samples.tag_label = '')
+  AND sample_meta.tag_label IS NOT NULL
+  AND sample_meta.tag_label <> '';
+
+ALTER TABLE sample_meta
+    DROP COLUMN IF EXISTS tag_label;
 
 -- RP2 task_sample 新增样本级自定义报告字段
 

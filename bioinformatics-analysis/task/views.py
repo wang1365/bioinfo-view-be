@@ -186,7 +186,7 @@ class TaskView(ModelViewSet):
         row.append(custom_name or "")
         row.append(sample_ratio or "")
         row.append(sample_meta.is_nc_sample if sample_meta else "")
-        row.append(sample_meta.tag_label if sample_meta else "")
+        row.append(sample.tag_label if sample else "")
 
         return row
 

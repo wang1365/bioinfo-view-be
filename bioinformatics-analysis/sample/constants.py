@@ -107,13 +107,6 @@ SAMPLE_META_MODEL_ATTRS = [
         'search_type': SearchType.exact
     },
     {
-        'key': 'tag_label',
-        'name': 'Tag标签',
-        'en_name': 'Tag Label',
-        'value_type': 'string',
-        'search_type': SearchType.exact
-    },
-    {
         'key': 'patient_identifier',
         'name': '患者识别号',
         'en_name': 'Patient Identification',
@@ -274,6 +267,13 @@ SAMPLE_MODEL_ATTRS = [
         'key': 'sample_identifier',
         'name': '样本识别号',
         'en_name': 'Sample Identification Number',
+        'value_type': 'string',
+        'search_type': SearchType.exact
+    },
+    {
+        'key': 'tag_label',
+        'name': 'Tag标签',
+        'en_name': 'Tag Label',
         'value_type': 'string',
         'search_type': SearchType.exact
     },
