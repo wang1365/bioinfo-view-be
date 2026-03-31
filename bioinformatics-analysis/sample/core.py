@@ -116,6 +116,7 @@ class ValueProcess:
             'test_date': self._process_date,
             'risk': self._process_boolean,
             'is_nc_sample': self._process_boolean,
+            'msre': self._process_boolean,
         }
 
     def _get_function(self, key):
