@@ -61,7 +61,7 @@ def _get_rp2_default_report_path(task_root_dir, sample_name, language):
         task_root_dir,
         sample_name,
         "report",
-        f"{sample_name}.{language}_RP_Panel_report.docx",
+        f"{sample_name}.{language}_RIA_Panel_report.docx",
     )
 
 
