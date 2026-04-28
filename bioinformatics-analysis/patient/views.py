@@ -225,7 +225,7 @@ class PatientViewSet(ModelViewSet):
         response = HttpResponse(data)
         filename = os.path.basename(PATIENT_META_TEMPLATE_PATH)
         # 使用RFC 5987格式处理国际化文件名
-        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename)}'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename, safe=".-_()~")}'
         response['Content-Type'] = 'application/octet-stream'
         return response
 
@@ -261,6 +261,6 @@ class PatientViewSet(ModelViewSet):
                                       int(time.time() * 100))
         response = HttpResponse(data)
         # 使用RFC 5987格式处理国际化文件名，兼容所有浏览器
-        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename)}'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename, safe=".-_()~")}'
         response['Content-Type'] = 'application/octet-stream'
         return response
