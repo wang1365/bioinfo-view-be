@@ -179,11 +179,9 @@ class SampleView(CustomeViewSets):
         with open(path, "rb") as f:
             data = f.read()
 
-        filename = '{}-{}.csv'.format(request.account.username,
-                                      int(time.time() * 100))
+        filename = 'samples_{}.csv'.format(int(time.time() * 1000))
         response = HttpResponse(data)
-        response['Content-Disposition'] = 'attachment; filename={}'.format(
-            filename)
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         response['Content-Type'] = 'application/octet-stream'
         return response
 
@@ -242,11 +240,9 @@ class SampleMetaView(CustomeViewSets):
         with open(path, "rb") as f:
             data = f.read()
 
-        filename = '{}-{}.csv'.format(request.account.username,
-                                      int(time.time() * 100))
+        filename = 'samples_meta_{}.csv'.format(int(time.time() * 1000))
         response = HttpResponse(data)
-        response['Content-Disposition'] = 'attachment; filename={}'.format(
-            filename)
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         response['Content-Type'] = 'application/octet-stream'
         return response
 

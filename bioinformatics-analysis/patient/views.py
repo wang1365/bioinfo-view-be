@@ -195,7 +195,7 @@ class PatientViewSet(ModelViewSet):
     def dl_patient_template(self, request, *args, **kwargs):
         response = HttpResponse(content_type='text/csv;charset=utf-8')
         response[
-            'Content-Disposition'] = 'attachment; filename="patient_template.csv"'
+            'Content-Disposition'] = 'attachment; filename=patient_template.csv'
         file_import_service.download_patient_template(response)
         return response
 
@@ -225,7 +225,7 @@ class PatientViewSet(ModelViewSet):
         response = HttpResponse(data)
         filename = os.path.basename(PATIENT_META_TEMPLATE_PATH)
         # 使用RFC 5987格式处理国际化文件名
-        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename, safe=".-_()~")}'
+        response['Content-Disposition'] = f'attachment; filename={filename}; filename*=UTF-8\'{quote(filename, safe=".-_()~")}'
         response['Content-Type'] = 'application/octet-stream'
         return response
 
