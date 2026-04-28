@@ -4,6 +4,7 @@ import openpyxl
 import os
 import time
 import uuid
+from urllib.parse import quote
 from django.db.models import Q
 
 from rest_framework.parsers import MultiPartParser
@@ -222,8 +223,9 @@ class PatientViewSet(ModelViewSet):
             data = f.read()
 
         response = HttpResponse(data)
-        response['Content-Disposition'] = 'attachment; filename={}'.format(
-            os.path.basename(PATIENT_META_TEMPLATE_PATH))
+        filename = os.path.basename(PATIENT_META_TEMPLATE_PATH)
+        # 使用RFC 5987格式处理国际化文件名
+        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename)}'
         response['Content-Type'] = 'application/octet-stream'
         return response
 
@@ -258,7 +260,7 @@ class PatientViewSet(ModelViewSet):
         filename = '{}-{}.csv'.format(request.account.username,
                                       int(time.time() * 100))
         response = HttpResponse(data)
-        response['Content-Disposition'] = 'attachment; filename={}'.format(
-            filename)
+        # 使用RFC 5987格式处理国际化文件名，兼容所有浏览器
+        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename)}'
         response['Content-Type'] = 'application/octet-stream'
         return response
