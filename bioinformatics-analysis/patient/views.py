@@ -257,10 +257,8 @@ class PatientViewSet(ModelViewSet):
         with open(path, "rb") as f:
             data = f.read()
 
-        filename = '{}-{}.csv'.format(request.account.username,
-                                      int(time.time() * 100))
+        filename = 'patients_{}.csv'.format(int(time.time() * 1000))
         response = HttpResponse(data)
-        # 使用RFC 5987格式处理国际化文件名，兼容所有浏览器
-        response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'{quote(filename, safe=".-_()~")}'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Type'] = 'application/octet-stream'
         return response
