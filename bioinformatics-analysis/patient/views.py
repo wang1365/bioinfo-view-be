@@ -259,6 +259,6 @@ class PatientViewSet(ModelViewSet):
 
         filename = 'patients_{}.csv'.format(int(time.time() * 1000))
         response = HttpResponse(data)
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         response['Content-Type'] = 'application/octet-stream'
         return response
